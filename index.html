@@ -93,11 +93,20 @@
 
   window.logout = () => signOut(auth);
 
-  onAuthStateChanged(auth, user => {
-    login.style.display = user ? "none" : "block";
-    app.style.display = user ? "block" : "none";
-    if (user) cargar();
-  });
+const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginDiv.style.display = "none";
+    appDiv.style.display = "block";
+    cargar();
+  } else {
+    loginDiv.style.display = "block";
+    appDiv.style.display = "none";
+  }
+});
+
 
   // CARGAR MODELOS
   async function cargar() {
