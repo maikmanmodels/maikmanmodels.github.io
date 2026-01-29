@@ -3,31 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>Maikman Models - Stock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    input, button {
+      margin: 5px 0;
+      padding: 6px;
+    }
+    ul {
+      margin-top: 20px;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+  </style>
 </head>
 <body>
 
 <h1>Maikman Models</h1>
 
+<!-- LOGIN -->
 <div id="login">
   <h2>Acceso</h2>
-  <input type="email" id="email" placeholder="Email"><br><br>
-  <input type="password" id="password" placeholder="Contraseña"><br><br>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Contraseña"><br>
   <button onclick="login()">Entrar</button>
   <p id="error" style="color:red;"></p>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none;">
-  <p>✅ Acceso concedido</p>
+  <h2>Inventario</h2>
+
+  <!-- FORMULARIO -->
+  <h3>Añadir maqueta</h3>
+  <input id="codigo" placeholder="Código"><br>
+  <input id="nombre" placeholder="Nombre del modelo"><br>
+  <input id="fabricante" placeholder="Fabricante"><br>
+  <input id="escala" placeholder="Escala (ej: 1:12)"><br>
+  <input id="estado" placeholder="Estado (Nuevo, Empezado...)"><br>
+  <input id="ubicacion" placeholder="Ubicación"><br>
+  <button onclick="agregarModelo()">Añadir</button>
+
+  <hr>
+
+  <!-- LISTA -->
+  <h3>Stock actual</h3>
+  <ul id="lista-stock"></ul>
+
+  <br>
   <button onclick="logout()">Cerrar sesión</button>
 </div>
 
-<!-- Firebase -->
+<!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc }
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // 🔴 CONFIGURACIÓN DE TU FIREBASE (solo esto)
+  // 🔐 CONFIGURACIÓN FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
     authDomain: "maikmanmodelsstock.firebaseapp.com",
@@ -37,31 +75,61 @@
     appId: "1:871520809912:web:4042f15ef200832a95d54d"
   };
 
-  // Inicializar Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
 
-  // Función login
+  // LOGIN
   window.login = function () {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
     signInWithEmailAndPassword(auth, email, password)
-      .catch(error => {
+      .catch(() => {
         document.getElementById("error").innerText = "Credenciales incorrectas";
       });
   };
 
-  // Función logout
+  // LOGOUT
   window.logout = function () {
     signOut(auth);
   };
 
-  // Detectar estado de usuario
+  // CARGAR STOCK
+  async function cargarStock() {
+    const lista = document.getElementById("lista-stock");
+    lista.innerHTML = "";
+
+    const snapshot = await getDocs(collection(db, "stock"));
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const li = document.createElement("li");
+      li.textContent =
+        `${d.codigo} | ${d.nombre} | ${d.fabricante} | ${d.escala} | ${d.estado} | ${d.ubicacion}`;
+      lista.appendChild(li);
+    });
+  }
+
+  // AÑADIR MODELO
+  window.agregarModelo = async function () {
+    await addDoc(collection(db, "stock"), {
+      codigo: document.getElementById("codigo").value,
+      nombre: document.getElementById("nombre").value,
+      fabricante: document.getElementById("fabricante").value,
+      escala: document.getElementById("escala").value,
+      estado: document.getElementById("estado").value,
+      ubicacion: document.getElementById("ubicacion").value
+    });
+
+    cargarStock();
+  };
+
+  // CONTROL DE SESIÓN
   onAuthStateChanged(auth, user => {
     if (user) {
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
+      cargarStock();
     } else {
       document.getElementById("login").style.display = "block";
       document.getElementById("app").style.display = "none";
