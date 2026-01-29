@@ -4,25 +4,17 @@
   <meta charset="UTF-8">
   <title>Maikman Models - Stock</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-    }
-    input, button {
-      margin: 5px 0;
-      padding: 6px;
-    }
-    ul {
-      margin-top: 20px;
-    }
-    li {
-      margin-bottom: 6px;
-    }
+    body { font-family: Arial; margin: 20px; }
+    input, select, button { margin: 4px; }
+    img { max-width: 80px; display: block; }
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    th { background: #eee; }
   </style>
 </head>
 <body>
 
-<h1>Maikman Models</h1>
+<h1>Maikman Models - Control de Stock</h1>
 
 <!-- LOGIN -->
 <div id="login">
@@ -35,106 +27,148 @@
 
 <!-- APP -->
 <div id="app" style="display:none;">
-  <h2>Inventario</h2>
 
-  <!-- FORMULARIO -->
-  <h3>Añadir maqueta</h3>
-  <input id="codigo" placeholder="Código"><br>
-  <input id="nombre" placeholder="Nombre del modelo"><br>
-  <input id="fabricante" placeholder="Fabricante"><br>
-  <input id="escala" placeholder="Escala (ej: 1:12)"><br>
-  <input id="estado" placeholder="Estado (Nuevo, Empezado...)"><br>
-  <input id="ubicacion" placeholder="Ubicación"><br>
-  <button onclick="agregarModelo()">Añadir</button>
-
-  <hr>
-
-  <!-- LISTA -->
-  <h3>Stock actual</h3>
-  <ul id="lista-stock"></ul>
-
-  <br>
   <button onclick="logout()">Cerrar sesión</button>
+
+  <h2>➕ Añadir / Editar modelo</h2>
+  <input id="codigo" placeholder="Código">
+  <input id="fabricante" placeholder="Fabricante">
+  <input id="nombre" placeholder="Nombre del modelo">
+
+  <select id="estado">
+    <option>Nuevo</option>
+    <option>En proceso</option>
+    <option>Terminado</option>
+  </select>
+
+  <input id="foto" placeholder="URL de la foto">
+  <button onclick="guardar()">Guardar</button>
+
+  <h2>🔍 Buscar</h2>
+  <input id="busqueda" placeholder="Código o fabricante" oninput="render()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Fabricante</th>
+        <th>Nombre</th>
+        <th>Estado</th>
+        <th>Foto</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+  </table>
+
 </div>
 
 <!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, collection, getDocs, addDoc }
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // 🔐 CONFIGURACIÓN FIREBASE
   const firebaseConfig = {
-    apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+    apiKey: "TU_API_KEY",
     authDomain: "maikmanmodelsstock.firebaseapp.com",
     projectId: "maikmanmodelsstock",
-    storageBucket: "maikmanmodelsstock.appspot.com",
-    messagingSenderId: "871520809912",
-    appId: "1:871520809912:web:4042f15ef200832a95d54d"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  let editandoId = null;
+  let modelos = [];
+
   // LOGIN
-  window.login = function () {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    signInWithEmailAndPassword(auth, email, password)
-      .catch(() => {
-        document.getElementById("error").innerText = "Credenciales incorrectas";
-      });
+  window.login = () => {
+    signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    ).catch(() => error.innerText = "Credenciales incorrectas");
   };
 
-  // LOGOUT
-  window.logout = function () {
-    signOut(auth);
-  };
+  window.logout = () => signOut(auth);
 
-  // CARGAR STOCK
-  async function cargarStock() {
-    const lista = document.getElementById("lista-stock");
-    lista.innerHTML = "";
+  onAuthStateChanged(auth, user => {
+    login.style.display = user ? "none" : "block";
+    app.style.display = user ? "block" : "none";
+    if (user) cargar();
+  });
 
-    const snapshot = await getDocs(collection(db, "stock"));
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      const li = document.createElement("li");
-      li.textContent =
-        `${d.codigo} | ${d.nombre} | ${d.fabricante} | ${d.escala} | ${d.estado} | ${d.ubicacion}`;
-      lista.appendChild(li);
-    });
+  // CRUD
+  async function cargar() {
+    const snap = await getDocs(collection(db, "modelos"));
+    modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
   }
 
-  // AÑADIR MODELO
-  window.agregarModelo = async function () {
-    await addDoc(collection(db, "stock"), {
-      codigo: document.getElementById("codigo").value,
-      nombre: document.getElementById("nombre").value,
-      fabricante: document.getElementById("fabricante").value,
-      escala: document.getElementById("escala").value,
-      estado: document.getElementById("estado").value,
-      ubicacion: document.getElementById("ubicacion").value
-    });
+  window.guardar = async () => {
+    const data = {
+      codigo: codigo.value,
+      fabricante: fabricante.value,
+      nombre: nombre.value,
+      estado: estado.value,
+      foto: foto.value
+    };
 
-    cargarStock();
+    if (editandoId) {
+      await updateDoc(doc(db, "modelos", editandoId), data);
+      editandoId = null;
+    } else {
+      await addDoc(collection(db, "modelos"), data);
+    }
+
+    codigo.value = fabricante.value = nombre.value = foto.value = "";
+    estado.value = "Nuevo";
+    cargar();
   };
 
-  // CONTROL DE SESIÓN
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      cargarStock();
-    } else {
-      document.getElementById("login").style.display = "block";
-      document.getElementById("app").style.display = "none";
+  window.editar = (m) => {
+    editandoId = m.id;
+    codigo.value = m.codigo;
+    fabricante.value = m.fabricante;
+    nombre.value = m.nombre;
+    estado.value = m.estado;
+    foto.value = m.foto;
+  };
+
+  window.borrar = async (id) => {
+    if (confirm("¿Borrar este modelo?")) {
+      await deleteDoc(doc(db, "modelos", id));
+      cargar();
     }
-  });
+  };
+
+  function render() {
+    const q = busqueda.value.toLowerCase();
+    tabla.innerHTML = "";
+
+    modelos
+      .filter(m =>
+        m.codigo.toLowerCase().includes(q) ||
+        m.fabricante.toLowerCase().includes(q)
+      )
+      .forEach(m => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${m.codigo}</td>
+            <td>${m.fabricante}</td>
+            <td>${m.nombre}</td>
+            <td>${m.estado}</td>
+            <td>${m.foto ? `<img src="${m.foto}">` : ""}</td>
+            <td>
+              <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
+              <button onclick='borrar("${m.id}")'>🗑️</button>
+            </td>
+          </tr>`;
+      });
+  }
 </script>
 
 </body>
