@@ -12,6 +12,18 @@
   --accent: #38bdf8;
 }
 
+body.light {
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --text: #020617;
+  --accent: #2563eb;
+}
+
+* {
+  box-sizing: border-box;
+  transition: background .3s, color .3s;
+}
+
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
@@ -21,7 +33,10 @@ body {
 
 header {
   padding: 20px;
-  font-size: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 22px;
   font-weight: bold;
 }
 
@@ -31,6 +46,7 @@ button {
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
+  color: white;
 }
 
 input {
@@ -39,6 +55,16 @@ input {
   border: none;
   width: 100%;
 }
+
+#login {
+  max-width: 320px;
+  margin: 80px auto;
+  background: var(--card);
+  padding: 20px;
+  border-radius: 12px;
+}
+
+#app { display:none; }
 
 #controls {
   display: flex;
@@ -66,10 +92,6 @@ input {
   border-radius: 8px;
 }
 
-.card small {
-  opacity: .7;
-}
-
 .modal {
   position: fixed;
   inset: 0;
@@ -93,19 +115,40 @@ input {
 
 <body>
 
-<header>📦 Maikman Models</header>
+<!-- LOGIN -->
+<div id="login">
+  <h2>Acceso</h2>
+  <input id="email" type="email" placeholder="Email"><br><br>
+
+  <input id="password" type="password" placeholder="Contraseña">
+  <label>
+    <input type="checkbox" onclick="verPassword()"> Ver contraseña
+  </label><br><br>
+
+  <button onclick="login()">Entrar</button>
+  <p id="error" style="color:red;"></p>
+</div>
+
+<!-- APP -->
+<div id="app">
+<header>
+  📦 Maikman Models
+  <button onclick="toggleTheme()">🌓</button>
+</header>
 
 <div id="controls">
   <input id="search" placeholder="Buscar por código, fabricante o modelo">
   <button onclick="openModal()">➕ Añadir nuevo modelo</button>
+  <button onclick="logout()">Salir</button>
 </div>
 
 <div id="grid"></div>
+</div>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
-    <h3>Nuevo modelo</h3>
+    <h3 id="modalTitle">Nuevo modelo</h3>
     <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
     <input id="modelo" placeholder="Modelo">
@@ -118,8 +161,8 @@ input {
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
@@ -136,71 +179,127 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+const loginBox = document.getElementById("login");
+const appBox = document.getElementById("app");
 const modal = document.getElementById("modal");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
 
 let modelos = [];
+let editId = null;
 
-window.openModal = () => modal.style.display = "flex";
-window.closeModal = () => modal.style.display = "none";
+/* LOGIN */
+window.login = () => {
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .catch(() => error.innerText = "Credenciales incorrectas");
+};
 
+window.logout = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  loginBox.style.display = user ? "none" : "block";
+  appBox.style.display = user ? "block" : "none";
+  if (user) cargarModelos();
+});
+
+/* THEME */
+window.toggleTheme = () => {
+  document.body.classList.toggle("light");
+};
+
+/* PASSWORD */
+window.verPassword = () => {
+  password.type = password.type === "password" ? "text" : "password";
+};
+
+/* MODAL */
+window.openModal = (m=null) => {
+  modal.style.display = "flex";
+  if (m) {
+    modalTitle.innerText = "Editar modelo";
+    codigo.value = m.codigo;
+    fabricante.value = m.fabricante;
+    modelo.value = m.modelo;
+    editId = m.id;
+  } else {
+    modalTitle.innerText = "Nuevo modelo";
+    codigo.value = fabricante.value = modelo.value = "";
+    editId = null;
+  }
+};
+
+window.closeModal = () => {
+  modal.style.display = "none";
+};
+
+/* DATA */
 async function cargarModelos() {
   modelos = [];
   const snap = await getDocs(collection(db, "modelos"));
-  snap.forEach(d => modelos.push({ id: d.id, ...d.data() }));
+  snap.forEach(d => modelos.push({ id:d.id, ...d.data() }));
   pintar();
 }
 
 function pintar() {
   const q = search.value.toLowerCase();
   grid.innerHTML = "";
-  modelos
-    .filter(m =>
-      m.codigo.toLowerCase().includes(q) ||
-      m.fabricante.toLowerCase().includes(q) ||
-      m.modelo.toLowerCase().includes(q)
-    )
-    .forEach(m => {
-      grid.innerHTML += `
-      <div class="card">
-        <img src="${m.foto}">
-        <b>${m.modelo}</b><br>
-        <small>${m.fabricante} · ${m.codigo}</small><br><br>
-        <button onclick="borrar('${m.id}')">🗑️</button>
-      </div>`;
-    });
+
+  modelos.filter(m => {
+    return (
+      (m.codigo||"").toLowerCase().includes(q) ||
+      (m.fabricante||"").toLowerCase().includes(q) ||
+      (m.modelo||"").toLowerCase().includes(q)
+    );
+  }).forEach(m => {
+    grid.innerHTML += `
+    <div class="card">
+      <img src="${m.foto}">
+      <b>${m.modelo}</b><br>
+      <small>${m.fabricante} · ${m.codigo}</small><br><br>
+      <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
+      <button onclick="borrar('${m.id}')">🗑️</button>
+    </div>`;
+  });
 }
 
 window.guardarModelo = async () => {
-  const file = document.getElementById("foto").files[0];
-  const storageRef = ref(storage, "modelos/" + Date.now());
-  await uploadBytes(storageRef, file);
-  const fotoURL = await getDownloadURL(storageRef);
+  let fotoURL = "";
+  if (foto.files[0]) {
+    const r = ref(storage, "modelos/"+Date.now());
+    await uploadBytes(r, foto.files[0]);
+    fotoURL = await getDownloadURL(r);
+  }
 
-  await addDoc(collection(db, "modelos"), {
-    codigo: codigo.value,
-    fabricante: fabricante.value,
-    modelo: modelo.value,
-    foto: fotoURL
-  });
+  if (editId) {
+    await updateDoc(doc(db,"modelos",editId), {
+      codigo: codigo.value,
+      fabricante: fabricante.value,
+      modelo: modelo.value,
+      ...(fotoURL && { foto: fotoURL })
+    });
+  } else {
+    await addDoc(collection(db,"modelos"), {
+      codigo: codigo.value,
+      fabricante: fabricante.value,
+      modelo: modelo.value,
+      foto: fotoURL
+    });
+  }
 
   closeModal();
   cargarModelos();
 };
 
-window.borrar = async (id) => {
+window.editar = m => openModal(m);
+
+window.borrar = async id => {
   if (confirm("¿Borrar modelo?")) {
-    await deleteDoc(doc(db, "modelos", id));
+    await deleteDoc(doc(db,"modelos",id));
     cargarModelos();
   }
 };
 
 search.addEventListener("input", pintar);
-
-onAuthStateChanged(auth, user => {
-  if (user) cargarModelos();
-});
 </script>
 
 </body>
