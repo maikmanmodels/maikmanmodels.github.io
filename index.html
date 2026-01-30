@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <title>Maikman Models · Stock</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="icon" href="favicon.ico">
-
 <style>
 :root {
   --bg: #f4f6f8;
@@ -14,28 +12,23 @@
   --text: #1f2937;
   --primary: #6366f1;
 }
-
 body.dark {
   --bg: #0f172a;
   --card: #1e293b;
   --text: #e5e7eb;
 }
-
 * { box-sizing: border-box; font-family: system-ui; }
-
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   transition: .3s;
 }
-
 header {
   display: flex;
   justify-content: space-between;
   padding: 20px;
 }
-
 button {
   background: var(--primary);
   color: white;
@@ -44,18 +37,14 @@ button {
   border-radius: 10px;
   cursor: pointer;
 }
-
 button.danger { background: #dc2626; }
 button.secondary { background: #64748b; }
-
-.hidden { display: none; }
-
+.hidden { display: none !important; }
 #login, #app {
   max-width: 1000px;
   margin: auto;
   padding: 20px;
 }
-
 input {
   width: 100%;
   padding: 10px;
@@ -63,31 +52,27 @@ input {
   border-radius: 8px;
   border: 1px solid #ccc;
 }
-
 #grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
 }
-
 .card {
   background: var(--card);
   border-radius: 16px;
   padding: 15px;
 }
-
 .card img {
   width: 100%;
   height: 220px;
   object-fit: cover;
   border-radius: 12px;
 }
-
 .actions {
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 }
-
 /* MODAL */
 #modal {
   position: fixed;
@@ -96,18 +81,17 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
-
 #modalContent {
   background: var(--card);
-  padding: 20px;
+  padding: 24px;
   border-radius: 16px;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
 }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -117,16 +101,16 @@ input {
 
 <!-- LOGIN -->
 <div id="login">
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Contraseña">
+  <input id="email" placeholder="Email" autocomplete="email">
+  <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
   <button onclick="login()">Entrar</button>
-  <p id="error" style="color:red;"></p>
+  <p id="error" style="color:red; margin-top: 10px;"></p>
 </div>
 
 <!-- APP -->
 <div id="app" class="hidden">
   <button onclick="openModal()">➕ Añadir nuevo modelo</button>
-  <input id="search" placeholder="🔍 Buscar por código o fabricante">
+  <input id="search" placeholder="🔍 Buscar por código o fabricante" style="margin: 15px 0;">
   <div id="grid"></div>
   <br>
   <button onclick="logout()">Cerrar sesión</button>
@@ -136,26 +120,26 @@ input {
 <div id="modal" class="hidden">
   <div id="modalContent">
     <h3 id="modalTitle">Nuevo modelo</h3>
-    <input id="codigo" placeholder="Código">
+    <input id="codigo" placeholder="Código *" required>
     <input id="fabricante" placeholder="Fabricante">
-    <input id="nombre" placeholder="Modelo">
+    <input id="nombre" placeholder="Modelo *" required>
     <input id="fotoUrl" placeholder="URL imagen (opcional)">
     <input id="fotoFile" type="file" accept="image/*">
-    <button onclick="saveModel()">Guardar</button>
-    <button class="secondary" onclick="closeModal()">Cancelar</button>
+    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+      <button class="secondary" onclick="closeModal()">Cancelar</button>
+      <button onclick="saveModel()">Guardar</button>
+    </div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc }
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL }
+import { getStorage, ref, uploadBytes, getDownloadURL } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-document.addEventListener("DOMContentLoaded", () => {
 
 const firebaseConfig = {
   apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
@@ -166,105 +150,190 @@ const firebaseConfig = {
   appId: "1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const appFirebase = initializeApp(firebaseConfig);
-const auth = getAuth(appFirebase);
-const db = getFirestore(appFirebase);
-const storage = getStorage(appFirebase);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-const loginDiv = login;
-const appDiv = app;
+// Elementos DOM
+const loginDiv    = document.getElementById("login");
+const appDiv      = document.getElementById("app");
+const modal       = document.getElementById("modal");
+const grid        = document.getElementById("grid");
+const searchInput = document.getElementById("search");
+const errorMsg    = document.getElementById("error");
+
+const codigoInput    = document.getElementById("codigo");
+const fabricanteInput= document.getElementById("fabricante");
+const nombreInput    = document.getElementById("nombre");
+const fotoUrlInput   = document.getElementById("fotoUrl");
+const fotoFileInput  = document.getElementById("fotoFile");
+
 let modelos = [];
 let editId = null;
 
-window.login = () => {
-  signInWithEmailAndPassword(auth, email.value, password.value)
-    .catch(() => error.textContent = "Credenciales incorrectas");
-};
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  
+  signInWithEmailAndPassword(auth, email, password)
+    .catch(() => {
+      errorMsg.textContent = "Credenciales incorrectas";
+    });
+}
 
-window.logout = () => signOut(auth);
+function logout() {
+  signOut(auth);
+}
 
 onAuthStateChanged(auth, user => {
   loginDiv.classList.toggle("hidden", !!user);
   appDiv.classList.toggle("hidden", !user);
-  if (user) loadData();
+  errorMsg.textContent = ""; // limpiar error al cambiar estado
+
+  if (user) {
+    loadData();
+  }
 });
 
 async function loadData() {
-  const snap = await getDocs(collection(db, "modelos"));
-  modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  render(modelos);
+  try {
+    const snap = await getDocs(collection(db, "modelos"));
+    modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render(modelos);
+  } catch (e) {
+    console.error("Error cargando datos:", e);
+  }
 }
 
 function render(lista) {
   grid.innerHTML = "";
   lista.forEach(m => {
-    grid.innerHTML += `
+    const card = `
       <div class="card">
-        <img src="${m.foto}">
+        <img src="${m.foto || 'https://via.placeholder.com/260x220?text=Sin+foto'}" alt="${m.nombre}">
         <h3>${m.nombre}</h3>
-        <p>${m.codigo} · ${m.fabricante}</p>
+        <p>${m.codigo} · ${m.fabricante || '—'}</p>
         <div class="actions">
           <button onclick="editModel('${m.id}')">✏️</button>
           <button class="danger" onclick="deleteModel('${m.id}')">🗑️</button>
         </div>
       </div>`;
+    grid.innerHTML += card;
   });
 }
 
-search.oninput = e => {
-  const q = e.target.value.toLowerCase();
-  render(modelos.filter(m =>
-    m.codigo.toLowerCase().includes(q) ||
-    m.fabricante.toLowerCase().includes(q)
-  ));
+searchInput.oninput = () => {
+  const q = searchInput.value.toLowerCase().trim();
+  const filtered = modelos.filter(m =>
+    m.codigo?.toLowerCase().includes(q) ||
+    m.fabricante?.toLowerCase().includes(q) ||
+    m.nombre?.toLowerCase().includes(q)
+  );
+  render(filtered);
 };
 
-window.openModal = () => modal.classList.remove("hidden");
-window.closeModal = () => { modal.classList.add("hidden"); editId=null; };
+window.openModal = (isEdit = false) => {
+  modal.classList.remove("hidden");
+  if (!isEdit) {
+    // Limpiar solo si es nuevo
+    codigoInput.value = "";
+    fabricanteInput.value = "";
+    nombreInput.value = "";
+    fotoUrlInput.value = "";
+    fotoFileInput.value = "";
+    document.getElementById("modalTitle").textContent = "Nuevo modelo";
+  }
+};
+
+window.closeModal = () => {
+  modal.classList.add("hidden");
+  editId = null;
+  // Limpiar campos
+  codigoInput.value = "";
+  fabricanteInput.value = "";
+  nombreInput.value = "";
+  fotoUrlInput.value = "";
+  fotoFileInput.value = "";
+};
 
 window.saveModel = async () => {
-  let foto = fotoUrl.value;
-  if (fotoFile.files[0]) {
-    const fileRef = ref(storage, "modelos/" + Date.now());
-    await uploadBytes(fileRef, fotoFile.files[0]);
-    foto = await getDownloadURL(fileRef);
+  const codigo = codigoInput.value.trim();
+  const nombre = nombreInput.value.trim();
+
+  if (!codigo || !nombre) {
+    alert("Código y Nombre son obligatorios");
+    return;
+  }
+
+  let foto = fotoUrlInput.value.trim() || "";
+
+  if (fotoFileInput.files && fotoFileInput.files[0]) {
+    try {
+      const file = fotoFileInput.files[0];
+      const fileRef = ref(storage, `modelos/${Date.now()}_${file.name}`);
+      await uploadBytes(fileRef, file);
+      foto = await getDownloadURL(fileRef);
+    } catch (err) {
+      console.error("Error subiendo foto:", err);
+      alert("No se pudo subir la imagen");
+      return;
+    }
   }
 
   const data = {
-    codigo: codigo.value,
-    fabricante: fabricante.value,
-    nombre: nombre.value,
+    codigo,
+    fabricante: fabricanteInput.value.trim(),
+    nombre,
     foto
   };
 
-  editId
-    ? await updateDoc(doc(db,"modelos",editId), data)
-    : await addDoc(collection(db,"modelos"), data);
-
-  closeModal();
-  loadData();
-};
-
-window.editModel = id => {
-  const m = modelos.find(x => x.id === id);
-  codigo.value = m.codigo;
-  fabricante.value = m.fabricante;
-  nombre.value = m.nombre;
-  fotoUrl.value = m.foto;
-  editId = id;
-  openModal();
-};
-
-window.deleteModel = async id => {
-  if (confirm("¿Eliminar modelo?")) {
-    await deleteDoc(doc(db,"modelos",id));
-    loadData();
+  try {
+    if (editId) {
+      await updateDoc(doc(db, "modelos", editId), data);
+    } else {
+      await addDoc(collection(db, "modelos"), data);
+    }
+    closeModal();
+    await loadData();
+  } catch (err) {
+    console.error("Error al guardar:", err);
+    alert("Error al guardar el modelo");
   }
 };
 
-window.toggleTheme = () => document.body.classList.toggle("dark");
+window.editModel = (id) => {
+  const modelo = modelos.find(m => m.id === id);
+  if (!modelo) return;
 
-});
+  codigoInput.value = modelo.codigo || "";
+  fabricanteInput.value = modelo.fabricante || "";
+  nombreInput.value = modelo.nombre || "";
+  fotoUrlInput.value = modelo.foto || "";
+  fotoFileInput.value = ""; // no podemos pre-cargar archivo
+
+  editId = id;
+  document.getElementById("modalTitle").textContent = "Editar modelo";
+  openModal(true);
+};
+
+window.deleteModel = async (id) => {
+  if (!confirm("¿Realmente quieres eliminar este modelo?")) return;
+  
+  try {
+    await deleteDoc(doc(db, "modelos", id));
+    await loadData();
+  } catch (err) {
+    console.error("Error al eliminar:", err);
+    alert("No se pudo eliminar el modelo");
+  }
+};
+
+window.toggleTheme = () => {
+  document.body.classList.toggle("dark");
+};
+
+// Cargar datos iniciales si ya está autenticado
 </script>
 
 </body>
