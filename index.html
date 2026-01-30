@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <title>Maikman Models · Stock</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="favicon.ico">
 
-<!-- Lucide Icons CDN -->
-<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="icon" href="favicon.ico">
 
 <style>
 :root {
@@ -15,26 +13,29 @@
   --card: #ffffff;
   --text: #1f2937;
   --primary: #6366f1;
-  --success: #10b981;
-  --error: #ef4444;
 }
+
 body.dark {
   --bg: #0f172a;
   --card: #1e293b;
   --text: #e5e7eb;
 }
+
 * { box-sizing: border-box; font-family: system-ui; }
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   transition: .3s;
 }
+
 header {
   display: flex;
   justify-content: space-between;
   padding: 20px;
 }
+
 button {
   background: var(--primary);
   color: white;
@@ -42,68 +43,52 @@ button {
   padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
-  font-weight: 500;
 }
-button.danger { background: var(--error); }
+
+button.danger { background: #dc2626; }
 button.secondary { background: #64748b; }
-.hidden { display: none !important; }
+
+.hidden { display: none; }
+
 #login, #app {
   max-width: 1000px;
   margin: auto;
   padding: 20px;
 }
-.input-group {
-  position: relative;
-  margin-bottom: 10px;
-}
+
 input {
   width: 100%;
   padding: 10px;
-  padding-right: 50px;
+  margin-bottom: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
-.eye-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--text);
-  opacity: 0.7;
-}
+
 #grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
 }
+
 .card {
   background: var(--card);
   border-radius: 16px;
   padding: 15px;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
 }
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-}
+
 .card img {
   width: 100%;
   height: 220px;
   object-fit: cover;
   border-radius: 12px;
 }
+
 .actions {
   display: flex;
   gap: 10px;
-  margin-top: 12px;
 }
 
-/* MODAL con animación */
+/* MODAL */
 #modal {
   position: fixed;
   inset: 0;
@@ -111,327 +96,103 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-#modal.show {
-  opacity: 1;
-  visibility: visible;
-}
-#modalContent {
-  background: var(--card);
-  padding: 24px;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 420px;
-  transform: scale(0.95);
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-#modal.show #modalContent {
-  transform: scale(1);
-  opacity: 1;
 }
 
-/* Toast */
-#toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  border-radius: 8px;
-  color: white;
-  font-weight: 500;
-  z-index: 2000;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
+#modalContent {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
 }
-#toast.success { background: var(--success); }
-#toast.error   { background: var(--error); }
-#toast.show    { opacity: 1; }
 </style>
 </head>
+
 <body>
 
 <header>
   <h1>Maikman Models</h1>
-  <button onclick="toggleTheme()">
-    <i data-lucide="sun-moon" style="width:20px;height:20px;"></i>
-  </button>
+  <button onclick="toggleTheme()">🌙 / ☀️</button>
 </header>
 
 <!-- LOGIN -->
 <div id="login">
-  <input id="email" placeholder="Email" autocomplete="email">
-  
-  <div class="input-group">
-    <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
-    <button type="button" class="eye-btn" onclick="togglePassword()">
-      <i data-lucide="eye" id="eye-icon"></i>
-    </button>
-  </div>
-  
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Contraseña">
   <button onclick="login()">Entrar</button>
-  <p id="error" style="color:var(--error); margin-top: 10px;"></p>
+  <p id="error" style="color:red;"></p>
 </div>
 
 <!-- APP -->
 <div id="app" class="hidden">
-  <button onclick="openModal()">
-    <i data-lucide="plus" style="margin-right:6px;"></i> Añadir nuevo modelo
-  </button>
-  <input id="search" placeholder="🔍 Buscar por código, nombre o fabricante" style="margin: 15px 0;">
+  <button onclick="openModal()">➕ Añadir nuevo modelo</button>
+  <input id="search" placeholder="🔍 Buscar por código o fabricante">
   <div id="grid"></div>
   <br>
-  <button onclick="logout()">
-    <i data-lucide="log-out" style="margin-right:6px;"></i> Cerrar sesión
-  </button>
+  <button onclick="logout()">Cerrar sesión</button>
 </div>
 
 <!-- MODAL -->
 <div id="modal" class="hidden">
   <div id="modalContent">
     <h3 id="modalTitle">Nuevo modelo</h3>
-    <input id="codigo" placeholder="Código *" required>
+    <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
-    <input id="nombre" placeholder="Modelo *" required>
+    <input id="nombre" placeholder="Modelo">
     <input id="fotoUrl" placeholder="URL imagen (opcional)">
     <input id="fotoFile" type="file" accept="image/*">
-    <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
-      <button class="secondary" onclick="closeModal()">
-        <i data-lucide="x" style="margin-right:6px;"></i> Cancelar
-      </button>
-      <button onclick="saveModel()">
-        <i data-lucide="save" style="margin-right:6px;"></i> Guardar
-      </button>
-    </div>
+    <button onclick="saveModel()">Guardar</button>
+    <button class="secondary" onclick="closeModal()">Cancelar</button>
   </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast"></div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } 
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } 
+import { getStorage, ref, uploadBytes, getDownloadURL }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// Your web app's Firebase configuration
+document.addEventListener("DOMContentLoaded", () => {
+
 const firebaseConfig = {
   apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
   authDomain: "maikmanmodelsstock.firebaseapp.com",
   projectId: "maikmanmodelsstock",
-  storageBucket: "maikmanmodelsstock.firebasestorage.app",
+  storageBucket: "maikmanmodelsstock.appspot.com",
   messagingSenderId: "871520809912",
   appId: "1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const appFirebase = initializeApp(firebaseConfig);
+const auth = getAuth(appFirebase);
+const db = getFirestore(appFirebase);
+const storage = getStorage(appFirebase);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-// Elementos DOM
-const loginDiv    = document.getElementById("login");
-const appDiv      = document.getElementById("app");
-const modal       = document.getElementById("modal");
-const grid        = document.getElementById("grid");
-const searchInput = document.getElementById("search");
-const errorMsg    = document.getElementById("error");
-const toast       = document.getElementById("toast");
-
-const codigoInput     = document.getElementById("codigo");
-const fabricanteInput = document.getElementById("fabricante");
-const nombreInput     = document.getElementById("nombre");
-const fotoUrlInput    = document.getElementById("fotoUrl");
-const fotoFileInput   = document.getElementById("fotoFile");
-const passwordInput   = document.getElementById("password");
-const eyeIcon         = document.getElementById("eye-icon");
-
+const loginDiv = login;
+const appDiv = app;
 let modelos = [];
 let editId = null;
 
-// Inicializar iconos Lucide
-lucide.createIcons();
+window.login = () => {
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .catch(() => error.textContent = "Credenciales incorrectas");
+};
 
-// ── Toast ───────────────────────────────────────────────────────────
-function showToast(message, type = 'success') {
-  toast.textContent = message;
-  toast.className = `show ${type}`;
-  setTimeout(() => {
-    toast.className = toast.className.replace('show', '');
-  }, 3200);
-}
+window.logout = () => signOut(auth);
 
-// ── Funciones de autenticación ─────────────────────────────────────
-function login() {
-  const email = document.getElementById("email").value.trim();
-  const pw = passwordInput.value;
-  if (!email || !pw) {
-    errorMsg.textContent = "Introduce email y contraseña";
-    return;
-  }
-  signInWithEmailAndPassword(auth, email, pw)
-    .catch(() => {
-      errorMsg.textContent = "Credenciales incorrectas o problema de conexión";
-    });
-}
-
-function logout() {
-  signOut(auth);
-}
-
-// ── Mostrar/ocultar contraseña ─────────────────────────────────────
-function togglePassword() {
-  if (passwordInput.type === "password") {
-    passwordInput.type = "text";
-    eyeIcon.setAttribute('data-lucide', 'eye-off');
-  } else {
-    passwordInput.type = "password";
-    eyeIcon.setAttribute('data-lucide', 'eye');
-  }
-  lucide.createIcons();
-}
-
-// ── Tema claro/oscuro ───────────────────────────────────────────────
-function toggleTheme() {
-  document.body.classList.toggle("dark");
-  lucide.createIcons(); // por si hay iconos que cambian con el tema
-}
-
-// ── Modal ───────────────────────────────────────────────────────────
-function openModal(isEdit = false) {
-  modal.classList.remove("hidden");
-  setTimeout(() => modal.classList.add("show"), 10);
-  if (!isEdit) {
-    codigoInput.value = "";
-    fabricanteInput.value = "";
-    nombreInput.value = "";
-    fotoUrlInput.value = "";
-    fotoFileInput.value = "";
-    document.getElementById("modalTitle").textContent = "Nuevo modelo";
-  }
-}
-
-function closeModal() {
-  modal.classList.remove("show");
-  setTimeout(() => {
-    modal.classList.add("hidden");
-    editId = null;
-  }, 300);
-}
-
-// ── Guardar con detección de duplicado ──────────────────────────────
-async function saveModel() {
-  const codigo     = codigoInput.value.trim();
-  const fabricante = fabricanteInput.value.trim();
-  const nombre     = nombreInput.value.trim();
-
-  if (!codigo || !nombre) {
-    showToast("Código y Nombre son obligatorios", "error");
-    return;
-  }
-
-  // Verificar duplicado solo al crear (no al editar)
-  if (!editId) {
-    const q = query(
-      collection(db, "modelos"),
-      where("codigo", "==", codigo),
-      where("nombre", "==", nombre),
-      where("fabricante", "==", fabricante || "")
-    );
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      showToast("Ya existe un modelo con estos datos", "error");
-      return;
-    }
-  }
-
-  let foto = fotoUrlInput.value.trim() || "";
-
-  if (fotoFileInput.files?.[0]) {
-    try {
-      const file = fotoFileInput.files[0];
-      const fileRef = ref(storage, `modelos/${Date.now()}_${file.name}`);
-      await uploadBytes(fileRef, file);
-      foto = await getDownloadURL(fileRef);
-    } catch (err) {
-      showToast("Error al subir imagen", "error");
-      return;
-    }
-  }
-
-  const data = {
-    codigo,
-    fabricante,
-    nombre,
-    foto,
-    updatedAt: new Date()
-  };
-
-  try {
-    if (editId) {
-      await updateDoc(doc(db, "modelos", editId), data);
-      showToast("Modelo actualizado correctamente ✓");
-    } else {
-      await addDoc(collection(db, "modelos"), data);
-      showToast("Modelo añadido correctamente ✓");
-    }
-    closeModal();
-    await loadData();
-  } catch (err) {
-    console.error(err);
-    showToast("Error al guardar el modelo", "error");
-  }
-}
-
-function editModel(id) {
-  const modelo = modelos.find(m => m.id === id);
-  if (!modelo) return;
-
-  codigoInput.value = modelo.codigo || "";
-  fabricanteInput.value = modelo.fabricante || "";
-  nombreInput.value = modelo.nombre || "";
-  fotoUrlInput.value = modelo.foto || "";
-  fotoFileInput.value = "";
-
-  editId = id;
-  document.getElementById("modalTitle").textContent = "Editar modelo";
-  openModal(true);
-}
-
-async function deleteModel(id) {
-  if (!confirm("¿Realmente quieres eliminar este modelo?")) return;
-  
-  try {
-    await deleteDoc(doc(db, "modelos", id));
-    showToast("Modelo eliminado");
-    await loadData();
-  } catch (err) {
-    console.error(err);
-    showToast("Error al eliminar", "error");
-  }
-}
+onAuthStateChanged(auth, user => {
+  loginDiv.classList.toggle("hidden", !!user);
+  appDiv.classList.toggle("hidden", !user);
+  if (user) loadData();
+});
 
 async function loadData() {
-  try {
-    const snap = await getDocs(collection(db, "modelos"));
-    modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    render(modelos);
-  } catch (e) {
-    console.error("Error cargando datos:", e);
-  }
+  const snap = await getDocs(collection(db, "modelos"));
+  modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  render(modelos);
 }
 
 function render(lista) {
@@ -439,51 +200,72 @@ function render(lista) {
   lista.forEach(m => {
     grid.innerHTML += `
       <div class="card">
-        <img src="${m.foto || 'https://via.placeholder.com/260x220?text=Sin+foto'}" alt="${m.nombre}">
+        <img src="${m.foto}">
         <h3>${m.nombre}</h3>
-        <p>${m.codigo} · ${m.fabricante || '—'}</p>
+        <p>${m.codigo} · ${m.fabricante}</p>
         <div class="actions">
-          <button onclick="editModel('${m.id}')">
-            <i data-lucide="pencil"></i>
-          </button>
-          <button class="danger" onclick="deleteModel('${m.id}')">
-            <i data-lucide="trash-2"></i>
-          </button>
+          <button onclick="editModel('${m.id}')">✏️</button>
+          <button class="danger" onclick="deleteModel('${m.id}')">🗑️</button>
         </div>
       </div>`;
   });
-  lucide.createIcons();
 }
 
-searchInput.oninput = () => {
-  const q = searchInput.value.toLowerCase().trim();
-  const filtered = modelos.filter(m =>
-    (m.codigo    || "").toLowerCase().includes(q) ||
-    (m.nombre     || "").toLowerCase().includes(q) ||
-    (m.fabricante || "").toLowerCase().includes(q)
-  );
-  render(filtered);
+search.oninput = e => {
+  const q = e.target.value.toLowerCase();
+  render(modelos.filter(m =>
+    m.codigo.toLowerCase().includes(q) ||
+    m.fabricante.toLowerCase().includes(q)
+  ));
 };
 
-// ── Estado de autenticación ─────────────────────────────────────────
-onAuthStateChanged(auth, user => {
-  loginDiv.classList.toggle("hidden", !!user);
-  appDiv.classList.toggle("hidden", !user);
-  errorMsg.textContent = "";
-  if (user) loadData();
+window.openModal = () => modal.classList.remove("hidden");
+window.closeModal = () => { modal.classList.add("hidden"); editId=null; };
+
+window.saveModel = async () => {
+  let foto = fotoUrl.value;
+  if (fotoFile.files[0]) {
+    const fileRef = ref(storage, "modelos/" + Date.now());
+    await uploadBytes(fileRef, fotoFile.files[0]);
+    foto = await getDownloadURL(fileRef);
+  }
+
+  const data = {
+    codigo: codigo.value,
+    fabricante: fabricante.value,
+    nombre: nombre.value,
+    foto
+  };
+
+  editId
+    ? await updateDoc(doc(db,"modelos",editId), data)
+    : await addDoc(collection(db,"modelos"), data);
+
+  closeModal();
+  loadData();
+};
+
+window.editModel = id => {
+  const m = modelos.find(x => x.id === id);
+  codigo.value = m.codigo;
+  fabricante.value = m.fabricante;
+  nombre.value = m.nombre;
+  fotoUrl.value = m.foto;
+  editId = id;
+  openModal();
+};
+
+window.deleteModel = async id => {
+  if (confirm("¿Eliminar modelo?")) {
+    await deleteDoc(doc(db,"modelos",id));
+    loadData();
+  }
+};
+
+window.toggleTheme = () => document.body.classList.toggle("dark");
+
 });
-
-// ── Exponer funciones para que onclick del HTML las encuentre ───────
-window.login          = login;
-window.logout         = logout;
-window.togglePassword = togglePassword;
-window.toggleTheme    = toggleTheme;
-window.openModal      = openModal;
-window.closeModal     = closeModal;
-window.saveModel      = saveModel;
-window.editModel      = editModel;
-window.deleteModel    = deleteModel;
-
 </script>
+
 </body>
 </html>
