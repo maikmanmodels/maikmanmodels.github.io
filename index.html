@@ -27,7 +27,6 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  transition: .3s;
 }
 
 header {
@@ -45,10 +44,10 @@ button {
   cursor: pointer;
 }
 
-button.danger { background: #dc2626; }
 button.secondary { background: #64748b; }
+button.danger { background: #dc2626; }
 
-.hidden { display: none; }
+.hidden { display: none !important; }
 
 #login, #app {
   max-width: 1000px;
@@ -92,10 +91,15 @@ input {
 #modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.5);
-  display: flex;
+  background: rgba(0,0,0,.6);
+  display: none;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
+}
+
+#modal.show {
+  display: flex;
 }
 
 #modalContent {
@@ -133,7 +137,7 @@ input {
 </div>
 
 <!-- MODAL -->
-<div id="modal" class="hidden">
+<div id="modal">
   <div id="modalContent">
     <h3 id="modalTitle">Nuevo modelo</h3>
     <input id="codigo" placeholder="Código">
@@ -166,29 +170,28 @@ const firebaseConfig = {
   appId: "1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const appFirebase = initializeApp(firebaseConfig);
-const auth = getAuth(appFirebase);
-const db = getFirestore(appFirebase);
-const storage = getStorage(appFirebase);
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const storage = getStorage(fbApp);
 
-const loginDiv = login;
-const appDiv = app;
 let modelos = [];
 let editId = null;
 
-window.login = () => {
+// AUTH
+window.login = () =>
   signInWithEmailAndPassword(auth, email.value, password.value)
     .catch(() => error.textContent = "Credenciales incorrectas");
-};
 
 window.logout = () => signOut(auth);
 
 onAuthStateChanged(auth, user => {
-  loginDiv.classList.toggle("hidden", !!user);
-  appDiv.classList.toggle("hidden", !user);
+  login.classList.toggle("hidden", !!user);
+  app.classList.toggle("hidden", !user);
   if (user) loadData();
 });
 
+// DATA
 async function loadData() {
   const snap = await getDocs(collection(db, "modelos"));
   modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -211,23 +214,26 @@ function render(lista) {
   });
 }
 
-search.oninput = e => {
-  const q = e.target.value.toLowerCase();
-  render(modelos.filter(m =>
-    m.codigo.toLowerCase().includes(q) ||
-    m.fabricante.toLowerCase().includes(q)
-  ));
+// MODAL
+window.openModal = () => {
+  modal.classList.add("show");
 };
 
-window.openModal = () => modal.classList.remove("hidden");
-window.closeModal = () => { modal.classList.add("hidden"); editId=null; };
+window.closeModal = () => {
+  modal.classList.remove("show");
+  editId = null;
+  codigo.value = fabricante.value = nombre.value = fotoUrl.value = "";
+  fotoFile.value = "";
+};
 
 window.saveModel = async () => {
+  if (!codigo.value || !fabricante.value || !nombre.value) return;
+
   let foto = fotoUrl.value;
   if (fotoFile.files[0]) {
-    const fileRef = ref(storage, "modelos/" + Date.now());
-    await uploadBytes(fileRef, fotoFile.files[0]);
-    foto = await getDownloadURL(fileRef);
+    const refImg = ref(storage, "modelos/" + Date.now());
+    await uploadBytes(refImg, fotoFile.files[0]);
+    foto = await getDownloadURL(refImg);
   }
 
   const data = {
@@ -238,8 +244,8 @@ window.saveModel = async () => {
   };
 
   editId
-    ? await updateDoc(doc(db,"modelos",editId), data)
-    : await addDoc(collection(db,"modelos"), data);
+    ? await updateDoc(doc(db, "modelos", editId), data)
+    : await addDoc(collection(db, "modelos"), data);
 
   closeModal();
   loadData();
@@ -252,14 +258,22 @@ window.editModel = id => {
   nombre.value = m.nombre;
   fotoUrl.value = m.foto;
   editId = id;
-  openModal();
+  modal.classList.add("show");
 };
 
 window.deleteModel = async id => {
   if (confirm("¿Eliminar modelo?")) {
-    await deleteDoc(doc(db,"modelos",id));
+    await deleteDoc(doc(db, "modelos", id));
     loadData();
   }
+};
+
+search.oninput = e => {
+  const q = e.target.value.toLowerCase();
+  render(modelos.filter(m =>
+    m.codigo.toLowerCase().includes(q) ||
+    m.fabricante.toLowerCase().includes(q)
+  ));
 };
 
 window.toggleTheme = () => document.body.classList.toggle("dark");
