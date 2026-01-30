@@ -21,27 +21,19 @@ body.dark {
   --text: #e5e7eb;
 }
 
-* {
-  box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
-}
+* { box-sizing: border-box; font-family: system-ui; }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  transition: background .3s, color .3s;
+  transition: .3s;
 }
 
 header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 20px;
-}
-
-h1 {
-  margin: 0;
 }
 
 button {
@@ -53,26 +45,23 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  opacity: .9;
-}
+button.danger { background: #dc2626; }
+button.secondary { background: #64748b; }
+
+.hidden { display: none; }
 
 #login, #app {
-  max-width: 900px;
+  max-width: 1000px;
   margin: auto;
   padding: 20px;
 }
 
 input {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   margin-bottom: 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
-}
-
-.hidden {
-  display: none;
 }
 
 #grid {
@@ -85,7 +74,6 @@ input {
   background: var(--card);
   border-radius: 16px;
   padding: 15px;
-  animation: fade .4s ease;
 }
 
 .card img {
@@ -93,12 +81,29 @@ input {
   height: 220px;
   object-fit: cover;
   border-radius: 12px;
-  margin-bottom: 10px;
 }
 
-@keyframes fade {
-  from {opacity: 0; transform: translateY(10px);}
-  to {opacity: 1; transform: translateY(0);}
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* MODAL */
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#modalContent {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
 }
 </style>
 </head>
@@ -112,105 +117,152 @@ input {
 
 <!-- LOGIN -->
 <div id="login">
-  <h2>Acceso</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Contraseña">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Contraseña">
   <button onclick="login()">Entrar</button>
   <p id="error" style="color:red;"></p>
 </div>
 
 <!-- APP -->
 <div id="app" class="hidden">
+  <button onclick="openModal()">➕ Añadir nuevo modelo</button>
   <input id="search" placeholder="🔍 Buscar por código o fabricante">
   <div id="grid"></div>
   <br>
   <button onclick="logout()">Cerrar sesión</button>
 </div>
 
-<!-- FIREBASE -->
+<!-- MODAL -->
+<div id="modal" class="hidden">
+  <div id="modalContent">
+    <h3 id="modalTitle">Nuevo modelo</h3>
+    <input id="codigo" placeholder="Código">
+    <input id="fabricante" placeholder="Fabricante">
+    <input id="nombre" placeholder="Modelo">
+    <input id="fotoUrl" placeholder="URL imagen (opcional)">
+    <input id="fotoFile" type="file" accept="image/*">
+    <button onclick="saveModel()">Guardar</button>
+    <button class="secondary" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, getDocs }
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // 🔥 Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-    authDomain: "maikmanmodelsstock.firebaseapp.com",
-    projectId: "maikmanmodelsstock",
-    storageBucket: "maikmanmodelsstock.appspot.com",
-    messagingSenderId: "871520809912",
-    appId: "1:871520809912:web:4042f15ef200832a95d54d"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+  authDomain: "maikmanmodelsstock.firebaseapp.com",
+  projectId: "maikmanmodelsstock",
+  storageBucket: "maikmanmodelsstock.appspot.com",
+  messagingSenderId: "871520809912",
+  appId: "1:871520809912:web:4042f15ef200832a95d54d"
+};
 
-  const firebaseApp = initializeApp(firebaseConfig);
-  const auth = getAuth(firebaseApp);
-  const db = getFirestore(firebaseApp);
+const appFirebase = initializeApp(firebaseConfig);
+const auth = getAuth(appFirebase);
+const db = getFirestore(appFirebase);
+const storage = getStorage(appFirebase);
 
-  // DOM
-  const loginDiv = document.getElementById("login");
-  const appDiv = document.getElementById("app");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const errorP = document.getElementById("error");
-  const grid = document.getElementById("grid");
-  const search = document.getElementById("search");
+const loginDiv = login;
+const appDiv = app;
+let modelos = [];
+let editId = null;
 
-  let modelos = [];
+window.login = () => {
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .catch(() => error.textContent = "Credenciales incorrectas");
+};
 
-  // LOGIN
-  window.login = () => {
-    signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-      .catch(() => {
-        errorP.textContent = "Credenciales incorrectas";
-      });
-  };
+window.logout = () => signOut(auth);
 
-  window.logout = () => signOut(auth);
+onAuthStateChanged(auth, user => {
+  loginDiv.classList.toggle("hidden", !!user);
+  appDiv.classList.toggle("hidden", !user);
+  if (user) loadData();
+});
 
-  onAuthStateChanged(auth, user => {
-    loginDiv.classList.toggle("hidden", !!user);
-    appDiv.classList.toggle("hidden", !user);
-    if (user) cargarModelos();
-  });
+async function loadData() {
+  const snap = await getDocs(collection(db, "modelos"));
+  modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  render(modelos);
+}
 
-  // FIRESTORE
-  async function cargarModelos() {
-    const snap = await getDocs(collection(db, "modelos"));
-    modelos = snap.docs.map(d => d.data());
-    pintar(modelos);
-  }
-
-  function pintar(lista) {
-    grid.innerHTML = "";
-    lista.forEach(m => {
-      grid.innerHTML += `
-        <div class="card">
-          <img src="${m.foto}">
-          <h3>${m.nombre}</h3>
-          <p><b>Código:</b> ${m.codigo}</p>
-          <p><b>Fabricante:</b> ${m.fabricante}</p>
+function render(lista) {
+  grid.innerHTML = "";
+  lista.forEach(m => {
+    grid.innerHTML += `
+      <div class="card">
+        <img src="${m.foto}">
+        <h3>${m.nombre}</h3>
+        <p>${m.codigo} · ${m.fabricante}</p>
+        <div class="actions">
+          <button onclick="editModel('${m.id}')">✏️</button>
+          <button class="danger" onclick="deleteModel('${m.id}')">🗑️</button>
         </div>
-      `;
-    });
+      </div>`;
+  });
+}
+
+search.oninput = e => {
+  const q = e.target.value.toLowerCase();
+  render(modelos.filter(m =>
+    m.codigo.toLowerCase().includes(q) ||
+    m.fabricante.toLowerCase().includes(q)
+  ));
+};
+
+window.openModal = () => modal.classList.remove("hidden");
+window.closeModal = () => { modal.classList.add("hidden"); editId=null; };
+
+window.saveModel = async () => {
+  let foto = fotoUrl.value;
+  if (fotoFile.files[0]) {
+    const fileRef = ref(storage, "modelos/" + Date.now());
+    await uploadBytes(fileRef, fotoFile.files[0]);
+    foto = await getDownloadURL(fileRef);
   }
 
-  search.addEventListener("input", e => {
-    const q = e.target.value.toLowerCase();
-    pintar(modelos.filter(m =>
-      m.codigo.toLowerCase().includes(q) ||
-      m.fabricante.toLowerCase().includes(q)
-    ));
-  });
-
-  // TEMA
-  window.toggleTheme = () => {
-    document.body.classList.toggle("dark");
+  const data = {
+    codigo: codigo.value,
+    fabricante: fabricante.value,
+    nombre: nombre.value,
+    foto
   };
+
+  editId
+    ? await updateDoc(doc(db,"modelos",editId), data)
+    : await addDoc(collection(db,"modelos"), data);
+
+  closeModal();
+  loadData();
+};
+
+window.editModel = id => {
+  const m = modelos.find(x => x.id === id);
+  codigo.value = m.codigo;
+  fabricante.value = m.fabricante;
+  nombre.value = m.nombre;
+  fotoUrl.value = m.foto;
+  editId = id;
+  openModal();
+};
+
+window.deleteModel = async id => {
+  if (confirm("¿Eliminar modelo?")) {
+    await deleteDoc(doc(db,"modelos",id));
+    loadData();
+  }
+};
+
+window.toggleTheme = () => document.body.classList.toggle("dark");
 
 });
 </script>
