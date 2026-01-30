@@ -5,15 +5,14 @@
 <title>Maikman Models · Stock</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Favicon -->
 <link rel="icon" href="favicon.ico">
 
 <style>
 :root {
   --bg: #f4f6f8;
   --card: #ffffff;
-  --text: #222;
-  --primary: #4f46e5;
+  --text: #1f2937;
+  --primary: #6366f1;
 }
 
 body.dark {
@@ -50,12 +49,12 @@ button {
   color: white;
   border: none;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
 button:hover {
-  opacity: 0.9;
+  opacity: .9;
 }
 
 #login, #app {
@@ -68,8 +67,12 @@ input {
   width: 100%;
   padding: 12px;
   margin-bottom: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ccc;
+}
+
+.hidden {
+  display: none;
 }
 
 #grid {
@@ -80,25 +83,22 @@ input {
 
 .card {
   background: var(--card);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 15px;
-  animation: fadeIn .4s ease;
+  animation: fade .4s ease;
 }
 
 .card img {
   width: 100%;
   height: 220px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
 }
 
-@keyframes fadeIn {
+@keyframes fade {
   from {opacity: 0; transform: translateY(10px);}
   to {opacity: 1; transform: translateY(0);}
-}
-
-.hidden {
-  display: none;
 }
 </style>
 </head>
@@ -130,76 +130,89 @@ input {
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, getDocs } 
+import { getFirestore, collection, getDocs }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-  authDomain: "maikmanmodelsstock.firebaseapp.com",
-  projectId: "maikmanmodelsstock",
-  storageBucket: "maikmanmodelsstock.appspot.com",
-  messagingSenderId: "871520809912",
-  appId: "1:871520809912:web:4042f15ef200832a95d54d"
-};
+document.addEventListener("DOMContentLoaded", () => {
 
-const firebaseApp = initializeApp(firebaseConfig);
+  // 🔥 Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+    authDomain: "maikmanmodelsstock.firebaseapp.com",
+    projectId: "maikmanmodelsstock",
+    storageBucket: "maikmanmodelsstock.appspot.com",
+    messagingSenderId: "871520809912",
+    appId: "1:871520809912:web:4042f15ef200832a95d54d"
+  };
 
-const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp);
+  const firebaseApp = initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const db = getFirestore(firebaseApp);
 
-window.login = () => {
-  signInWithEmailAndPassword(
-    auth,
-    email.value,
-    password.value
-  ).catch(() => {
-    error.textContent = "Credenciales incorrectas";
+  // DOM
+  const loginDiv = document.getElementById("login");
+  const appDiv = document.getElementById("app");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const errorP = document.getElementById("error");
+  const grid = document.getElementById("grid");
+  const search = document.getElementById("search");
+
+  let modelos = [];
+
+  // LOGIN
+  window.login = () => {
+    signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+      .catch(() => {
+        errorP.textContent = "Credenciales incorrectas";
+      });
+  };
+
+  window.logout = () => signOut(auth);
+
+  onAuthStateChanged(auth, user => {
+    loginDiv.classList.toggle("hidden", !!user);
+    appDiv.classList.toggle("hidden", !user);
+    if (user) cargarModelos();
   });
-};
 
-window.logout = () => signOut(auth);
-const appDiv = document.getElementById("app");
-const loginDiv = document.getElementById("login");
+  // FIRESTORE
+  async function cargarModelos() {
+    const snap = await getDocs(collection(db, "modelos"));
+    modelos = snap.docs.map(d => d.data());
+    pintar(modelos);
+  }
 
-onAuthStateChanged(auth, user => {
-  loginDiv.classList.toggle("hidden", !!user);
-  appDiv.classList.toggle("hidden", !user);
-  if (user) loadData();
-});
+  function pintar(lista) {
+    grid.innerHTML = "";
+    lista.forEach(m => {
+      grid.innerHTML += `
+        <div class="card">
+          <img src="${m.foto}">
+          <h3>${m.nombre}</h3>
+          <p><b>Código:</b> ${m.codigo}</p>
+          <p><b>Fabricante:</b> ${m.fabricante}</p>
+        </div>
+      `;
+    });
+  }
 
-async function loadData() {
-  const snap = await getDocs(collection(db, "modelos"));
-  window.data = snap.docs.map(d => d.data());
-  render(window.data);
-}
-
-function render(items) {
-  grid.innerHTML = "";
-  items.forEach(m => {
-    grid.innerHTML += `
-      <div class="card">
-        <img src="${m.foto}">
-        <h3>${m.nombre}</h3>
-        <p><b>Código:</b> ${m.codigo}</p>
-        <p><b>Fabricante:</b> ${m.fabricante}</p>
-      </div>
-    `;
+  search.addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    pintar(modelos.filter(m =>
+      m.codigo.toLowerCase().includes(q) ||
+      m.fabricante.toLowerCase().includes(q)
+    ));
   });
-}
 
-search.addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  render(window.data.filter(m =>
-    m.codigo.toLowerCase().includes(q) ||
-    m.fabricante.toLowerCase().includes(q)
-  ));
+  // TEMA
+  window.toggleTheme = () => {
+    document.body.classList.toggle("dark");
+  };
+
 });
-
-window.toggleTheme = () => {
-  document.body.classList.toggle("dark");
-};
 </script>
 
 </body>
