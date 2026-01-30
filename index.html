@@ -4,152 +4,64 @@
   <meta charset="UTF-8">
   <title>Maikman Models</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="icon" href="favicon.ico">
 
   <style>
     :root {
-      --bg: #0f1115;
-      --card: #181b22;
-      --accent: #4da3ff;
-      --text: #eaeaea;
-      --muted: #9aa0a6;
-      --danger: #ff4d4d;
+      --bg:#0f1115; --card:#181b22; --accent:#4da3ff;
+      --text:#eaeaea; --muted:#9aa0a6; --danger:#ff4d4d;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 20px;
+      margin:0; padding:20px;
+      font-family:system-ui, sans-serif;
+      background:var(--bg); color:var(--text);
     }
-
-    h1, h2 {
-      margin-top: 0;
+    input, button {
+      width:100%; padding:10px;
+      border-radius:8px; border:none;
+      margin-bottom:10px;
+      background:#22252d; color:var(--text);
     }
-
-    button {
-      background: var(--accent);
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      color: #000;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.1s ease, opacity 0.1s ease;
-    }
-
-    button:hover {
-      transform: scale(1.03);
-      opacity: 0.9;
-    }
-
-    button.danger {
-      background: var(--danger);
-      color: #fff;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 10px;
-      background: #22252d;
-      color: var(--text);
-    }
-
-    input::placeholder {
-      color: var(--muted);
-    }
-
-    #login, #app {
-      max-width: 1100px;
-      margin: auto;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .form {
-      background: var(--card);
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
+    button { background:var(--accent); color:#000; font-weight:600; cursor:pointer; }
+    button.danger { background:var(--danger); color:#fff; }
+    h1,h2 { margin-top:0; }
+    #login,#app { max-width:1100px; margin:auto; }
+    .top-bar { display:flex; gap:10px; margin-bottom:20px; }
+    .form { background:var(--card); padding:16px; border-radius:12px; margin-bottom:20px; }
     .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+      gap:16px;
     }
-
     .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      animation: fadeIn 0.2s ease;
+      background:var(--card); padding:12px;
+      border-radius:12px;
+      display:flex; flex-direction:column; gap:10px;
     }
-
     .card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: #000;
+      width:100%; height:180px;
+      object-fit:cover; border-radius:8px;
     }
-
-    .card h3 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .muted {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      margin-top: auto;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .actions { display:flex; gap:8px; margin-top:auto; }
+    .muted { color:var(--muted); font-size:.9rem; }
   </style>
 </head>
+
 <body>
 
 <h1>Maikman Models</h1>
 
-<!-- LOGIN -->
 <div id="login">
   <div class="form">
     <h2>Acceso</h2>
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Contraseña">
     <button onclick="login()">Entrar</button>
-    <p id="error" style="color:#ff4d4d;"></p>
+    <p id="error" style="color:#ff4d4d"></p>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:none;">
+<div id="app" style="display:none">
 
   <div class="top-bar">
     <input id="busqueda" placeholder="Buscar por código o fabricante">
@@ -157,16 +69,15 @@
   </div>
 
   <div class="form">
-    <h2>➕ Añadir / Editar modelo</h2>
+    <h2>Añadir / Editar modelo</h2>
     <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
-    <input id="nombre" placeholder="Nombre del modelo">
+    <input id="nombre" placeholder="Nombre">
     <input id="foto" placeholder="URL de la foto">
     <button onclick="guardar()">Guardar</button>
   </div>
 
   <div class="grid" id="grid"></div>
-
 </div>
 
 <script type="module">
@@ -185,9 +96,9 @@
     appId: "1:871520809912:web:4042f15ef200832a95d54d"
   };
 
-  const appFirebase = initializeApp(firebaseConfig);
-  const auth = getAuth(appFirebase);
-  const db = getFirestore(appFirebase);
+  const appFB = initializeApp(firebaseConfig);
+  const auth = getAuth(appFB);
+  const db = getFirestore(appFB);
 
   const loginDiv = document.getElementById("login");
   const appDiv = document.getElementById("app");
@@ -197,10 +108,9 @@
   let modelos = [];
   let editandoId = null;
 
-  window.login = () => {
+  window.login = () =>
     signInWithEmailAndPassword(auth, email.value, password.value)
       .catch(() => error.textContent = "Credenciales incorrectas");
-  };
 
   window.logout = () => signOut(auth);
 
@@ -220,35 +130,35 @@
 
   window.guardar = async () => {
     const data = {
-      codigo: codigo.value || "",
-      fabricante: fabricante.value || "",
-      nombre: nombre.value || "",
-      foto: foto.value || ""
+      codigo: codigo.value,
+      fabricante: fabricante.value,
+      nombre: nombre.value,
+      foto: foto.value
     };
 
-    if (editandoId) {
-      await updateDoc(doc(db, "modelos", editandoId), data);
-      editandoId = null;
-    } else {
-      await addDoc(collection(db, "modelos"), data);
-    }
+    editandoId
+      ? await updateDoc(doc(db,"modelos",editandoId), data)
+      : await addDoc(collection(db,"modelos"), data);
 
+    editandoId = null;
     codigo.value = fabricante.value = nombre.value = foto.value = "";
     cargar();
   };
 
-  window.editar = (m) => {
-    editandoId = m.id;
+  window.editarPorId = id => {
+    const m = modelos.find(x => x.id === id);
+    if (!m) return;
+    editandoId = id;
     codigo.value = m.codigo;
     fabricante.value = m.fabricante;
     nombre.value = m.nombre;
     foto.value = m.foto;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top:0, behavior:"smooth" });
   };
 
-  window.borrar = async (id) => {
+  window.borrar = async id => {
     if (confirm("¿Borrar este modelo?")) {
-      await deleteDoc(doc(db, "modelos", id));
+      await deleteDoc(doc(db,"modelos",id));
       cargar();
     }
   };
@@ -270,11 +180,10 @@
             <div class="muted">${m.fabricante}</div>
             <div class="muted">Código: ${m.codigo}</div>
             <div class="actions">
-              <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
-              <button class="danger" onclick='borrar("${m.id}")'>🗑️</button>
+              <button onclick="editarPorId('${m.id}')">✏️</button>
+              <button class="danger" onclick="borrar('${m.id}')">🗑️</button>
             </div>
-          </div>
-        `;
+          </div>`;
       });
   }
 </script>
