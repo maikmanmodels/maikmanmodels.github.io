@@ -144,9 +144,10 @@ const firebaseConfig = {
   appId: "1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const firebaseApp = initializeApp(firebaseConfig);
+
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
 
 window.login = () => {
   signInWithEmailAndPassword(
@@ -159,10 +160,12 @@ window.login = () => {
 };
 
 window.logout = () => signOut(auth);
+const appDiv = document.getElementById("app");
+const loginDiv = document.getElementById("login");
 
 onAuthStateChanged(auth, user => {
-  login.classList.toggle("hidden", !!user);
-  app.classList.toggle("hidden", !user);
+  loginDiv.classList.toggle("hidden", !!user);
+  appDiv.classList.toggle("hidden", !user);
   if (user) loadData();
 });
 
