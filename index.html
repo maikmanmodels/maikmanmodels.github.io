@@ -2,60 +2,171 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Maikman Models - Stock</title>
-<link rel="icon" href="favicon.ico">
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input, button { margin: 4px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 15px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-    th { background: #eee; }
+  <title>Maikman Models</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    img {
-      max-width: 150px;
-      height: auto;
+  <link rel="icon" href="favicon.ico">
+
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --accent: #4da3ff;
+      --text: #eaeaea;
+      --muted: #9aa0a6;
+      --danger: #ff4d4d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+    }
+
+    h1, h2 {
+      margin-top: 0;
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #000;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.1s ease, opacity 0.1s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      opacity: 0.9;
+    }
+
+    button.danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 10px;
+      background: #22252d;
+      color: var(--text);
+    }
+
+    input::placeholder {
+      color: var(--muted);
+    }
+
+    #login, #app {
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .form {
+      background: var(--card);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #000;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-<h1>Maikman Models - Control de Stock</h1>
+<h1>Maikman Models</h1>
 
 <!-- LOGIN -->
 <div id="login">
-  <h2>Acceso</h2>
-  <input type="email" id="email" placeholder="Email"><br>
-  <input type="password" id="password" placeholder="Contraseña"><br>
-  <button onclick="login()">Entrar</button>
-  <p id="error" style="color:red;"></p>
+  <div class="form">
+    <h2>Acceso</h2>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button onclick="login()">Entrar</button>
+    <p id="error" style="color:#ff4d4d;"></p>
+  </div>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none;">
-  <button onclick="logout()">Cerrar sesión</button>
 
-  <h2>➕ Añadir / Editar modelo</h2>
-  <input id="codigo" placeholder="Código">
-  <input id="fabricante" placeholder="Fabricante">
-  <input id="nombre" placeholder="Nombre del modelo">
-  <input id="foto" placeholder="URL de la foto">
-  <button onclick="guardar()">Guardar</button>
+  <div class="top-bar">
+    <input id="busqueda" placeholder="Buscar por código o fabricante">
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
 
-  <h2>🔍 Buscar</h2>
-  <input id="busqueda" placeholder="Código o fabricante">
+  <div class="form">
+    <h2>➕ Añadir / Editar modelo</h2>
+    <input id="codigo" placeholder="Código">
+    <input id="fabricante" placeholder="Fabricante">
+    <input id="nombre" placeholder="Nombre del modelo">
+    <input id="foto" placeholder="URL de la foto">
+    <button onclick="guardar()">Guardar</button>
+  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Fabricante</th>
-        <th>Nombre</th>
-        <th>Foto</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tabla"></tbody>
-  </table>
+  <div class="grid" id="grid"></div>
+
 </div>
 
 <script type="module">
@@ -74,36 +185,29 @@
     appId: "1:871520809912:web:4042f15ef200832a95d54d"
   };
 
-  const firebaseApp = initializeApp(firebaseConfig);
-  const auth = getAuth(firebaseApp);
-  const db = getFirestore(firebaseApp);
+  const appFirebase = initializeApp(firebaseConfig);
+  const auth = getAuth(appFirebase);
+  const db = getFirestore(appFirebase);
 
   const loginDiv = document.getElementById("login");
   const appDiv = document.getElementById("app");
-
-  const busquedaInput = document.getElementById("busqueda");
-  busquedaInput.addEventListener("input", render);
+  const grid = document.getElementById("grid");
+  const busqueda = document.getElementById("busqueda");
 
   let modelos = [];
   let editandoId = null;
 
-  // LOGIN
   window.login = () => {
     signInWithEmailAndPassword(auth, email.value, password.value)
-      .catch(() => error.innerText = "Credenciales incorrectas");
+      .catch(() => error.textContent = "Credenciales incorrectas");
   };
 
   window.logout = () => signOut(auth);
 
   onAuthStateChanged(auth, user => {
-    if (user) {
-      loginDiv.style.display = "none";
-      appDiv.style.display = "block";
-      cargar();
-    } else {
-      loginDiv.style.display = "block";
-      appDiv.style.display = "none";
-    }
+    loginDiv.style.display = user ? "none" : "block";
+    appDiv.style.display = user ? "block" : "none";
+    if (user) cargar();
   });
 
   async function cargar() {
@@ -111,6 +215,8 @@
     modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render();
   }
+
+  busqueda.addEventListener("input", render);
 
   window.guardar = async () => {
     const data = {
@@ -137,6 +243,7 @@
     fabricante.value = m.fabricante;
     nombre.value = m.nombre;
     foto.value = m.foto;
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   window.borrar = async (id) => {
@@ -147,8 +254,8 @@
   };
 
   function render() {
-    const q = busquedaInput.value.toLowerCase();
-    tabla.innerHTML = "";
+    const q = busqueda.value.toLowerCase();
+    grid.innerHTML = "";
 
     modelos
       .filter(m =>
@@ -156,17 +263,18 @@
         m.fabricante.toLowerCase().includes(q)
       )
       .forEach(m => {
-        tabla.innerHTML += `
-          <tr>
-            <td>${m.codigo}</td>
-            <td>${m.fabricante}</td>
-            <td>${m.nombre}</td>
-            <td>${m.foto ? `<img src="${m.foto}">` : ""}</td>
-            <td>
+        grid.innerHTML += `
+          <div class="card">
+            ${m.foto ? `<img src="${m.foto}">` : ""}
+            <h3>${m.nombre}</h3>
+            <div class="muted">${m.fabricante}</div>
+            <div class="muted">Código: ${m.codigo}</div>
+            <div class="actions">
               <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
-              <button onclick='borrar("${m.id}")'>🗑️</button>
-            </td>
-          </tr>`;
+              <button class="danger" onclick='borrar("${m.id}")'>🗑️</button>
+            </div>
+          </div>
+        `;
       });
   }
 </script>
