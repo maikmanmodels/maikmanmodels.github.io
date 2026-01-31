@@ -12,15 +12,66 @@
 body.dark{
   --bg:#121212;--card:#1e1e1e;--text:#eee;--accent:#4dabf7
 }
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);transition:.3s}
-header{display:flex;justify-content:space-between;align-items:center;padding:1rem}
-button{padding:.6rem 1rem;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
-input{padding:.6rem;border-radius:6px;border:1px solid #ccc;width:100%}
-.card{background:var(--card);padding:1rem;border-radius:12px;margin:1rem}
-#models{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
-.model img{width:100%;height:180px;object-fit:cover;border-radius:8px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10}
-.modal-content{background:var(--card);padding:1rem;border-radius:12px;width:90%;max-width:420px}
+body{
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+  transition:.3s;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1rem;
+}
+button{
+  padding:.6rem 1rem;
+  border:none;
+  border-radius:8px;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+}
+input{
+  padding:.6rem;
+  border-radius:6px;
+  border:1px solid #ccc;
+  width:100%;
+}
+.card{
+  background:var(--card);
+  padding:1rem;
+  border-radius:12px;
+  margin:1rem;
+}
+#models{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:1rem;
+}
+.model img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:8px;
+}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+}
+.modal-content{
+  background:var(--card);
+  padding:1rem;
+  border-radius:12px;
+  width:90%;
+  max-width:420px;
+}
 video{width:100%;border-radius:8px}
 </style>
 </head>
@@ -30,8 +81,8 @@ video{width:100%;border-radius:8px}
 <header>
   <h2>Maikman Models</h2>
   <div>
-    <button onclick="toggleTheme()">🌙</button>
-    <button onclick="logout()">Salir</button>
+    <button id="themeBtn">🌙</button>
+    <button id="logoutBtn">Salir</button>
   </div>
 </header>
 
@@ -39,26 +90,24 @@ video{width:100%;border-radius:8px}
   <h3>Acceso</h3>
   <input id="email" type="email" placeholder="Email"><br><br>
   <input id="password" type="password" placeholder="Contraseña">
-  <label><input type="checkbox" onclick="verPass()"> Ver contraseña</label><br><br>
-  <button onclick="login()">Entrar</button>
+  <label><input type="checkbox" id="verPass"> Ver contraseña</label><br><br>
+  <button id="loginBtn">Entrar</button>
   <p id="error" style="color:red"></p>
 </div>
 
 <div id="app" style="display:none">
   <div class="card">
-    <input id="busqueda" placeholder="Buscar por código, fabricante o modelo">
-    <br><br>
-    <button onclick="abrirModal()">➕ Añadir nuevo modelo</button>
+    <input id="busqueda" placeholder="Buscar por código, fabricante o modelo"><br><br>
+    <button id="addBtn">➕ Añadir nuevo modelo</button>
   </div>
   <div id="models"></div>
 </div>
 
-<!-- MODAL NUEVO MODELO -->
+<!-- MODAL MODELO -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3>Nuevo modelo</h3>
-
-    <button onclick="abrirScanner()">📷 Escanear código</button><br><br>
+    <button id="scanBtn">📷 Escanear código</button><br><br>
 
     <input id="codigo" placeholder="Código"><br><br>
     <input id="fabricante" placeholder="Fabricante"><br><br>
@@ -67,8 +116,8 @@ video{width:100%;border-radius:8px}
     <input id="imgUrl" placeholder="URL imagen (opcional)"><br><br>
     <input id="imgFile" type="file" accept="image/*"><br><br>
 
-    <button onclick="guardar()">Guardar</button>
-    <button onclick="cerrarModal()">Cancelar</button>
+    <button id="saveBtn">Guardar</button>
+    <button id="cancelBtn">Cancelar</button>
   </div>
 </div>
 
@@ -77,7 +126,7 @@ video{width:100%;border-radius:8px}
   <div class="modal-content">
     <h3>Escanear código</h3>
     <video id="video" autoplay></video><br><br>
-    <button onclick="cerrarScanner()">Cancelar</button>
+    <button id="closeScan">Cancelar</button>
   </div>
 </div>
 
@@ -90,6 +139,17 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+/* ===== ELEMENTOS ===== */
+const el = id => document.getElementById(id);
+
+const loginBox = el("login");
+const appBox = el("app");
+const modelsBox = el("models");
+const modal = el("modal");
+const scanner = el("scanner");
+const video = el("video");
+
+/* ===== FIREBASE ===== */
 const firebaseConfig={
  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
  authDomain:"maikmanmodelsstock.firebaseapp.com",
@@ -99,25 +159,30 @@ const firebaseConfig={
  appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
-const storage=getStorage(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 let modelos=[];
 let stream=null;
 let detector=null;
 
-window.login=()=>signInWithEmailAndPassword(auth,email.value,password.value)
-.catch(()=>error.innerText="Credenciales incorrectas");
-window.logout=()=>signOut(auth);
+/* ===== AUTH ===== */
+el("loginBtn").onclick = ()=>{
+ signInWithEmailAndPassword(auth, el("email").value, el("password").value)
+ .catch(()=>el("error").innerText="Credenciales incorrectas");
+};
 
-onAuthStateChanged(auth,u=>{
- login.style.display=u?"none":"block";
- app.style.display=u?"block":"none";
- if(u)cargar();
+el("logoutBtn").onclick = ()=>signOut(auth);
+
+onAuthStateChanged(auth,user=>{
+ loginBox.style.display = user ? "none" : "block";
+ appBox.style.display = user ? "block" : "none";
+ if(user) cargar();
 });
 
+/* ===== DATA ===== */
 async function cargar(){
  modelos=[];
  const q=await getDocs(collection(db,"modelos"));
@@ -125,15 +190,15 @@ async function cargar(){
  pintar();
 }
 
-window.pintar=()=>{
- const t=busqueda.value.toLowerCase();
- models.innerHTML="";
+function pintar(){
+ const t = el("busqueda").value.toLowerCase();
+ modelsBox.innerHTML="";
  modelos.filter(m=>
   (m.codigo||"").toLowerCase().includes(t)||
   (m.fabricante||"").toLowerCase().includes(t)||
   (m.modelo||"").toLowerCase().includes(t)
  ).forEach(m=>{
-  models.innerHTML+=`
+  modelsBox.innerHTML+=`
    <div class="card model">
     <img src="${m.imagen}">
     <b>${m.modelo}</b><br>
@@ -141,46 +206,51 @@ window.pintar=()=>{
     <button onclick="borrar('${m.id}')">🗑</button>
    </div>`;
  });
-};
+}
 
-busqueda.oninput=pintar;
+el("busqueda").oninput = pintar;
 
-window.abrirModal=()=>modal.style.display="flex";
-window.cerrarModal=()=>modal.style.display="none";
+/* ===== MODAL ===== */
+el("addBtn").onclick = ()=>modal.style.display="flex";
+el("cancelBtn").onclick = ()=>modal.style.display="none";
 
-window.guardar=async()=>{
+/* ===== GUARDAR ===== */
+el("saveBtn").onclick = async ()=>{
  let imagen="";
- if(imgFile.files[0]){
+ const file = el("imgFile").files[0];
+ if(file){
   const r=ref(storage,"modelos/"+Date.now());
-  await uploadBytes(r,imgFile.files[0]);
+  await uploadBytes(r,file);
   imagen=await getDownloadURL(r);
- } else imagen=imgUrl.value;
+ } else imagen=el("imgUrl").value;
 
  await addDoc(collection(db,"modelos"),{
-  codigo:codigo.value,
-  fabricante:fabricante.value,
-  modelo:modelo.value,
+  codigo:el("codigo").value,
+  fabricante:el("fabricante").value,
+  modelo:el("modelo").value,
   imagen
  });
- cerrarModal();
- codigo.value=fabricante.value=modelo.value=imgUrl.value="";
- imgFile.value="";
+
+ modal.style.display="none";
+ ["codigo","fabricante","modelo","imgUrl"].forEach(id=>el(id).value="");
+ el("imgFile").value="";
  cargar();
 };
 
-window.borrar=async id=>{
+window.borrar = async id=>{
  if(confirm("¿Borrar modelo?")){
   await deleteDoc(doc(db,"modelos",id));
   cargar();
  }
 };
 
-window.toggleTheme=()=>document.body.classList.toggle("dark");
-window.verPass=()=>password.type=password.type==="password"?"text":"password";
+/* ===== UI ===== */
+el("themeBtn").onclick = ()=>document.body.classList.toggle("dark");
+el("verPass").onchange = ()=>el("password").type =
+ el("password").type==="password"?"text":"password";
 
-/* ====== ESCÁNER ====== */
-
-window.abrirScanner=async()=>{
+/* ===== ESCÁNER ===== */
+el("scanBtn").onclick = async ()=>{
  scanner.style.display="flex";
  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
  video.srcObject=stream;
@@ -188,32 +258,29 @@ window.abrirScanner=async()=>{
  detectar();
 };
 
-async function detectar(){
- if(!detector)return;
- const codes=await detector.detect(video);
- if(codes.length){
-  const code=codes[0].rawValue;
-  cerrarScanner();
-  codigo.value=code;
-  buscarAPI(code);
- } else requestAnimationFrame(detectar);
-}
-
-window.cerrarScanner=()=>{
+el("closeScan").onclick = ()=>{
  scanner.style.display="none";
  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
 };
 
-/* ====== API GRATUITA ====== */
+async function detectar(){
+ if(!detector) return;
+ const codes=await detector.detect(video);
+ if(codes.length){
+  const code=codes[0].rawValue;
+  el("codigo").value=code;
+  el("closeScan").click();
+  buscarAPI(code);
+ } else requestAnimationFrame(detectar);
+}
+
 async function buscarAPI(code){
  const r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const j=await r.json();
- if(j.status===1){
-  if(confirm("Datos encontrados. ¿Usarlos?")){
-   fabricante.value=j.product.brands||"";
-   modelo.value=j.product.product_name||"";
-   if(j.product.image_url) imgUrl.value=j.product.image_url;
-  }
+ if(j.status===1 && confirm("Datos encontrados. ¿Usarlos?")){
+  el("fabricante").value=j.product.brands||"";
+  el("modelo").value=j.product.product_name||"";
+  if(j.product.image_url) el("imgUrl").value=j.product.image_url;
  }
 }
 </script>
