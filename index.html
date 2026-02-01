@@ -12,14 +12,15 @@
 body.dark{--bg:#121212;--card:#1e1e1e;--text:#eee;--accent:#4dabf7}
 body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
 header{display:flex;justify-content:space-between;padding:1rem}
-button{padding:.6rem 1rem;border:none;border-radius:8px;background:var(--accent);color:#fff}
+button{padding:.5rem .8rem;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
 input{padding:.6rem;border-radius:6px;border:1px solid #ccc;width:100%}
 .card{background:var(--card);padding:1rem;border-radius:12px;margin:1rem}
 #models{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
 .model img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+.actions{display:flex;gap:.5rem;margin-top:.5rem}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10}
 .modal-content{background:var(--card);padding:1rem;border-radius:12px;width:90%;max-width:420px}
-#scanner video{width:100%}
+#camera{width:100%}
 </style>
 </head>
 
@@ -38,30 +39,37 @@ input{padding:.6rem;border-radius:6px;border:1px solid #ccc;width:100%}
   <input id="password" type="password" placeholder="Contraseña">
   <label><input type="checkbox" onclick="verPass()"> Ver</label>
   <button onclick="login()">Entrar</button>
-  <p id="error"></p>
+  <p id="error" style="color:red"></p>
 </div>
 
 <div id="app" style="display:none">
   <div class="card">
-    <input id="busqueda" placeholder="Buscar">
-    <button onclick="abrirModal()">➕ Añadir</button>
+    <input id="busqueda" placeholder="Buscar por código, fabricante o modelo">
+    <button onclick="nuevo()">➕ Añadir</button>
   </div>
   <div id="models"></div>
 </div>
 
+<!-- MODAL MODELO -->
 <div id="modal" class="modal">
   <div class="modal-content">
+    <h3 id="modalTitulo">Nuevo modelo</h3>
     <button onclick="abrirScanner()">📷 Escanear</button><br><br>
+
     <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
     <input id="modelo" placeholder="Modelo">
     <input id="imgUrl" placeholder="URL imagen">
     <input id="imgFile" type="file">
-    <button onclick="guardar()">Guardar</button>
-    <button onclick="cerrarModal()">Cancelar</button>
+
+    <div class="actions">
+      <button onclick="guardar()">Guardar</button>
+      <button onclick="cerrarModal()">Cancelar</button>
+    </div>
   </div>
 </div>
 
+<!-- SCANNER -->
 <div id="scanner" class="modal">
   <div class="modal-content">
     <div id="camera"></div>
@@ -73,12 +81,14 @@ input{padding:.6rem;border-radius:6px;border:1px solid #ccc;width:100%}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc }
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const el=id=>document.getElementById(id);
+const placeholderImg =
+"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+U2luIGltYWdlbjwvdGV4dD48L3N2Zz4=";
 
 const app=initializeApp({
  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
@@ -92,7 +102,9 @@ const app=initializeApp({
 const auth=getAuth(app);
 const db=getFirestore(app);
 const storage=getStorage(app);
+
 let modelos=[];
+let editId=null;
 
 /* AUTH */
 window.login=()=>signInWithEmailAndPassword(auth,email.value,password.value)
@@ -120,20 +132,41 @@ function pintar(){
   (m.fabricante||"").toLowerCase().includes(t)||
   (m.modelo||"").toLowerCase().includes(t)
  ).forEach(m=>{
-  const img=m.imagen||m.img||"https://via.placeholder.com/300x200?text=Sin+imagen";
+  const img=m.imagen||placeholderImg;
   models.innerHTML+=`
    <div class="card model">
     <img src="${img}">
     <b>${m.modelo||""}</b><br>
     ${m.fabricante||""}<br>${m.codigo||""}
-    <button onclick="borrar('${m.id}')">🗑</button>
+    <div class="actions">
+      <button onclick="editar('${m.id}')">✏️</button>
+      <button onclick="borrar('${m.id}')">🗑</button>
+    </div>
    </div>`;
  });
 }
 busqueda.oninput=pintar;
 
 /* MODAL */
-window.abrirModal=()=>modal.style.display="flex";
+window.nuevo=()=>{
+ editId=null;
+ modalTitulo.innerText="Nuevo modelo";
+ ["codigo","fabricante","modelo","imgUrl"].forEach(i=>el(i).value="");
+ imgFile.value="";
+ modal.style.display="flex";
+};
+
+window.editar=id=>{
+ const m=modelos.find(x=>x.id===id);
+ editId=id;
+ modalTitulo.innerText="Editar modelo";
+ codigo.value=m.codigo||"";
+ fabricante.value=m.fabricante||"";
+ modelo.value=m.modelo||"";
+ imgUrl.value=m.imagen||"";
+ modal.style.display="flex";
+};
+
 window.cerrarModal=()=>modal.style.display="none";
 
 /* GUARDAR */
@@ -144,13 +177,22 @@ window.guardar=async()=>{
   await uploadBytes(r,imgFile.files[0]);
   imagen=await getDownloadURL(r);
  }
- await addDoc(collection(db,"modelos"),{
+
+ const data={
   codigo:codigo.value,
   fabricante:fabricante.value,
   modelo:modelo.value,
   imagen
- });
- cerrarModal(); cargar();
+ };
+
+ if(editId){
+  await updateDoc(doc(db,"modelos",editId),data);
+ } else {
+  await addDoc(collection(db,"modelos"),data);
+ }
+
+ cerrarModal();
+ cargar();
 };
 
 /* BORRAR */
@@ -165,15 +207,13 @@ window.borrar=async id=>{
 window.toggleTheme=()=>document.body.classList.toggle("dark");
 window.verPass=()=>password.type=password.type==="password"?"text":"password";
 
-/* ESCÁNER (QUAGGA) */
+/* ESCÁNER */
 window.abrirScanner=()=>{
  scanner.style.display="flex";
  Quagga.init({
   inputStream:{type:"LiveStream",target:document.querySelector("#camera")},
   decoder:{readers:["ean_reader","upc_reader","ean_8_reader"]}
- },()=>{
-  Quagga.start();
- });
+ },()=>Quagga.start());
  Quagga.onDetected(d=>{
   const code=d.codeResult.code;
   Quagga.stop();
@@ -198,5 +238,6 @@ async function buscarAPI(code){
  }
 }
 </script>
+
 </body>
 </html>
