@@ -2,242 +2,161 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Maikman Models Stock</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+<title>Maikman Models</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root{--bg:#f4f4f4;--card:#fff;--text:#111;--accent:#007bff}
-body.dark{--bg:#121212;--card:#1e1e1e;--text:#eee;--accent:#4dabf7}
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
-header{display:flex;justify-content:space-between;padding:1rem}
-button{padding:.5rem .8rem;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
-input{padding:.6rem;border-radius:6px;border:1px solid #ccc;width:100%}
-.card{background:var(--card);padding:1rem;border-radius:12px;margin:1rem}
-#models{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
-.model img{width:100%;height:180px;object-fit:cover;border-radius:8px}
-.actions{display:flex;gap:.5rem;margin-top:.5rem}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10}
-.modal-content{background:var(--card);padding:1rem;border-radius:12px;width:90%;max-width:420px}
-#camera{width:100%}
+:root{--cols:3}
+body{font-family:sans-serif;margin:0;background:#f4f4f4}
+body.dark{background:#121212;color:#eee}
+header{display:flex;justify-content:space-between;align-items:center;padding:1rem;background:#222;color:#fff}
+button{cursor:pointer;padding:.5rem 1rem}
+#models{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:1rem;padding:1rem}
+.card{background:#fff;padding:1rem;border-radius:10px}
+body.dark .card{background:#1e1e1e}
+img{width:100%;border-radius:6px}
+.modal{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center}
+.modal-content{background:#fff;padding:1rem;border-radius:10px;min-width:300px}
+body.dark .modal-content{background:#222;color:#fff}
+input,select{width:100%;margin:.3rem 0;padding:.4rem}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>Maikman Models</h2>
-  <div>
-    <button onclick="toggleTheme()">🌙</button>
-    <button onclick="logout()">Salir</button>
-  </div>
+<h2>Maikman Models</h2>
+<div>
+<button onclick="abrirConfig()">⚙️</button>
+<button onclick="logout()">Salir</button>
+</div>
 </header>
 
-<div id="login" class="card">
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Contraseña">
-  <label><input type="checkbox" onclick="verPass()"> Ver</label>
-  <button onclick="login()">Entrar</button>
-  <p id="error" style="color:red"></p>
+<div style="padding:1rem">
+<input id="search" placeholder="Buscar modelo, fabricante o código">
+<button onclick="nuevo()">➕ Añadir modelo</button>
+<button onclick="scan()">📷 Escanear</button>
 </div>
 
-<div id="app" style="display:none">
-  <div class="card">
-    <input id="busqueda" placeholder="Buscar por código, fabricante o modelo">
-    <button onclick="nuevo()">➕ Añadir</button>
-  </div>
-  <div id="models"></div>
-</div>
+<div id="models"></div>
 
 <!-- MODAL MODELO -->
 <div id="modal" class="modal">
-  <div class="modal-content">
-    <h3 id="modalTitulo">Nuevo modelo</h3>
-    <button onclick="abrirScanner()">📷 Escanear</button><br><br>
-
-    <input id="codigo" placeholder="Código">
-    <input id="fabricante" placeholder="Fabricante">
-    <input id="modelo" placeholder="Modelo">
-    <input id="imgUrl" placeholder="URL imagen">
-    <input id="imgFile" type="file">
-
-    <div class="actions">
-      <button onclick="guardar()">Guardar</button>
-      <button onclick="cerrarModal()">Cancelar</button>
-    </div>
-  </div>
+<div class="modal-content">
+<h3>Modelo</h3>
+<input id="codigo" placeholder="Código / EAN">
+<input id="fabricante" placeholder="Fabricante">
+<input id="modelo" placeholder="Modelo">
+<input id="escala" placeholder="Escala">
+<input id="imgurl" placeholder="URL imagen">
+<input type="file" id="imgfile">
+<button onclick="buscarScalemates()">🔎 Buscar en Scalemates</button>
+<br><br>
+<button onclick="guardar()">💾 Guardar</button>
+<button onclick="cerrar()">Cancelar</button>
+</div>
 </div>
 
-<!-- SCANNER -->
-<div id="scanner" class="modal">
-  <div class="modal-content">
-    <div id="camera"></div>
-    <button onclick="cerrarScanner()">Cancelar</button>
-  </div>
+<!-- CONFIG -->
+<div id="config" class="modal">
+<div class="modal-content">
+<h3>Configuración</h3>
+<button onclick="toggleTheme()">🌗 Tema</button>
+<select id="cols" onchange="setCols()">
+<option>2</option><option>3</option><option>4</option><option>5</option>
+</select>
+<br><br>
+<button onclick="cerrarConfig()">Cerrar</button>
+</div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {getFirestore,collection,getDocs,addDoc,deleteDoc,doc} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const el=id=>document.getElementById(id);
-const placeholderImg =
-"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+U2luIGltYWdlbjwvdGV4dD48L3N2Zz4=";
-
-const app=initializeApp({
+const firebaseConfig={
  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
  authDomain:"maikmanmodelsstock.firebaseapp.com",
- projectId:"maikmanmodelsstock",
- storageBucket:"maikmanmodelsstock.appspot.com",
- messagingSenderId:"871520809912",
- appId:"1:871520809912:web:4042f15ef200832a95d54d"
-});
+ projectId:"maikmanmodelsstock"
+};
 
+const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
-const storage=getStorage(app);
 
-let modelos=[];
-let editId=null;
+let data=[];
 
-/* AUTH */
-window.login=()=>signInWithEmailAndPassword(auth,email.value,password.value)
-.catch(()=>error.innerText="Credenciales incorrectas");
-window.logout=()=>signOut(auth);
 onAuthStateChanged(auth,u=>{
- el("login").style.display=u?"none":"block";
- el("app").style.display=u?"block":"none";
- if(u)cargar();
+ if(!u) location.href="login.html";
+ cargar();
 });
 
-/* DATA */
 async function cargar(){
- modelos=[];
- const q=await getDocs(collection(db,"modelos"));
- q.forEach(d=>modelos.push({...d.data(),id:d.id}));
+ const q=await getDocs(collection(db,"models"));
+ data=q.docs.map(d=>({...d.data(),id:d.id}));
  pintar();
 }
 
 function pintar(){
- const t=busqueda.value.toLowerCase();
  models.innerHTML="";
- modelos.filter(m=>
-  (m.codigo||"").toLowerCase().includes(t)||
-  (m.fabricante||"").toLowerCase().includes(t)||
-  (m.modelo||"").toLowerCase().includes(t)
+ const t=search.value.toLowerCase();
+ data.filter(m=>
+ (m.modelo||"").toLowerCase().includes(t)||
+ (m.fabricante||"").toLowerCase().includes(t)||
+ (m.codigo||"").includes(t)
  ).forEach(m=>{
-  const img=m.imagen||placeholderImg;
   models.innerHTML+=`
-   <div class="card model">
-    <img src="${img}">
-    <b>${m.modelo||""}</b><br>
-    ${m.fabricante||""}<br>${m.codigo||""}
-    <div class="actions">
-      <button onclick="editar('${m.id}')">✏️</button>
-      <button onclick="borrar('${m.id}')">🗑</button>
-    </div>
-   </div>`;
+  <div class="card">
+   <img src="${m.img||'https://via.placeholder.com/300x200?text=Sin+imagen'}">
+   <b>${m.fabricante||""}</b><br>
+   ${m.modelo||""}<br>
+   ${m.escala||""}<br>
+   <button onclick="borrar('${m.id}')">🗑️</button>
+  </div>`;
  });
 }
-busqueda.oninput=pintar;
 
-/* MODAL */
-window.nuevo=()=>{
- editId=null;
- modalTitulo.innerText="Nuevo modelo";
- ["codigo","fabricante","modelo","imgUrl"].forEach(i=>el(i).value="");
- imgFile.value="";
- modal.style.display="flex";
-};
+search.oninput=pintar;
 
-window.editar=id=>{
- const m=modelos.find(x=>x.id===id);
- editId=id;
- modalTitulo.innerText="Editar modelo";
- codigo.value=m.codigo||"";
- fabricante.value=m.fabricante||"";
- modelo.value=m.modelo||"";
- imgUrl.value=m.imagen||"";
- modal.style.display="flex";
-};
+window.nuevo=()=>modal.style.display="flex";
+window.cerrar=()=>modal.style.display="none";
 
-window.cerrarModal=()=>modal.style.display="none";
-
-/* GUARDAR */
 window.guardar=async()=>{
- let imagen=imgUrl.value;
- if(imgFile.files[0]){
-  const r=ref(storage,"modelos/"+Date.now());
-  await uploadBytes(r,imgFile.files[0]);
-  imagen=await getDownloadURL(r);
- }
-
- const data={
+ await addDoc(collection(db,"models"),{
   codigo:codigo.value,
   fabricante:fabricante.value,
   modelo:modelo.value,
-  imagen
- };
+  escala:escala.value,
+  img:imgurl.value
+ });
+ cerrar(); cargar();
+};
 
- if(editId){
-  await updateDoc(doc(db,"modelos",editId),data);
- } else {
-  await addDoc(collection(db,"modelos"),data);
- }
-
- cerrarModal();
+window.borrar=async(id)=>{
+ await deleteDoc(doc(db,"models",id));
  cargar();
 };
 
-/* BORRAR */
-window.borrar=async id=>{
- if(confirm("¿Borrar modelo?")){
-  await deleteDoc(doc(db,"modelos",id));
-  cargar();
- }
+window.buscarScalemates=async()=>{
+ const q=codigo.value||modelo.value;
+ const res=await fetch("https://TU-WORKER.cloudflare.workers.dev?q="+encodeURIComponent(q));
+ const html=await res.text();
+
+ // detección básica
+ if(html.includes("Revell")) fabricante.value="Revell";
+ if(html.includes("1:")) escala.value=html.match(/1:\d+/)?.[0]||"";
 };
 
-/* UI */
+window.logout=()=>signOut(auth);
+
+window.abrirConfig=()=>config.style.display="flex";
+window.cerrarConfig=()=>config.style.display="none";
 window.toggleTheme=()=>document.body.classList.toggle("dark");
-window.verPass=()=>password.type=password.type==="password"?"text":"password";
-
-/* ESCÁNER */
-window.abrirScanner=()=>{
- scanner.style.display="flex";
- Quagga.init({
-  inputStream:{type:"LiveStream",target:document.querySelector("#camera")},
-  decoder:{readers:["ean_reader","upc_reader","ean_8_reader"]}
- },()=>Quagga.start());
- Quagga.onDetected(d=>{
-  const code=d.codeResult.code;
-  Quagga.stop();
-  cerrarScanner();
-  codigo.value=code;
-  buscarAPI(code);
- });
+window.setCols=()=>{
+ document.documentElement.style.setProperty("--cols",cols.value);
 };
 
-window.cerrarScanner=()=>{
- scanner.style.display="none";
- Quagga.stop();
-};
-
-async function buscarAPI(code){
- const r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
- const j=await r.json();
- if(j.status===1 && confirm("Datos encontrados. ¿Usarlos?")){
-  fabricante.value=j.product.brands||"";
-  modelo.value=j.product.product_name||"";
-  if(j.product.image_url) imgUrl.value=j.product.image_url;
- }
-}
 </script>
-
 </body>
 </html>
