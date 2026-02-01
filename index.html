@@ -5,74 +5,21 @@
 <title>Maikman Models Stock</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+
 <style>
-:root{
-  --bg:#f4f4f4;--card:#fff;--text:#111;--accent:#007bff
-}
-body.dark{
-  --bg:#121212;--card:#1e1e1e;--text:#eee;--accent:#4dabf7
-}
-body{
-  margin:0;
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
-  transition:.3s;
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:1rem;
-}
-button{
-  padding:.6rem 1rem;
-  border:none;
-  border-radius:8px;
-  background:var(--accent);
-  color:white;
-  cursor:pointer;
-}
-input{
-  padding:.6rem;
-  border-radius:6px;
-  border:1px solid #ccc;
-  width:100%;
-}
-.card{
-  background:var(--card);
-  padding:1rem;
-  border-radius:12px;
-  margin:1rem;
-}
-#models{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:1rem;
-}
-.model img{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  border-radius:8px;
-}
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-}
-.modal-content{
-  background:var(--card);
-  padding:1rem;
-  border-radius:12px;
-  width:90%;
-  max-width:420px;
-}
-video{width:100%;border-radius:8px}
+:root{--bg:#f4f4f4;--card:#fff;--text:#111;--accent:#007bff}
+body.dark{--bg:#121212;--card:#1e1e1e;--text:#eee;--accent:#4dabf7}
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+header{display:flex;justify-content:space-between;padding:1rem}
+button{padding:.6rem 1rem;border:none;border-radius:8px;background:var(--accent);color:#fff}
+input{padding:.6rem;border-radius:6px;border:1px solid #ccc;width:100%}
+.card{background:var(--card);padding:1rem;border-radius:12px;margin:1rem}
+#models{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+.model img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10}
+.modal-content{background:var(--card);padding:1rem;border-radius:12px;width:90%;max-width:420px}
+#scanner video{width:100%}
 </style>
 </head>
 
@@ -81,52 +28,44 @@ video{width:100%;border-radius:8px}
 <header>
   <h2>Maikman Models</h2>
   <div>
-    <button id="themeBtn">🌙</button>
-    <button id="logoutBtn">Salir</button>
+    <button onclick="toggleTheme()">🌙</button>
+    <button onclick="logout()">Salir</button>
   </div>
 </header>
 
 <div id="login" class="card">
-  <h3>Acceso</h3>
-  <input id="email" type="email" placeholder="Email"><br><br>
+  <input id="email" placeholder="Email">
   <input id="password" type="password" placeholder="Contraseña">
-  <label><input type="checkbox" id="verPass"> Ver contraseña</label><br><br>
-  <button id="loginBtn">Entrar</button>
-  <p id="error" style="color:red"></p>
+  <label><input type="checkbox" onclick="verPass()"> Ver</label>
+  <button onclick="login()">Entrar</button>
+  <p id="error"></p>
 </div>
 
 <div id="app" style="display:none">
   <div class="card">
-    <input id="busqueda" placeholder="Buscar por código, fabricante o modelo"><br><br>
-    <button id="addBtn">➕ Añadir nuevo modelo</button>
+    <input id="busqueda" placeholder="Buscar">
+    <button onclick="abrirModal()">➕ Añadir</button>
   </div>
   <div id="models"></div>
 </div>
 
-<!-- MODAL MODELO -->
 <div id="modal" class="modal">
   <div class="modal-content">
-    <h3>Nuevo modelo</h3>
-    <button id="scanBtn">📷 Escanear código</button><br><br>
-
-    <input id="codigo" placeholder="Código"><br><br>
-    <input id="fabricante" placeholder="Fabricante"><br><br>
-    <input id="modelo" placeholder="Modelo"><br><br>
-
-    <input id="imgUrl" placeholder="URL imagen (opcional)"><br><br>
-    <input id="imgFile" type="file" accept="image/*"><br><br>
-
-    <button id="saveBtn">Guardar</button>
-    <button id="cancelBtn">Cancelar</button>
+    <button onclick="abrirScanner()">📷 Escanear</button><br><br>
+    <input id="codigo" placeholder="Código">
+    <input id="fabricante" placeholder="Fabricante">
+    <input id="modelo" placeholder="Modelo">
+    <input id="imgUrl" placeholder="URL imagen">
+    <input id="imgFile" type="file">
+    <button onclick="guardar()">Guardar</button>
+    <button onclick="cerrarModal()">Cancelar</button>
   </div>
 </div>
 
-<!-- MODAL SCANNER -->
 <div id="scanner" class="modal">
   <div class="modal-content">
-    <h3>Escanear código</h3>
-    <video id="video" autoplay></video><br><br>
-    <button id="closeScan">Cancelar</button>
+    <div id="camera"></div>
+    <button onclick="cerrarScanner()">Cancelar</button>
   </div>
 </div>
 
@@ -139,50 +78,33 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-/* ===== ELEMENTOS ===== */
-const el = id => document.getElementById(id);
+const el=id=>document.getElementById(id);
 
-const loginBox = el("login");
-const appBox = el("app");
-const modelsBox = el("models");
-const modal = el("modal");
-const scanner = el("scanner");
-const video = el("video");
-
-/* ===== FIREBASE ===== */
-const firebaseConfig={
+const app=initializeApp({
  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
  authDomain:"maikmanmodelsstock.firebaseapp.com",
  projectId:"maikmanmodelsstock",
  storageBucket:"maikmanmodelsstock.appspot.com",
  messagingSenderId:"871520809912",
  appId:"1:871520809912:web:4042f15ef200832a95d54d"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-let modelos=[];
-let stream=null;
-let detector=null;
-
-/* ===== AUTH ===== */
-el("loginBtn").onclick = ()=>{
- signInWithEmailAndPassword(auth, el("email").value, el("password").value)
- .catch(()=>el("error").innerText="Credenciales incorrectas");
-};
-
-el("logoutBtn").onclick = ()=>signOut(auth);
-
-onAuthStateChanged(auth,user=>{
- loginBox.style.display = user ? "none" : "block";
- appBox.style.display = user ? "block" : "none";
- if(user) cargar();
 });
 
-/* ===== DATA ===== */
+const auth=getAuth(app);
+const db=getFirestore(app);
+const storage=getStorage(app);
+let modelos=[];
+
+/* AUTH */
+window.login=()=>signInWithEmailAndPassword(auth,email.value,password.value)
+.catch(()=>error.innerText="Credenciales incorrectas");
+window.logout=()=>signOut(auth);
+onAuthStateChanged(auth,u=>{
+ el("login").style.display=u?"none":"block";
+ el("app").style.display=u?"block":"none";
+ if(u)cargar();
+});
+
+/* DATA */
 async function cargar(){
  modelos=[];
  const q=await getDocs(collection(db,"modelos"));
@@ -191,99 +113,90 @@ async function cargar(){
 }
 
 function pintar(){
- const t = el("busqueda").value.toLowerCase();
- modelsBox.innerHTML="";
+ const t=busqueda.value.toLowerCase();
+ models.innerHTML="";
  modelos.filter(m=>
   (m.codigo||"").toLowerCase().includes(t)||
   (m.fabricante||"").toLowerCase().includes(t)||
   (m.modelo||"").toLowerCase().includes(t)
  ).forEach(m=>{
-  modelsBox.innerHTML+=`
+  const img=m.imagen||m.img||"https://via.placeholder.com/300x200?text=Sin+imagen";
+  models.innerHTML+=`
    <div class="card model">
-    <img src="${m.imagen}">
-    <b>${m.modelo}</b><br>
-    ${m.fabricante}<br>${m.codigo}<br><br>
+    <img src="${img}">
+    <b>${m.modelo||""}</b><br>
+    ${m.fabricante||""}<br>${m.codigo||""}
     <button onclick="borrar('${m.id}')">🗑</button>
    </div>`;
  });
 }
+busqueda.oninput=pintar;
 
-el("busqueda").oninput = pintar;
+/* MODAL */
+window.abrirModal=()=>modal.style.display="flex";
+window.cerrarModal=()=>modal.style.display="none";
 
-/* ===== MODAL ===== */
-el("addBtn").onclick = ()=>modal.style.display="flex";
-el("cancelBtn").onclick = ()=>modal.style.display="none";
-
-/* ===== GUARDAR ===== */
-el("saveBtn").onclick = async ()=>{
- let imagen="";
- const file = el("imgFile").files[0];
- if(file){
+/* GUARDAR */
+window.guardar=async()=>{
+ let imagen=imgUrl.value;
+ if(imgFile.files[0]){
   const r=ref(storage,"modelos/"+Date.now());
-  await uploadBytes(r,file);
+  await uploadBytes(r,imgFile.files[0]);
   imagen=await getDownloadURL(r);
- } else imagen=el("imgUrl").value;
-
+ }
  await addDoc(collection(db,"modelos"),{
-  codigo:el("codigo").value,
-  fabricante:el("fabricante").value,
-  modelo:el("modelo").value,
+  codigo:codigo.value,
+  fabricante:fabricante.value,
+  modelo:modelo.value,
   imagen
  });
-
- modal.style.display="none";
- ["codigo","fabricante","modelo","imgUrl"].forEach(id=>el(id).value="");
- el("imgFile").value="";
- cargar();
+ cerrarModal(); cargar();
 };
 
-window.borrar = async id=>{
+/* BORRAR */
+window.borrar=async id=>{
  if(confirm("¿Borrar modelo?")){
   await deleteDoc(doc(db,"modelos",id));
   cargar();
  }
 };
 
-/* ===== UI ===== */
-el("themeBtn").onclick = ()=>document.body.classList.toggle("dark");
-el("verPass").onchange = ()=>el("password").type =
- el("password").type==="password"?"text":"password";
+/* UI */
+window.toggleTheme=()=>document.body.classList.toggle("dark");
+window.verPass=()=>password.type=password.type==="password"?"text":"password";
 
-/* ===== ESCÁNER ===== */
-el("scanBtn").onclick = async ()=>{
+/* ESCÁNER (QUAGGA) */
+window.abrirScanner=()=>{
  scanner.style.display="flex";
- stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
- video.srcObject=stream;
- detector=new BarcodeDetector({formats:["ean_13","upc_a","ean_8"]});
- detectar();
-};
-
-el("closeScan").onclick = ()=>{
- scanner.style.display="none";
- if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
-};
-
-async function detectar(){
- if(!detector) return;
- const codes=await detector.detect(video);
- if(codes.length){
-  const code=codes[0].rawValue;
-  el("codigo").value=code;
-  el("closeScan").click();
+ Quagga.init({
+  inputStream:{type:"LiveStream",target:document.querySelector("#camera")},
+  decoder:{readers:["ean_reader","upc_reader","ean_8_reader"]}
+ },()=>{
+  Quagga.start();
+ });
+ Quagga.onDetected(d=>{
+  const code=d.codeResult.code;
+  Quagga.stop();
+  cerrarScanner();
+  codigo.value=code;
   buscarAPI(code);
- } else requestAnimationFrame(detectar);
-}
+ });
+};
+
+window.cerrarScanner=()=>{
+ scanner.style.display="none";
+ Quagga.stop();
+};
 
 async function buscarAPI(code){
  const r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const j=await r.json();
  if(j.status===1 && confirm("Datos encontrados. ¿Usarlos?")){
-  el("fabricante").value=j.product.brands||"";
-  el("modelo").value=j.product.product_name||"";
-  if(j.product.image_url) el("imgUrl").value=j.product.image_url;
+  fabricante.value=j.product.brands||"";
+  modelo.value=j.product.product_name||"";
+  if(j.product.image_url) imgUrl.value=j.product.image_url;
  }
 }
 </script>
-
 </body>
 </html>
