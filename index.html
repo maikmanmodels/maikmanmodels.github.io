@@ -2,302 +2,242 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Maikman Models</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maikman Models – Inventario</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-:root { --cols: 3; }
+:root {
+  --bg: #f2f2f2;
+  --card: #ffffff;
+  --text: #000000;
+  --accent: #d32f2f;
+}
 
-* { box-sizing: border-box; }
+[data-theme="dark"] {
+  --bg: #121212;
+  --card: #1e1e1e;
+  --text: #ffffff;
+}
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #f4f4f4;
-  transition: background .3s, color .3s;
-}
-
-body.dark {
-  background: #121212;
-  color: #eee;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
 header {
-  background: #1f1f1f;
-  color: #fff;
-  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 15px;
+  background: var(--card);
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
 }
 
 button {
-  cursor: pointer;
-  padding: .5rem .8rem;
-  border-radius: 6px;
+  padding: 6px 12px;
   border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
 }
 
-header button {
-  background: #333;
-  color: #fff;
+button.secondary {
+  background: #555;
 }
 
-#toolbar {
-  padding: 1rem;
-  display: flex;
-  gap: .5rem;
-  flex-wrap: wrap;
-}
-
-input, select {
-  padding: .5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  width: 100%;
-}
-
-#search {
-  flex: 1;
-  min-width: 200px;
-}
-
-#models {
-  padding: 1rem;
+#grid {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 12px;
+  padding: 12px;
 }
 
 .card {
-  background: #fff;
-  border-radius: 12px;
-  padding: .8rem;
-  display: flex;
-  flex-direction: column;
-  gap: .4rem;
-  transition: transform .2s;
+  background: var(--card);
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
 }
-
-.card:hover { transform: scale(1.02); }
-
-body.dark .card { background: #1e1e1e; }
 
 .card img {
   width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
-.card .actions {
-  display: flex;
-  justify-content: space-between;
+.pantalla {
+  display: none;
 }
 
+/* Modal */
 .modal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.6);
   display: none;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
-  background: #fff;
-  padding: 1rem;
-  border-radius: 12px;
-  width: 320px;
-  max-width: 90%;
+  background: var(--card);
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
 }
-
-body.dark .modal-content { background: #222; }
-
-.modal-content h3 { margin-top: 0; }
-
-.modal-content button { width: 100%; margin-top: .4rem; }
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>Maikman Models</h2>
-  <div style="display:flex;gap:.5rem">
+  <strong>Maikman Models</strong>
+  <div>
     <button onclick="abrirConfig()">⚙️</button>
-    <button onclick="logout()">Salir</button>
+    <button class="secondary" onclick="salir()">Salir</button>
   </div>
 </header>
 
-<div id="toolbar">
-  <input id="search" placeholder="Buscar por fabricante, modelo o código">
-  <button onclick="nuevo()">➕ Añadir modelo</button>
-</div>
-
-<div id="models"></div>
-
-<!-- MODAL MODELO -->
-<div id="modal" class="modal">
-  <div class="modal-content">
-    <h3>Modelo</h3>
-    <input id="codigo" placeholder="Código / EAN">
-    <input id="fabricante" placeholder="Fabricante">
-    <input id="modelo" placeholder="Modelo">
-    <input id="escala" placeholder="Escala">
-    <input id="imgurl" placeholder="URL imagen">
-    <button onclick="buscarScalemates()">🔎 Buscar en Scalemates</button>
-    <button onclick="guardar()">💾 Guardar</button>
-    <button onclick="cerrar()">Cancelar</button>
+<!-- PANTALLA LOGIN / INICIO -->
+<div id="pantalla-login" class="pantalla">
+  <div style="padding:20px">
+    <h2>Inventario de Maquetas</h2>
+    <button onclick="entrar()">Entrar</button>
   </div>
 </div>
 
-<!-- CONFIG -->
-<div id="config" class="modal">
+<!-- PANTALLA BUSCADOR -->
+<div id="pantalla-app" class="pantalla">
+  <div style="padding:12px">
+    <input id="busqueda" placeholder="Buscar modelo en Scalemates..."
+           style="width:70%;padding:6px">
+    <button onclick="buscar()">Buscar</button>
+  </div>
+
+  <div id="grid"></div>
+</div>
+
+<!-- MODAL CONFIGURACIÓN -->
+<div id="modalConfig" class="modal">
   <div class="modal-content">
     <h3>Configuración</h3>
-    <button onclick="toggleTheme()">🌗 Modo claro / oscuro</button>
-    <select id="cols" onchange="setCols()">
-      <option value="2">2 tarjetas</option>
-      <option value="3">3 tarjetas</option>
-      <option value="4">4 tarjetas</option>
-      <option value="5">5 tarjetas</option>
-    </select>
+
+    <label>
+      Tema:
+      <select onchange="cambiarTema(this.value)">
+        <option value="light">Claro</option>
+        <option value="dark">Oscuro</option>
+      </select>
+    </label>
+
+    <br><br>
+
+    <label>
+      Tarjetas por fila:
+      <select onchange="cambiarColumnas(this.value)">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+    </label>
+
+    <br><br>
+
     <button onclick="cerrarConfig()">Cerrar</button>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script>
+/* ---------- ESTADO ---------- */
+let columnas = localStorage.getItem("columnas") || 3;
+let tema = localStorage.getItem("tema") || "light";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-  authDomain: "maikmanmodelsstock.firebaseapp.com",
-  projectId: "maikmanmodelsstock"
-};
+document.documentElement.setAttribute("data-theme", tema);
+document.getElementById("grid").style.gridTemplateColumns =
+  `repeat(${columnas}, 1fr)`;
 
-const SCALEMATES_PROXY = "https://scalemates-proxy.yotracuentadeinstagram.workers.dev";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let modelos = [];
-
-onAuthStateChanged(auth, user => {
-  if (!user) location.href = "login.html";
-  cargar();
-});
-
-async function cargar() {
-  const q = await getDocs(collection(db, "models"));
-  modelos = q.docs.map(d => ({ id: d.id, ...d.data() }));
-  pintar();
+/* ---------- NAVEGACIÓN ---------- */
+function entrar() {
+  document.getElementById("pantalla-login").style.display = "none";
+  document.getElementById("pantalla-app").style.display = "block";
 }
 
-function pintar() {
-  models.innerHTML = "";
-  const t = search.value.toLowerCase();
+function salir() {
+  document.querySelectorAll(".pantalla").forEach(p => p.style.display = "none");
+  document.getElementById("pantalla-login").style.display = "block";
+  history.replaceState(null, "", "./");
+}
 
-  modelos
-    .filter(m =>
-      (m.fabricante || "").toLowerCase().includes(t) ||
-      (m.modelo || "").toLowerCase().includes(t) ||
-      (m.codigo || "").includes(t)
-    )
-    .forEach(m => {
-      models.innerHTML += `
-        <div class="card">
-          <img src="${m.img || 'https://via.placeholder.com/300x200?text=Sin+imagen'}">
-          <b>${m.fabricante || ""}</b>
-          <span>${m.modelo || ""}</span>
-          <small>${m.escala || ""}</small>
-          <div class="actions">
-            <button onclick="borrar('${m.id}')">🗑️</button>
-          </div>
-        </div>
+/* ---------- CONFIG ---------- */
+function abrirConfig() {
+  document.getElementById("modalConfig").style.display = "flex";
+}
+
+function cerrarConfig() {
+  document.getElementById("modalConfig").style.display = "none";
+}
+
+function cambiarTema(valor) {
+  document.documentElement.setAttribute("data-theme", valor);
+  localStorage.setItem("tema", valor);
+}
+
+function cambiarColumnas(valor) {
+  columnas = valor;
+  document.getElementById("grid").style.gridTemplateColumns =
+    `repeat(${valor}, 1fr)`;
+  localStorage.setItem("columnas", valor);
+}
+
+/* ---------- BÚSQUEDA SCALEMATES ---------- */
+async function buscar() {
+  const q = document.getElementById("busqueda").value.trim();
+  if (!q) return;
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "Buscando…";
+
+  try {
+    const url =
+      "https://scalemates-proxy.yotracuentadeinstagram.workers.dev/?query=" +
+      encodeURIComponent(q);
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    grid.innerHTML = "";
+
+    if (!data.results || data.results.length === 0) {
+      grid.innerHTML = "Sin resultados";
+      return;
+    }
+
+    data.results.forEach(m => {
+      const div = document.createElement("div");
+      div.className = "card";
+
+      div.innerHTML = `
+        <img src="${m.image || 'https://via.placeholder.com/300x200?text=Sin+imagen'}">
+        <strong>${m.name || 'Modelo desconocido'}</strong><br>
+        Marca: ${m.brand || '-'}<br>
+        Escala: ${m.scale || '-'}
       `;
+
+      grid.appendChild(div);
     });
-}
 
-search.oninput = pintar;
-
-window.nuevo = () => modal.style.display = "flex";
-window.cerrar = () => modal.style.display = "none";
-
-window.guardar = async () => {
-  await addDoc(collection(db, "models"), {
-    codigo: codigo.value,
-    fabricante: fabricante.value,
-    modelo: modelo.value,
-    escala: escala.value,
-    img: imgurl.value
-  });
-  cerrar();
-  cargar();
-};
-
-window.borrar = async id => {
-  await deleteDoc(doc(db, "models", id));
-  cargar();
-};
-
-window.buscarScalemates = async () => {
-  const q = codigo.value || modelo.value;
-  if (!q) return alert("Introduce un código o modelo");
-
-  const res = await fetch(`${SCALEMATES_PROXY}?q=${encodeURIComponent(q)}`);
-  const html = await res.text();
-
-  const parser = new DOMParser();
-  const docu = parser.parseFromString(html, "text/html");
-  const item = docu.querySelector(".listitem");
-
-  if (!item) return alert("No se encontraron resultados");
-
-  modelo.value = item.querySelector("a")?.innerText || "";
-
-  const meta = item.querySelector(".subtext")?.innerText || "";
-  const esc = meta.match(/1:\d+/);
-  if (esc) escala.value = esc[0];
-
-  const marcas = ["Tamiya","Revell","Italeri","Hasegawa","Bandai","Airfix","Academy"];
-  marcas.forEach(m => { if (meta.includes(m)) fabricante.value = m; });
-
-  const img = item.querySelector("img");
-  if (img?.src) {
-    imgurl.value = img.src.startsWith("http")
-      ? img.src
-      : "https://www.scalemates.com" + img.src;
+  } catch (e) {
+    grid.innerHTML = "Error al buscar";
+    console.error(e);
   }
-
-  alert("Datos cargados desde Scalemates. Revísalos antes de guardar ✅");
-};
-
-window.logout = () => signOut(auth);
-
-window.abrirConfig = () => config.style.display = "flex";
-window.cerrarConfig = () => config.style.display = "none";
-
-window.toggleTheme = () => {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("theme",
-    document.body.classList.contains("dark") ? "dark" : "light"
-  );
-};
-
-window.setCols = () => {
-  document.documentElement.style.setProperty("--cols", cols.value);
-  localStorage.setItem("cols", cols.value);
-};
-
-if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
-if (localStorage.getItem("cols")) {
-  document.documentElement.style.setProperty("--cols", localStorage.getItem("cols"));
-  cols.value = localStorage.getItem("cols");
 }
+
+/* ---------- INICIO ---------- */
+window.onload = () => {
+  salir();
+};
 </script>
 
 </body>
