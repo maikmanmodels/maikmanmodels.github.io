@@ -74,7 +74,11 @@ input {
 </head>
 
 <body>
-
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("appScreen").style.display = "none";
+  });
+</script>
 <header>
   <h2>Maikman Models</h2>
   <button onclick="logout()">Salir</button>
