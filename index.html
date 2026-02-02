@@ -2,90 +2,73 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Maikman Models – Inventario</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maikman Models – Stock</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root {
-  --bg: #f2f2f2;
-  --card: #ffffff;
-  --text: #000000;
-  --accent: #d32f2f;
-}
-
-[data-theme="dark"] {
-  --bg: #121212;
-  --card: #1e1e1e;
-  --text: #ffffff;
-}
-
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  margin: 0;
+  background: #111;
+  color: #eee;
 }
-
 header {
+  background: #000;
+  padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
-  background: var(--card);
-  box-shadow: 0 2px 4px rgba(0,0,0,.2);
 }
-
 button {
-  padding: 6px 12px;
+  background: #1e88e5;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background: var(--accent);
+  padding: 8px 12px;
   color: white;
-}
-
-button.secondary {
-  background: #555;
-}
-
-#grid {
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-}
-
-.card {
-  background: var(--card);
-  padding: 10px;
+  cursor: pointer;
   border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,.2);
 }
-
+button.danger {
+  background: #c62828;
+}
+input {
+  padding: 6px;
+  margin: 4px 0;
+  width: 100%;
+}
+#login, #app {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 20px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+}
+.card {
+  background: #1e1e1e;
+  padding: 10px;
+  border-radius: 8px;
+}
 .card img {
   width: 100%;
-  border-radius: 4px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
 }
-
-.pantalla {
-  display: none;
-}
-
-/* Modal */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.6);
+  background: rgba(0,0,0,.8);
   display: none;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
-
 .modal-content {
-  background: var(--card);
+  background: #222;
   padding: 20px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
+  width: 300px;
+  border-radius: 10px;
 }
 </style>
 </head>
@@ -93,150 +76,116 @@ button.secondary {
 <body>
 
 <header>
-  <strong>Maikman Models</strong>
-  <div>
-    <button onclick="abrirConfig()">⚙️</button>
-    <button class="secondary" onclick="salir()">Salir</button>
-  </div>
+  <h2>Maikman Models</h2>
+  <button onclick="logout()">Salir</button>
 </header>
 
-<!-- PANTALLA LOGIN / INICIO -->
-<div id="pantalla-login" class="pantalla">
-  <div style="padding:20px">
-    <h2>Inventario de Maquetas</h2>
-    <button onclick="entrar()">Entrar</button>
-  </div>
+<!-- LOGIN -->
+<div id="login">
+  <h3>Acceso</h3>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Contraseña">
+  <button onclick="login()">Entrar</button>
+  <p id="error" style="color:red"></p>
 </div>
 
-<!-- PANTALLA BUSCADOR -->
-<div id="pantalla-app" class="pantalla">
-  <div style="padding:12px">
-    <input id="busqueda" placeholder="Buscar modelo en Scalemates..."
-           style="width:70%;padding:6px">
-    <button onclick="buscar()">Buscar</button>
-  </div>
-
-  <div id="grid"></div>
+<!-- APP -->
+<div id="app" style="display:none">
+  <button onclick="abrirModal()">➕ Añadir nuevo modelo</button>
+  <div class="grid" id="lista"></div>
 </div>
 
-<!-- MODAL CONFIGURACIÓN -->
-<div id="modalConfig" class="modal">
+<!-- MODAL -->
+<div class="modal" id="modal">
   <div class="modal-content">
-    <h3>Configuración</h3>
-
-    <label>
-      Tema:
-      <select onchange="cambiarTema(this.value)">
-        <option value="light">Claro</option>
-        <option value="dark">Oscuro</option>
-      </select>
-    </label>
-
-    <br><br>
-
-    <label>
-      Tarjetas por fila:
-      <select onchange="cambiarColumnas(this.value)">
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
-    </label>
-
-    <br><br>
-
-    <button onclick="cerrarConfig()">Cerrar</button>
+    <h3>Nuevo modelo</h3>
+    <input id="codigo" placeholder="Código">
+    <input id="fabricante" placeholder="Fabricante">
+    <input id="modelo" placeholder="Modelo">
+    <input id="imagen" placeholder="URL imagen">
+    <button onclick="guardar()">Guardar</button>
+    <button class="danger" onclick="cerrarModal()">Cancelar</button>
   </div>
 </div>
 
-<script>
-/* ---------- ESTADO ---------- */
-let columnas = localStorage.getItem("columnas") || 3;
-let tema = localStorage.getItem("tema") || "light";
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-document.documentElement.setAttribute("data-theme", tema);
-document.getElementById("grid").style.gridTemplateColumns =
-  `repeat(${columnas}, 1fr)`;
+const firebaseConfig = {
+  apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+  authDomain: "maikmanmodelsstock.firebaseapp.com",
+  projectId: "maikmanmodelsstock",
+  storageBucket: "maikmanmodelsstock.appspot.com",
+  messagingSenderId: "871520809912",
+  appId: "1:871520809912:web:4042f15ef200832a95d54d"
+};
 
-/* ---------- NAVEGACIÓN ---------- */
-function entrar() {
-  document.getElementById("pantalla-login").style.display = "none";
-  document.getElementById("pantalla-app").style.display = "block";
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-function salir() {
-  document.querySelectorAll(".pantalla").forEach(p => p.style.display = "none");
-  document.getElementById("pantalla-login").style.display = "block";
-  history.replaceState(null, "", "./");
-}
+const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+const lista = document.getElementById("lista");
+const modal = document.getElementById("modal");
 
-/* ---------- CONFIG ---------- */
-function abrirConfig() {
-  document.getElementById("modalConfig").style.display = "flex";
-}
-
-function cerrarConfig() {
-  document.getElementById("modalConfig").style.display = "none";
-}
-
-function cambiarTema(valor) {
-  document.documentElement.setAttribute("data-theme", valor);
-  localStorage.setItem("tema", valor);
-}
-
-function cambiarColumnas(valor) {
-  columnas = valor;
-  document.getElementById("grid").style.gridTemplateColumns =
-    `repeat(${valor}, 1fr)`;
-  localStorage.setItem("columnas", valor);
-}
-
-/* ---------- BÚSQUEDA SCALEMATES ---------- */
-async function buscar() {
-  const q = document.getElementById("busqueda").value.trim();
-  if (!q) return;
-
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "Buscando…";
-
+window.login = async () => {
   try {
-    const url =
-      "https://scalemates-proxy.yotracuentadeinstagram.workers.dev/?query=" +
-      encodeURIComponent(q);
-
-    const res = await fetch(url);
-    const data = await res.json();
-
-    grid.innerHTML = "";
-
-    if (!data.results || data.results.length === 0) {
-      grid.innerHTML = "Sin resultados";
-      return;
-    }
-
-    data.results.forEach(m => {
-      const div = document.createElement("div");
-      div.className = "card";
-
-      div.innerHTML = `
-        <img src="${m.image || 'https://via.placeholder.com/300x200?text=Sin+imagen'}">
-        <strong>${m.name || 'Modelo desconocido'}</strong><br>
-        Marca: ${m.brand || '-'}<br>
-        Escala: ${m.scale || '-'}
-      `;
-
-      grid.appendChild(div);
-    });
-
-  } catch (e) {
-    grid.innerHTML = "Error al buscar";
-    console.error(e);
+    await signInWithEmailAndPassword(auth, email.value, password.value);
+  } catch {
+    error.textContent = "Credenciales incorrectas";
   }
+};
+
+window.logout = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginDiv.style.display = "none";
+    appDiv.style.display = "block";
+    cargar();
+  } else {
+    loginDiv.style.display = "block";
+    appDiv.style.display = "none";
+  }
+});
+
+async function cargar() {
+  lista.innerHTML = "";
+  const snap = await getDocs(collection(db, "modelos"));
+  snap.forEach(d => {
+    const m = d.data();
+    lista.innerHTML += `
+      <div class="card">
+        <img src="${m.imagen || 'https://via.placeholder.com/300x200'}">
+        <b>${m.modelo}</b><br>
+        ${m.fabricante}<br>
+        ${m.codigo}<br>
+        <button class="danger" onclick="borrar('${d.id}')">Borrar</button>
+      </div>`;
+  });
 }
 
-/* ---------- INICIO ---------- */
-window.onload = () => {
-  salir();
+window.borrar = async id => {
+  await deleteDoc(doc(db, "modelos", id));
+  cargar();
+};
+
+window.abrirModal = () => modal.style.display = "flex";
+window.cerrarModal = () => modal.style.display = "none";
+
+window.guardar = async () => {
+  await addDoc(collection(db, "modelos"), {
+    codigo: codigo.value,
+    fabricante: fabricante.value,
+    modelo: modelo.value,
+    imagen: imagen.value
+  });
+  cerrarModal();
+  cargar();
 };
 </script>
 
