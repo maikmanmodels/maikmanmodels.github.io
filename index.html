@@ -26,23 +26,23 @@ button {
 
 input { padding:8px; border-radius:6px; border:none; width:100%; }
 
-#login {
+#loginBox {
   max-width:320px; margin:80px auto; background:var(--card);
   padding:20px; border-radius:12px;
 }
 
-#app { display:none; }
+#appBox { display:none; }
 
 #controls { display:flex; gap:10px; padding:20px; flex-wrap:wrap; }
 
 #grid {
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
   gap:16px; padding:20px;
 }
 
 .card {
   background:var(--card); border-radius:12px; padding:12px;
-  position:relative;
 }
 
 .card img {
@@ -52,18 +52,11 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 .modal {
   position:fixed; inset:0; background:rgba(0,0,0,.6);
   display:none; align-items:center; justify-content:center;
-  z-index:10;
 }
 
 .modal-content {
   background:var(--card); padding:20px; width:340px;
   border-radius:12px; display:flex; flex-direction:column; gap:10px;
-}
-
-.paint-box {
-  width:48px; height:48px; border-radius:8px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; font-weight:bold;
 }
 </style>
 </head>
@@ -71,7 +64,7 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 <body>
 
 <!-- LOGIN -->
-<div id="login">
+<div id="loginBox">
   <h2>Acceso</h2>
   <input id="email" type="email" placeholder="Email"><br><br>
   <input id="password" type="password" placeholder="Contraseña">
@@ -81,53 +74,39 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 </div>
 
 <!-- APP -->
-<div id="app">
+<div id="appBox">
 <header>
   📦 Maikman Models
   <button onclick="toggleTheme()">🌓</button>
 </header>
 
 <div id="controls">
-  <input id="search" placeholder="Buscar por código, fabricante o modelo">
-  <button onclick="openModal()">➕ Añadir modelo</button>
+  <input id="search" placeholder="Buscar modelo">
+  <button onclick="openModal()">➕ Añadir</button>
   <button onclick="logout()">Salir</button>
 </div>
 
 <div id="grid"></div>
 </div>
 
-<!-- MODAL MODELO -->
+<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle">Nuevo modelo</h3>
     <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
     <input id="modelo" placeholder="Modelo">
-    <input id="fotoURL" placeholder="URL imagen (opcional)">
-    <input type="file" id="fotoFile" accept="image/*">
+    <input id="fotoURL" placeholder="URL imagen">
     <button onclick="guardarModelo()">Guardar</button>
     <button onclick="closeModal()">Cancelar</button>
-  </div>
-</div>
-
-<!-- MODAL PINTURAS -->
-<div id="paintModal" class="modal">
-  <div class="modal-content">
-    <h3>Pinturas Tamiya</h3>
-    <input id="paintInput" placeholder="Ej: x1, xf-3, lp2">
-    <div id="paintList" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-    <button onclick="guardarPinturas()">Guardar</button>
-    <button onclick="closePaint()">Cerrar</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔑 FIREBASE */
 const firebaseConfig = {
   apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
   authDomain:"maikmanmodelsstock.firebaseapp.com",
@@ -140,141 +119,65 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
-/* 🎨 TABLA TAMIYA (AMPLÍA LA QUE YA TIENES) */
-const TAMIYA = {
-  "X-1":{color:"#000000"}, "X-2":{color:"#ffffff"},
-  "XF-1":{color:"#1c2526"}, "XF-2":{color:"#e8ecef"},
-  "LP-1":{color:"#000000"}, "TS-1":{color:"#111111"}
-};
-
-/* STATE */
-let modelos=[], editId=null, modeloActual=null;
+/* 🔧 ELEMENTOS */
+const loginBox = document.getElementById("loginBox");
+const appBox = document.getElementById("appBox");
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
+const modal = document.getElementById("modal");
 
 /* LOGIN */
-window.login = ()=>signInWithEmailAndPassword(auth,email.value,password.value)
+window.login = () =>
+  signInWithEmailAndPassword(auth,email.value,password.value)
   .catch(()=>error.innerText="Credenciales incorrectas");
-window.logout = ()=>signOut(auth);
 
-onAuthStateChanged(auth,u=>{
-  login.style.display=u?"none":"block";
-  app.style.display=u?"block":"none";
-  if(u) cargarModelos();
+window.logout = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    loginBox.style.display = "none";
+    appBox.style.display = "block";
+    cargarModelos();
+  } else {
+    loginBox.style.display = "block";
+    appBox.style.display = "none";
+  }
 });
 
 /* UI */
-window.toggleTheme=()=>document.body.classList.toggle("light");
-window.verPassword=()=>password.type=password.type==="password"?"text":"password";
+window.toggleTheme = () => document.body.classList.toggle("light");
+window.verPassword = () =>
+  password.type = password.type==="password"?"text":"password";
 
-/* MODAL MODELO */
-window.openModal=m=>{
-  modal.style.display="flex";
-  modalTitle.innerText=m?"Editar modelo":"Nuevo modelo";
-  codigo.value=m?.codigo||"";
-  fabricante.value=m?.fabricante||"";
-  modelo.value=m?.modelo||"";
-  editId=m?.id||null;
-};
-window.closeModal=()=>modal.style.display="none";
+window.openModal = ()=> modal.style.display="flex";
+window.closeModal = ()=> modal.style.display="none";
 
 /* DATA */
 async function cargarModelos(){
-  modelos=[];
-  const snap=await getDocs(collection(db,"modelos"));
-  snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
-  pintar();
-}
-
-function pintar(){
-  const q=search.value.toLowerCase();
   grid.innerHTML="";
-  modelos.filter(m =>
-    (m.codigo||"").toLowerCase().includes(q) ||
-    (m.fabricante||"").toLowerCase().includes(q) ||
-    (m.modelo||"").toLowerCase().includes(q)
-  ).forEach(m=>{
+  const snap = await getDocs(collection(db,"modelos"));
+  snap.forEach(d=>{
+    const m=d.data();
     grid.innerHTML+=`
-    <div class="card">
-      <img src="${m.foto||''}">
-      <b>${m.modelo||''}</b><br>
-      <small>${m.fabricante||''} · ${m.codigo||''}</small><br><br>
-      <button onclick='openModal(${JSON.stringify(m)})'>✏️</button>
-      <button onclick='abrirPinturas(${JSON.stringify(m)})'>🎨</button>
-      <button onclick="borrar('${m.id}')">🗑️</button>
-    </div>`;
+      <div class="card">
+        <img src="${m.foto||''}">
+        <b>${m.modelo}</b><br>
+        <small>${m.fabricante} · ${m.codigo}</small>
+      </div>`;
   });
 }
 
-/* GUARDAR MODELO */
-window.guardarModelo=async()=>{
-  let foto="";
-  if(fotoURL.value) foto=fotoURL.value;
-  else if(fotoFile.files[0]){
-    const r=ref(storage,"modelos/"+Date.now());
-    await uploadBytes(r,fotoFile.files[0]);
-    foto=await getDownloadURL(r);
-  }
-  const data={
+window.guardarModelo = async ()=>{
+  await addDoc(collection(db,"modelos"),{
     codigo:codigo.value,
     fabricante:fabricante.value,
     modelo:modelo.value,
-    foto,
-    pinturas:[]
-  };
-  editId
-    ? await updateDoc(doc(db,"modelos",editId),data)
-    : await addDoc(collection(db,"modelos"),data);
-  closeModal(); cargarModelos();
-};
-
-window.borrar=async id=>{
-  if(confirm("¿Borrar modelo?")){
-    await deleteDoc(doc(db,"modelos",id));
-    cargarModelos();
-  }
-};
-
-/* 🎨 PINTURAS */
-function normalizar(txt){
-  return txt.trim().toUpperCase().replace(/\s+/g,'')
-    .replace(/^([A-Z]+)(\d+)/,'$1-$2');
-}
-
-window.abrirPinturas=m=>{
-  modeloActual=m;
-  paintInput.value="";
-  paintModal.style.display="flex";
-  pintarPinturas(m.pinturas||[]);
-};
-
-window.closePaint=()=>paintModal.style.display="none";
-
-function pintarPinturas(lista){
-  paintList.innerHTML="";
-  lista.forEach(c=>{
-    const p=TAMIYA[c];
-    if(!p) return;
-    paintList.innerHTML+=`
-      <div class="paint-box"
-        style="background:${p.color};
-        color:${p.color==='#ffffff'?'#000':'#fff'}">${c}</div>`;
+    foto:fotoURL.value
   });
-}
-
-window.guardarPinturas=async()=>{
-  const actuales=modeloActual.pinturas||[];
-  const nuevas=paintInput.value.split(",")
-    .map(normalizar)
-    .filter(c=>TAMIYA[c]);
-  const final=[...new Set([...actuales,...nuevas])];
-  await updateDoc(doc(db,"modelos",modeloActual.id),{pinturas:final});
-  modeloActual.pinturas=final;
-  pintarPinturas(final);
-  paintInput.value="";
+  closeModal();
+  cargarModelos();
 };
-
-search.addEventListener("input",pintar);
 </script>
 
 </body>
