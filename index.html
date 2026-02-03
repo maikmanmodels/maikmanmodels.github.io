@@ -1,222 +1,235 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Maikman Models</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Maikman Models Stock</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, Arial, sans-serif;
-      background: #111;
-      color: #eee;
-    }
+<style>
+:root {
+  --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8;
+}
+body.light {
+  --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb;
+}
+* { box-sizing:border-box; transition:.3s; }
+body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); }
 
-    header {
-      background: #1c1c1c;
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+header {
+  padding:20px; display:flex; justify-content:space-between;
+  align-items:center; font-size:22px; font-weight:bold;
+}
 
-    h1, h2, h3 {
-      margin: 0 0 10px 0;
-    }
+button {
+  background:var(--accent); border:none; padding:8px 14px;
+  border-radius:6px; cursor:pointer; color:white;
+}
 
-    button {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #3b82f6;
-      color: white;
-      font-weight: 600;
-    }
+input { padding:8px; border-radius:6px; border:none; width:100%; }
 
-    button.secondary {
-      background: #444;
-    }
+#login {
+  max-width:320px; margin:80px auto; background:var(--card);
+  padding:20px; border-radius:12px;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: none;
-      font-size: 14px;
-    }
+#app { display:none; }
 
-    #loginScreen, #appScreen {
-      display: none;
-      padding: 20px;
-      max-width: 420px;
-      margin: auto;
-    }
+#controls { display:flex; gap:10px; padding:20px; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-      margin-top: 20px;
-    }
+#grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:16px; padding:20px;
+}
 
-    .card {
-      background: #1e1e1e;
-      padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,.4);
-    }
+.card {
+  background:var(--card); border-radius:12px; padding:12px;
+}
 
-    .card b {
-      font-size: 16px;
-      display: block;
-      margin-bottom: 6px;
-    }
+.card img {
+  width:100%; height:200px; object-fit:cover; border-radius:8px;
+}
 
-    .actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 6px;
-    }
-  </style>
+.modal {
+  position:fixed; inset:0; background:rgba(0,0,0,.6);
+  display:none; align-items:center; justify-content:center;
+}
+
+.modal-content {
+  background:var(--card); padding:20px; width:340px;
+  border-radius:12px; display:flex; flex-direction:column; gap:10px;
+}
+</style>
 </head>
 
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen">
-  <h2>Maikman Models</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Contraseña">
-  <button id="loginBtn">Entrar</button>
-  <p id="loginError" style="color:#f87171"></p>
+<div id="login">
+  <h2>Acceso</h2>
+  <input id="email" type="email" placeholder="Email"><br><br>
+  <input id="password" type="password" placeholder="Contraseña">
+  <label><input type="checkbox" onclick="verPassword()"> Ver contraseña</label><br><br>
+  <button onclick="login()">Entrar</button>
+  <p id="error" style="color:red;"></p>
 </div>
 
 <!-- APP -->
-<div id="appScreen">
-  <header>
-    <h3>Maikman Models</h3>
-    <button id="logoutBtn" class="secondary">Salir</button>
-  </header>
+<div id="app">
+<header>
+  📦 Maikman Models
+  <button onclick="toggleTheme()">🌓</button>
+</header>
 
-  <h3>Añadir modelo</h3>
+<div id="controls">
+  <input id="search" placeholder="Buscar por código, fabricante o modelo">
+  <button onclick="openModal()">➕ Añadir nuevo modelo</button>
+  <button onclick="logout()">Salir</button>
+</div>
 
-  <input id="codigo" placeholder="Código">
-  <input id="fabricante" placeholder="Fabricante">
-  <input id="modelo" placeholder="Modelo">
+<div id="grid"></div>
+</div>
 
-  <button id="addBtn">Guardar modelo</button>
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <h3 id="modalTitle">Nuevo modelo</h3>
+    <input id="codigo" placeholder="Código">
+    <input id="fabricante" placeholder="Fabricante">
+    <input id="modelo" placeholder="Modelo">
 
-  <div class="grid" id="cards"></div>
+    <b>Imagen</b>
+    <input id="fotoURL" placeholder="URL de la imagen (opcional)">
+    <input type="file" id="fotoFile" accept="image/*">
+
+    <button onclick="guardarModelo()">Guardar</button>
+    <button onclick="closeModal()">Cancelar</button>
+  </div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-    getAuth,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-  /* 🔥 FIREBASE REAL (TUS DATOS) 🔥 */
-  const firebaseConfig = {
-    apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-    authDomain: "maikmanmodelsstock.firebaseapp.com",
-    projectId: "maikmanmodelsstock",
-    storageBucket: "maikmanmodelsstock.firebasestorage.app",
-    messagingSenderId: "871520809912",
-    appId: "1:871520809912:web:4042f15ef200832a95d54d"
-  };
+const firebaseConfig = {
+  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+  authDomain:"maikmanmodelsstock.firebaseapp.com",
+  projectId:"maikmanmodelsstock",
+  storageBucket:"maikmanmodelsstock.appspot.com",
+  messagingSenderId:"871520809912",
+  appId:"1:871520809912:web:4042f15ef200832a95d54d"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-  const loginScreen = document.getElementById("loginScreen");
-  const appScreen = document.getElementById("appScreen");
-  const cardsDiv = document.getElementById("cards");
+const loginBox = document.getElementById("login");
+const appBox = document.getElementById("app");
+const modal = document.getElementById("modal");
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
 
-  /* ======================
-     AUTH
-  ====================== */
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      loginScreen.style.display = "none";
-      appScreen.style.display = "block";
-      renderCards();
-    } else {
-      appScreen.style.display = "none";
-      loginScreen.style.display = "block";
-    }
+let modelos = [];
+let editId = null;
+
+/* LOGIN */
+window.login = () =>
+  signInWithEmailAndPassword(auth,email.value,password.value)
+  .catch(()=>error.innerText="Credenciales incorrectas");
+
+window.logout = () => signOut(auth);
+
+onAuthStateChanged(auth,user=>{
+  loginBox.style.display = user?"none":"block";
+  appBox.style.display = user?"block":"none";
+  if(user) cargarModelos();
+});
+
+/* UI */
+window.toggleTheme = () => document.body.classList.toggle("light");
+window.verPassword = () =>
+  password.type = password.type==="password"?"text":"password";
+
+/* MODAL */
+window.openModal = m=>{
+  modal.style.display="flex";
+  modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
+  codigo.value = m?.codigo || "";
+  fabricante.value = m?.fabricante || "";
+  modelo.value = m?.modelo || "";
+  fotoURL.value = "";
+  fotoFile.value = "";
+  editId = m?.id || null;
+};
+window.closeModal = ()=> modal.style.display="none";
+
+/* DATA */
+async function cargarModelos(){
+  modelos=[];
+  const snap=await getDocs(collection(db,"modelos"));
+  snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
+  pintar();
+}
+
+function pintar(){
+  const q=search.value.toLowerCase();
+  grid.innerHTML="";
+  modelos.filter(m =>
+    (m.codigo||"").toLowerCase().includes(q) ||
+    (m.fabricante||"").toLowerCase().includes(q) ||
+    (m.modelo||"").toLowerCase().includes(q)
+  ).forEach(m=>{
+    grid.innerHTML+=`
+    <div class="card">
+      <img src="${m.foto}">
+      <b>${m.modelo||"Sin nombre"}</b><br>
+      <small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
+      <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
+      <button onclick="borrar('${m.id}')">🗑️</button>
+    </div>`;
   });
+}
 
-  document.getElementById("loginBtn").onclick = () => {
-    signInWithEmailAndPassword(
-      auth,
-      email.value,
-      password.value
-    ).catch(err => {
-      loginError.textContent = err.message;
-    });
-  };
+/* SAVE */
+window.guardarModelo = async ()=>{
+  let fotoFinal="";
 
-  document.getElementById("logoutBtn").onclick = () => {
-    signOut(auth);
-  };
-
-  /* ======================
-     MODELOS (localStorage)
-  ====================== */
-  function getModels() {
-    return JSON.parse(localStorage.getItem("maikman_models") || "[]");
+  if(fotoURL.value.trim()){
+    fotoFinal = fotoURL.value.trim();
+  } else if(fotoFile.files[0]){
+    const r = ref(storage,"modelos/"+Date.now());
+    await uploadBytes(r,fotoFile.files[0]);
+    fotoFinal = await getDownloadURL(r);
   }
 
-  function saveModels(models) {
-    localStorage.setItem("maikman_models", JSON.stringify(models));
-  }
-
-  function renderCards() {
-    cardsDiv.innerHTML = "";
-    getModels().forEach((m, i) => {
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <b>${m.modelo}</b>
-        Código: ${m.codigo}<br>
-        Fabricante: ${m.fabricante}
-        <div class="actions">
-          <button class="secondary" onclick="deleteModel(${i})">Borrar</button>
-        </div>
-      `;
-      cardsDiv.appendChild(div);
-    });
-  }
-
-  window.deleteModel = (index) => {
-    const models = getModels();
-    models.splice(index, 1);
-    saveModels(models);
-    renderCards();
+  const data={
+    codigo:codigo.value||"",
+    fabricante:fabricante.value||"",
+    modelo:modelo.value||"",
+    foto:fotoFinal
   };
 
-  document.getElementById("addBtn").onclick = () => {
-    const codigo = codigoInput.value || codigo.value;
-    const fabricante = fabricanteInput?.value || fabricante.value;
-    const modelo = modeloInput?.value || modelo.value;
+  if(editId){
+    await updateDoc(doc(db,"modelos",editId),data);
+  } else {
+    await addDoc(collection(db,"modelos"),data);
+  }
 
-    if (!codigo || !fabricante || !modelo) return;
+  closeModal();
+  cargarModelos();
+};
 
-    const models = getModels();
-    models.push({ codigo, fabricante, modelo });
-    saveModels(models);
-    renderCards();
+window.editar = m => openModal(m);
+window.borrar = async id=>{
+  if(confirm("¿Borrar modelo?")){
+    await deleteDoc(doc(db,"modelos",id));
+    cargarModelos();
+  }
+};
 
-    codigoInput.value = "";
-    fabricanteInput.value = "";
-    modeloInput.value = "";
-  };
+search.addEventListener("input",pintar);
 </script>
 
 </body>
