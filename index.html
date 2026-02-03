@@ -20,7 +20,7 @@ header {
 }
 
 button {
-  background:var(--accent); border:none; padding:8px 14px;
+  background:var(--accent); border:none; padding:6px 10px;
   border-radius:6px; cursor:pointer; color:white;
 }
 
@@ -50,17 +50,10 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 }
 
 .badge {
-  position:absolute;
-  bottom:8px;
-  right:8px;
-  background:#dc2626;
-  color:white;
-  border-radius:50%;
-  width:28px;
-  height:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  position:absolute; bottom:8px; right:8px;
+  background:#dc2626; color:white;
+  border-radius:50%; width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
   font-weight:bold;
 }
 
@@ -70,15 +63,19 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 }
 
 .modal-content {
-  background:var(--card); padding:20px; width:340px;
+  background:var(--card); padding:20px; width:360px;
   border-radius:12px; display:flex; flex-direction:column; gap:10px;
+}
+
+.tag {
+  display:inline-block; background:#334155;
+  padding:4px 8px; border-radius:6px; margin:2px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="login">
   <h2>Acceso</h2>
   <input id="email" type="email" placeholder="Email"><br><br>
@@ -88,7 +85,6 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
   <p id="error" style="color:red;"></p>
 </div>
 
-<!-- APP -->
 <div id="app">
 <header>
   📦 Maikman Models
@@ -97,27 +93,35 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 
 <div id="controls">
   <input id="search" placeholder="Buscar por código, fabricante o modelo">
-  <button onclick="openModal()">➕ Añadir nuevo modelo</button>
+  <button onclick="openModal()">➕ Añadir modelo</button>
   <button onclick="logout()">Salir</button>
 </div>
 
 <div id="grid"></div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL MODELO -->
 <div id="modal" class="modal">
   <div class="modal-content">
-    <h3 id="modalTitle">Nuevo modelo</h3>
+    <h3 id="modalTitle">Modelo</h3>
     <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
     <input id="modelo" placeholder="Modelo">
-
-    <b>Imagen</b>
-    <input id="fotoURL" placeholder="URL de la imagen (opcional)">
-    <input type="file" id="fotoFile" accept="image/*">
-
+    <input id="fotoURL" placeholder="URL imagen">
+    <input type="file" id="fotoFile">
     <button onclick="guardarModelo()">Guardar</button>
     <button onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL PINTURAS -->
+<div id="modalPaint" class="modal">
+  <div class="modal-content">
+    <h3>Pinturas Tamiya</h3>
+    <input id="paintInput" placeholder="Ej: XF1, x-2, TS-26">
+    <button onclick="addPaint()">Añadir pintura</button>
+    <div id="paintList"></div>
+    <button onclick="closePaint()">Cerrar</button>
   </div>
 </div>
 
@@ -144,118 +148,113 @@ const storage = getStorage(appFB);
 const loginBox = document.getElementById("login");
 const appBox = document.getElementById("app");
 const modal = document.getElementById("modal");
+const modalPaint = document.getElementById("modalPaint");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
 
-let modelos = [];
-let editId = null;
+let modelos=[], editId=null, paintModel=null;
 
-/* LOGIN */
-window.login = () =>
-  signInWithEmailAndPassword(auth,email.value,password.value)
-  .catch(()=>error.innerText="Credenciales incorrectas");
-
-window.logout = () => signOut(auth);
-
-onAuthStateChanged(auth,user=>{
-  loginBox.style.display = user ? "none" : "block";
-  appBox.style.display = user ? "block" : "none";
-  if(user) cargarModelos();
+/* AUTH */
+window.login = ()=>signInWithEmailAndPassword(auth,email.value,password.value);
+window.logout = ()=>signOut(auth);
+onAuthStateChanged(auth,u=>{
+  loginBox.style.display=u?"none":"block";
+  appBox.style.display=u?"block":"none";
+  if(u) cargarModelos();
 });
 
 /* UI */
-window.toggleTheme = () => document.body.classList.toggle("light");
-window.verPassword = () =>
-  password.type = password.type==="password"?"text":"password";
-
-/* MODAL */
-window.openModal = m=>{
-  modal.style.display="flex";
-  modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
-  codigo.value = m?.codigo || "";
-  fabricante.value = m?.fabricante || "";
-  modelo.value = m?.modelo || "";
-  fotoURL.value = "";
-  fotoFile.value = "";
-  editId = m?.id || null;
-};
-window.closeModal = ()=> modal.style.display="none";
+window.toggleTheme=()=>document.body.classList.toggle("light");
+window.verPassword=()=>password.type=password.type==="password"?"text":"password";
 
 /* DATA */
 async function cargarModelos(){
   modelos=[];
-  const snap=await getDocs(collection(db,"modelos"));
-  snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
+  const s=await getDocs(collection(db,"modelos"));
+  s.forEach(d=>modelos.push({id:d.id,...d.data()}));
   pintar();
 }
 
 function pintar(){
   const q=search.value.toLowerCase();
   grid.innerHTML="";
-  modelos.filter(m =>
-    (m.codigo||"").toLowerCase().includes(q) ||
-    (m.fabricante||"").toLowerCase().includes(q) ||
+  modelos.filter(m=>
+    (m.codigo||"").toLowerCase().includes(q)||
+    (m.fabricante||"").toLowerCase().includes(q)||
     (m.modelo||"").toLowerCase().includes(q)
   ).forEach(m=>{
     grid.innerHTML+=`
     <div class="card">
       <div style="position:relative">
-        <img src="${m.foto||''}">
+        <img src="${m.foto||""}">
         ${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
       </div>
-      <b>${m.modelo||"Sin nombre"}</b><br>
-      <small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
+      <b>${m.modelo}</b><br>
+      <small>${m.fabricante} · ${m.codigo}</small><br>
+      ${(m.pinturas||[]).map(p=>`<span class="tag">${p}</span>`).join("")}
+      <br><br>
       <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
+      <button onclick='abrirPinturas(${JSON.stringify(m)})'>🎨</button>
       <button onclick="borrar('${m.id}')">🗑️</button>
     </div>`;
   });
 }
 
-/* SAVE */
-window.guardarModelo = async ()=>{
-  const existente = modelos.find(m =>
-    (m.codigo && m.codigo === codigo.value) ||
-    (
-      m.fabricante.toLowerCase() === fabricante.value.toLowerCase() &&
-      m.modelo.toLowerCase() === modelo.value.toLowerCase()
-    )
-  );
+/* PINTURAS */
+window.abrirPinturas=m=>{
+  paintModel=m;
+  modalPaint.style.display="flex";
+  pintarPinturas();
+};
 
-  if(existente && !editId){
-    if(!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
-    await updateDoc(doc(db,"modelos",existente.id),{
-      duplicados:(existente.duplicados||1)+1
-    });
-    closeModal(); cargarModelos(); return;
-  }
+window.closePaint=()=>modalPaint.style.display="none";
 
-  let fotoFinal="";
-  if(fotoURL.value) fotoFinal=fotoURL.value;
+function normalizarPintura(v){
+  v=v.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  const m=v.match(/^(X|XF|LP|TS)(\d+)$/);
+  return m?`${m[1]}-${m[2]}`:null;
+}
+
+window.addPaint=async ()=>{
+  const n=normalizarPintura(paintInput.value);
+  if(!n) return alert("Formato inválido");
+  const arr=paintModel.pinturas||[];
+  if(arr.includes(n)) return;
+  arr.push(n);
+  await updateDoc(doc(db,"modelos",paintModel.id),{pinturas:arr});
+  paintModel.pinturas=arr;
+  paintInput.value="";
+  pintar(); pintarPinturas();
+};
+
+function pintarPinturas(){
+  paintList.innerHTML=(paintModel.pinturas||[])
+    .map(p=>`<span class="tag">${p}</span>`).join("");
+}
+
+/* CRUD */
+window.editar=m=>{editId=m.id;modal.style.display="flex";
+  codigo.value=m.codigo;fabricante.value=m.fabricante;
+  modelo.value=m.modelo;fotoURL.value=m.foto||"";};
+
+window.closeModal=()=>modal.style.display="none";
+
+window.guardarModelo=async ()=>{
+  let foto="";
+  if(fotoURL.value) foto=fotoURL.value;
   else if(fotoFile.files[0]){
     const r=ref(storage,"modelos/"+Date.now());
     await uploadBytes(r,fotoFile.files[0]);
-    fotoFinal=await getDownloadURL(r);
+    foto=await getDownloadURL(r);
   }
-
-  const data={
-    codigo:codigo.value,
-    fabricante:fabricante.value,
-    modelo:modelo.value,
-    foto:fotoFinal,
-    duplicados:1
-  };
-
-  if(editId) await updateDoc(doc(db,"modelos",editId),data);
-  else await addDoc(collection(db,"modelos"),data);
-
+  const d={codigo:codigo.value,fabricante:fabricante.value,modelo:modelo.value,foto,duplicados:1,pinturas:[]};
+  editId?await updateDoc(doc(db,"modelos",editId),d):await addDoc(collection(db,"modelos"),d);
   closeModal(); cargarModelos();
 };
 
-window.editar = m=>openModal(m);
-window.borrar = async id=>{
+window.borrar=async id=>{
   if(confirm("¿Borrar modelo?")){
-    await deleteDoc(doc(db,"modelos",id));
-    cargarModelos();
+    await deleteDoc(doc(db,"modelos",id)); cargarModelos();
   }
 };
 
