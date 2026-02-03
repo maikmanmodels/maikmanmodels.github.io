@@ -1,230 +1,199 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Maikman Models – Stock</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Maikman Models</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: #eee;
-}
-header {
-  background: #000;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-button {
-  background: #1e88e5;
-  border: none;
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-button.danger {
-  background: #c62828;
-}
-input {
-  width: 100%;
-  padding: 6px;
-  margin: 5px 0;
-}
-#login, #app {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 20px;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
-}
-.card {
-  background: #1e1e1e;
-  padding: 10px;
-  border-radius: 8px;
-}
-.card img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.8);
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.modal-content {
-  background: #222;
-  padding: 20px;
-  width: 320px;
-  border-radius: 10px;
-}
-</style>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    /* 🔴 TU CONFIG REAL DE FIREBASE 🔴 */
+    const firebaseConfig = {
+      apiKey: "PEGA_AQUI_TU_APIKEY",
+      authDomain: "PEGA_AQUI_TU_AUTHDOMAIN",
+      projectId: "PEGA_AQUI_TU_PROJECTID",
+      appId: "PEGA_AQUI_TU_APPID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.auth = auth;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+    }
+    header {
+      background: #222;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    button {
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #loginScreen, #appScreen {
+      display: none;
+      padding: 20px;
+    }
+    input {
+      padding: 8px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .card b {
+      display: block;
+      margin-bottom: 4px;
+    }
+  </style>
 </head>
 
 <body>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("appScreen").style.display = "none";
-  });
-</script>
-<header>
-  <h2>Maikman Models</h2>
-  <button onclick="logout()">Salir</button>
-</header>
 
-<!-- LOGIN -->
-<div id="login">
-  <h3>Acceso</h3>
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Contraseña">
+<!-- 🔐 LOGIN -->
+<div id="loginScreen">
+  <h2>Maikman Models · Login</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Contraseña">
   <button onclick="login()">Entrar</button>
-  <p id="error" style="color:red"></p>
+  <p id="loginError" style="color:red"></p>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:none">
-  <button onclick="abrirModal()">➕ Añadir nuevo modelo</button>
-  <input id="busqueda" placeholder="Buscar modelo..." oninput="pintar()">
-  <div class="grid" id="lista"></div>
+<!-- 🚀 APP -->
+<div id="appScreen">
+  <header>
+    <h3>Maikman Models</h3>
+    <button onclick="logout()">Salir</button>
+  </header>
+
+  <h4>Añadir modelo (EAN manual)</h4>
+  <input type="text" id="eanInput" placeholder="Código de barras / EAN">
+  <button onclick="buscar()">Buscar en Scalemates</button>
+  <p id="status"></p>
+
+  <div class="grid" id="cards"></div>
 </div>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <h3>Nuevo modelo</h3>
-    <input id="codigo" placeholder="Código / referencia">
-    <input id="fabricante" placeholder="Fabricante">
-    <input id="modelo" placeholder="Modelo">
-    <input id="imagen" placeholder="URL imagen">
-    <button onclick="buscarScalemates()">🔍 Buscar en Scalemates</button>
-    <button onclick="guardar()">Guardar</button>
-    <button class="danger" onclick="cerrarModal()">Cancelar</button>
-  </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-  authDomain: "maikmanmodelsstock.firebaseapp.com",
-  projectId: "maikmanmodelsstock",
-  storageBucket: "maikmanmodelsstock.appspot.com",
-  messagingSenderId: "871520809912",
-  appId: "1:871520809912:web:4042f15ef200832a95d54d"
-};
-
-const appFirebase = initializeApp(firebaseConfig);
-const auth = getAuth(appFirebase);
-const db = getFirestore(appFirebase);
-
-const loginDiv = document.getElementById("login");
-const appDiv = document.getElementById("app");
-const lista = document.getElementById("lista");
-const modal = document.getElementById("modal");
-const busqueda = document.getElementById("busqueda");
-
-let modelos = [];
-
-window.login = async () => {
-  try {
-    await signInWithEmailAndPassword(auth, email.value, password.value);
-  } catch {
-    error.textContent = "Credenciales incorrectas";
-  }
-};
-
-window.logout = () => signOut(auth);
-
-onAuthStateChanged(auth, user => {
+<script>
+/* =====================
+   AUTH CONTROL
+===================== */
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    loginDiv.style.display = "none";
-    appDiv.style.display = "block";
-    cargar();
+    loginScreen.style.display = "none";
+    appScreen.style.display = "block";
+    renderCards();
   } else {
-    loginDiv.style.display = "block";
-    appDiv.style.display = "none";
+    appScreen.style.display = "none";
+    loginScreen.style.display = "block";
   }
 });
 
-async function cargar() {
-  modelos = [];
-  lista.innerHTML = "";
-  const snap = await getDocs(collection(db, "modelos"));
-  snap.forEach(d => {
-    modelos.push({ id: d.id, ...d.data() });
-  });
-  pintar();
+function login() {
+  const email = email.value;
+  const password = password.value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .catch(err => {
+      loginError.textContent = err.message;
+    });
 }
 
-window.pintar = () => {
-  const texto = busqueda.value.toLowerCase();
-  lista.innerHTML = "";
-  modelos
-    .filter(m =>
-      (m.modelo || "").toLowerCase().includes(texto) ||
-      (m.fabricante || "").toLowerCase().includes(texto) ||
-      (m.codigo || "").toLowerCase().includes(texto)
-    )
-    .forEach(m => {
-      lista.innerHTML += `
-        <div class="card">
-          <img src="${m.imagen || 'https://via.placeholder.com/300x200?text=Sin+imagen'}">
-          <b>${m.modelo || ""}</b><br>
-          ${m.fabricante || ""}<br>
-          ${m.codigo || ""}<br>
-          <button class="danger" onclick="borrar('${m.id}')">Borrar</button>
-        </div>`;
-    });
-};
+function logout() {
+  signOut(auth);
+}
 
-window.borrar = async id => {
-  await deleteDoc(doc(db, "modelos", id));
-  cargar();
-};
+/* =====================
+   TARJETAS (LOCAL)
+===================== */
+function getCards() {
+  return JSON.parse(localStorage.getItem("maikman_cards") || "[]");
+}
 
-window.abrirModal = () => modal.style.display = "flex";
-window.cerrarModal = () => modal.style.display = "none";
+function saveCards(cards) {
+  localStorage.setItem("maikman_cards", JSON.stringify(cards));
+}
 
-window.guardar = async () => {
-  await addDoc(collection(db, "modelos"), {
-    codigo: codigo.value,
-    fabricante: fabricante.value,
-    modelo: modelo.value,
-    imagen: imagen.value
+function renderCards() {
+  const container = document.getElementById("cards");
+  container.innerHTML = "";
+  getCards().forEach(c => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <b>${c.model}</b>
+      Marca: ${c.brand}<br>
+      Escala: ${c.scale}<br>
+      EAN: ${c.ean}
+    `;
+    container.appendChild(div);
   });
-  cerrarModal();
-  cargar();
-};
+}
 
-window.buscarScalemates = async () => {
-  const q = codigo.value || modelo.value;
-  if (!q) return alert("Introduce un código o modelo");
+/* =====================
+   SCALEMATES SEARCH
+===================== */
+async function buscar() {
+  const ean = eanInput.value.trim();
+  if (!ean) return;
 
-  const url = `https://scalemates-proxy.yotracuentadeinstagram.workers.dev/?q=${encodeURIComponent(q)}`;
-  const res = await fetch(url);
-  const html = await res.text();
+  status.textContent = "Buscando en Scalemates…";
 
-  if (!html.includes("Search results")) {
-    alert("No se encontraron resultados en Scalemates");
-  } else {
-    alert("Resultado encontrado en Scalemates (HTML recibido correctamente)");
+  try {
+    const url = `https://scalemates-proxy.yotracuentadeinstagram.workers.dev/?query=${encodeURIComponent(ean)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Sin resultados");
+
+    const html = await res.text();
+
+    // Extracción simple (robusta)
+    const brand = (html.match(/Brand<\/td><td[^>]*>(.*?)<\/td>/i) || [])[1] || "Desconocida";
+    const scale = (html.match(/Scale<\/td><td[^>]*>(.*?)<\/td>/i) || [])[1] || "—";
+    const model = (html.match(/<h1[^>]*>(.*?)<\/h1>/i) || [])[1] || "Modelo Scalemates";
+
+    const cards = getCards();
+    cards.push({ ean, brand, scale, model });
+    saveCards(cards);
+    renderCards();
+
+    status.textContent = "Modelo añadido ✔";
+    eanInput.value = "";
+  } catch (e) {
+    status.textContent = "No se encontró el modelo";
   }
-};
+}
 </script>
 
 </body>
