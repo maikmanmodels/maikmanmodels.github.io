@@ -5,71 +5,65 @@
 <title>Maikman Models Stock</title>
 
 <style>
-:root {
-  --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8;
+:root{
+  --bg:#0f172a;--card:#020617;--text:#e5e7eb;--accent:#38bdf8;
 }
-body.light {
-  --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb;
+body.light{
+  --bg:#f1f5f9;--card:#fff;--text:#020617;--accent:#2563eb;
 }
-* { box-sizing:border-box; transition:.3s; }
-body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); }
+*{box-sizing:border-box;transition:.25s}
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
 
-header {
-  padding:20px; display:flex; justify-content:space-between;
-  align-items:center; font-size:22px; font-weight:bold;
-}
-
-button {
-  background:var(--accent); border:none; padding:6px 10px;
-  border-radius:6px; cursor:pointer; color:white;
+header{
+  padding:20px;display:flex;justify-content:space-between;
+  align-items:center;font-size:22px;font-weight:bold;
 }
 
-input { padding:8px; border-radius:6px; border:none; width:100%; }
-
-#login {
-  max-width:320px; margin:80px auto; background:var(--card);
-  padding:20px; border-radius:12px;
+button{
+  background:var(--accent);border:none;padding:8px 14px;
+  border-radius:6px;color:#fff;cursor:pointer
 }
 
-#app { display:none; }
+input{padding:8px;border-radius:6px;border:none;width:100%}
 
-#controls { display:flex; gap:10px; padding:20px; }
-
-#grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:16px; padding:20px;
+#login{
+  max-width:320px;margin:80px auto;background:var(--card);
+  padding:20px;border-radius:12px
 }
 
-.card {
-  background:var(--card); border-radius:12px; padding:12px;
+#app{display:none}
+
+#controls{
+  display:flex;gap:10px;padding:20px;flex-wrap:wrap
 }
 
-.card img {
-  width:100%; height:200px; object-fit:cover; border-radius:8px;
+#grid{
+  display:grid;gap:16px;padding:20px
 }
 
-.badge {
-  position:absolute; bottom:8px; right:8px;
-  background:#dc2626; color:white;
-  border-radius:50%; width:28px; height:28px;
-  display:flex; align-items:center; justify-content:center;
-  font-weight:bold;
+.card{
+  background:var(--card);border-radius:12px;padding:12px;position:relative
 }
 
-.modal {
-  position:fixed; inset:0; background:rgba(0,0,0,.6);
-  display:none; align-items:center; justify-content:center;
+.card img{
+  width:100%;height:200px;object-fit:cover;border-radius:8px
 }
 
-.modal-content {
-  background:var(--card); padding:20px; width:360px;
-  border-radius:12px; display:flex; flex-direction:column; gap:10px;
+.badge{
+  position:absolute;bottom:8px;right:8px;
+  background:red;color:white;font-size:12px;
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center
 }
 
-.tag {
-  display:inline-block; background:#334155;
-  padding:4px 8px; border-radius:6px; margin:2px;
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  display:none;align-items:center;justify-content:center
+}
+
+.modal-content{
+  background:var(--card);padding:20px;width:360px;
+  border-radius:12px;display:flex;flex-direction:column;gap:10px
 }
 </style>
 </head>
@@ -79,28 +73,30 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 <div id="login">
   <h2>Acceso</h2>
   <input id="email" type="email" placeholder="Email"><br><br>
-  <input id="password" type="password" placeholder="Contraseña">
-  <label><input type="checkbox" onclick="verPassword()"> Ver contraseña</label><br><br>
+  <input id="password" type="password" placeholder="Contraseña"><br><br>
   <button onclick="login()">Entrar</button>
-  <p id="error" style="color:red;"></p>
+  <p id="error" style="color:red"></p>
 </div>
 
 <div id="app">
 <header>
   📦 Maikman Models
-  <button onclick="toggleTheme()">🌓</button>
+  <div>
+    <button onclick="toggleTheme()">🌓</button>
+    <button onclick="openSettings()">⚙️</button>
+    <button onclick="logout()">Salir</button>
+  </div>
 </header>
 
 <div id="controls">
-  <input id="search" placeholder="Buscar por código, fabricante o modelo">
+  <input id="search" placeholder="Buscar">
   <button onclick="openModal()">➕ Añadir modelo</button>
-  <button onclick="logout()">Salir</button>
 </div>
 
 <div id="grid"></div>
 </div>
 
-<!-- MODAL MODELO -->
+<!-- MODALES -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle">Modelo</h3>
@@ -108,30 +104,38 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
     <input id="fabricante" placeholder="Fabricante">
     <input id="modelo" placeholder="Modelo">
     <input id="fotoURL" placeholder="URL imagen">
-    <input type="file" id="fotoFile">
     <button onclick="guardarModelo()">Guardar</button>
     <button onclick="closeModal()">Cancelar</button>
   </div>
 </div>
 
-<!-- MODAL PINTURAS -->
-<div id="modalPaint" class="modal">
+<div id="paintModal" class="modal">
   <div class="modal-content">
     <h3>Pinturas Tamiya</h3>
-    <input id="paintInput" placeholder="Ej: XF1, x-2, TS-26">
-    <button onclick="addPaint()">Añadir pintura</button>
-    <div id="paintList"></div>
+    <input id="paintInput" placeholder="x1, xf2, ts30">
+    <button onclick="guardarPinturas()">Guardar</button>
     <button onclick="closePaint()">Cerrar</button>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+<div id="settings" class="modal">
+  <div class="modal-content">
+    <h3>Ajustes</h3>
+    <label>Tarjetas por fila (PC)</label>
+    <input id="cols" type="number" min="1" max="6">
+    <button onclick="exportCSV()">Exportar CSV</button>
+    <button onclick="closeSettings()">Cerrar</button>
+  </div>
+</div>
 
-const firebaseConfig = {
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {getFirestore,collection,addDoc,getDocs,updateDoc,deleteDoc,doc}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig={
   apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
   authDomain:"maikmanmodelsstock.firebaseapp.com",
   projectId:"maikmanmodelsstock",
@@ -140,125 +144,160 @@ const firebaseConfig = {
   appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const appFB = initializeApp(firebaseConfig);
-const auth = getAuth(appFB);
-const db = getFirestore(appFB);
-const storage = getStorage(appFB);
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-const loginBox = document.getElementById("login");
-const appBox = document.getElementById("app");
-const modal = document.getElementById("modal");
-const modalPaint = document.getElementById("modalPaint");
-const grid = document.getElementById("grid");
-const search = document.getElementById("search");
+let modelos=[],editId=null,paintId=null;
 
-let modelos=[], editId=null, paintModel=null;
+const grid=document.getElementById("grid");
+const search=document.getElementById("search");
 
 /* AUTH */
-window.login = ()=>signInWithEmailAndPassword(auth,email.value,password.value);
-window.logout = ()=>signOut(auth);
+window.login=()=>signInWithEmailAndPassword(auth,email.value,password.value)
+.catch(()=>error.textContent="Credenciales incorrectas");
+
+window.logout=()=>signOut(auth);
+
 onAuthStateChanged(auth,u=>{
-  loginBox.style.display=u?"none":"block";
-  appBox.style.display=u?"block":"none";
-  if(u) cargarModelos();
+  login.style.display=u?"none":"block";
+  app.style.display=u?"block":"none";
+  if(u)cargar();
 });
 
 /* UI */
 window.toggleTheme=()=>document.body.classList.toggle("light");
-window.verPassword=()=>password.type=password.type==="password"?"text":"password";
+
+/* GRID RESPONSIVE */
+function ajustarGrid(){
+  if(innerWidth<768) grid.style.gridTemplateColumns="1fr";
+  else{
+    const c=localStorage.cols||3;
+    grid.style.gridTemplateColumns=`repeat(${c},1fr)`;
+  }
+}
+window.onresize=ajustarGrid;
 
 /* DATA */
-async function cargarModelos(){
+async function cargar(){
   modelos=[];
   const s=await getDocs(collection(db,"modelos"));
   s.forEach(d=>modelos.push({id:d.id,...d.data()}));
   pintar();
+  ajustarGrid();
 }
 
 function pintar(){
-  const q=search.value.toLowerCase();
   grid.innerHTML="";
   modelos.filter(m=>
-    (m.codigo||"").toLowerCase().includes(q)||
-    (m.fabricante||"").toLowerCase().includes(q)||
-    (m.modelo||"").toLowerCase().includes(q)
+    (m.modelo||"").toLowerCase().includes(search.value.toLowerCase())
   ).forEach(m=>{
     grid.innerHTML+=`
     <div class="card">
-      <div style="position:relative">
-        <img src="${m.foto||""}">
-        ${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
-      </div>
+      ${m.dup>1?`<div class="badge">${m.dup}</div>`:""}
+      <img src="${m.foto||''}">
       <b>${m.modelo}</b><br>
-      <small>${m.fabricante} · ${m.codigo}</small><br>
-      ${(m.pinturas||[]).map(p=>`<span class="tag">${p}</span>`).join("")}
-      <br><br>
+      <small>${m.fabricante} · ${m.codigo}</small><br><br>
       <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
-      <button onclick='abrirPinturas(${JSON.stringify(m)})'>🎨</button>
-      <button onclick="borrar('${m.id}')">🗑️</button>
+      <button onclick='pinturas("${m.id}")'>🎨</button>
+      <button onclick='borrar("${m.id}")'>🗑️</button>
     </div>`;
   });
 }
 
+/* DUPLICADOS */
+function esDuplicado(data){
+  return modelos.find(m=>
+    m.codigo===data.codigo &&
+    m.fabricante===data.fabricante &&
+    m.modelo===data.modelo
+  );
+}
+
+/* SAVE */
+window.guardarModelo=async()=>{
+  const data={
+    codigo:codigo.value,
+    fabricante:fabricante.value,
+    modelo:modelo.value,
+    foto:fotoURL.value,
+    dup:1,
+    pinturas:[]
+  };
+
+  const d=esDuplicado(data);
+  if(d && !editHighlight){
+    if(!confirm("Modelo duplicado ¿añadir?"))return;
+    await updateDoc(doc(db,"modelos",d.id),{dup:(d.dup||1)+1});
+    closeModal();cargar();return;
+  }
+
+  editId
+    ? await updateDoc(doc(db,"modelos",editId),data)
+    : await addDoc(collection(db,"modelos"),data);
+
+  closeModal();cargar();
+};
+
 /* PINTURAS */
-window.abrirPinturas=m=>{
-  paintModel=m;
-  modalPaint.style.display="flex";
-  pintarPinturas();
+window.pinturas=id=>{
+  paintId=id;
+  const m=modelos.find(x=>x.id===id);
+  paintInput.value=(m.pinturas||[]).join(", ");
+  paintModal.style.display="flex";
 };
 
-window.closePaint=()=>modalPaint.style.display="none";
-
-function normalizarPintura(v){
-  v=v.toUpperCase().replace(/[^A-Z0-9]/g,"");
-  const m=v.match(/^(X|XF|LP|TS)(\d+)$/);
-  return m?`${m[1]}-${m[2]}`:null;
-}
-
-window.addPaint=async ()=>{
-  const n=normalizarPintura(paintInput.value);
-  if(!n) return alert("Formato inválido");
-  const arr=paintModel.pinturas||[];
-  if(arr.includes(n)) return;
-  arr.push(n);
-  await updateDoc(doc(db,"modelos",paintModel.id),{pinturas:arr});
-  paintModel.pinturas=arr;
-  paintInput.value="";
-  pintar(); pintarPinturas();
+window.guardarPinturas=async()=>{
+  let arr=[...new Set(
+    paintInput.value.split(",")
+    .map(p=>p.trim().toUpperCase().replace(/[^A-Z0-9]/g,""))
+    .filter(p=>/^(X|XF|LP|TS)\d+$/.test(p))
+    .map(p=>p.replace(/([A-Z]+)(\d+)/,"$1-$2"))
+  )];
+  await updateDoc(doc(db,"modelos",paintId),{pinturas:arr});
+  closePaint();cargar();
 };
 
-function pintarPinturas(){
-  paintList.innerHTML=(paintModel.pinturas||[])
-    .map(p=>`<span class="tag">${p}</span>`).join("");
-}
-
-/* CRUD */
-window.editar=m=>{editId=m.id;modal.style.display="flex";
-  codigo.value=m.codigo;fabricante.value=m.fabricante;
-  modelo.value=m.modelo;fotoURL.value=m.foto||"";};
-
-window.closeModal=()=>modal.style.display="none";
-
-window.guardarModelo=async ()=>{
-  let foto="";
-  if(fotoURL.value) foto=fotoURL.value;
-  else if(fotoFile.files[0]){
-    const r=ref(storage,"modelos/"+Date.now());
-    await uploadBytes(r,fotoFile.files[0]);
-    foto=await getDownloadURL(r);
-  }
-  const d={codigo:codigo.value,fabricante:fabricante.value,modelo:modelo.value,foto,duplicados:1,pinturas:[]};
-  editId?await updateDoc(doc(db,"modelos",editId),d):await addDoc(collection(db,"modelos"),d);
-  closeModal(); cargarModelos();
+/* SETTINGS */
+window.openSettings=()=>settings.style.display="flex";
+window.closeSettings=()=>settings.style.display="none";
+cols.onchange=()=>{
+  localStorage.cols=cols.value;
+  ajustarGrid();
 };
 
+window.exportCSV=()=>{
+  let csv="Código,Fabricante,Modelo,Pinturas\n";
+  modelos.forEach(m=>{
+    csv+=`${m.codigo},${m.fabricante},${m.modelo},"${(m.pinturas||[]).join(" ")}"\n`;
+  });
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="maikman_models.csv";
+  a.click();
+};
+
+/* OTROS */
+window.editar=m=>{editId=m.id;openModal(m)};
 window.borrar=async id=>{
-  if(confirm("¿Borrar modelo?")){
-    await deleteDoc(doc(db,"modelos",id)); cargarModelos();
+  if(confirm("¿Eliminar modelo?")){
+    await deleteDoc(doc(db,"modelos",id));cargar();
   }
 };
+window.openModal=m=>{
+  modal.style.display="flex";
+  modalTitle.textContent=m?"Editar":"Nuevo";
+  codigo.value=m?.codigo||"";
+  fabricante.value=m?.fabricante||"";
+  modelo.value=m?.modelo||"";
+  fotoURL.value=m?.foto||"";
+  editId=m?.id||null;
+};
+window.closeModal=()=>modal.style.display="none";
+window.closePaint=()=>paintModal.style.display="none";
 
-search.addEventListener("input",pintar);
+search.oninput=pintar;
 </script>
+
 </body>
 </html>
