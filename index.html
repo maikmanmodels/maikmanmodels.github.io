@@ -33,17 +33,16 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 
 #app { display:none; }
 
-#controls { display:flex; gap:10px; padding:20px; flex-wrap:wrap; }
+#controls { display:flex; gap:10px; padding:20px; }
 
 #grid {
   display:grid;
-  grid-template-columns:repeat(var(--cols,auto-fill),minmax(260px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
   gap:16px; padding:20px;
 }
 
 .card {
   background:var(--card); border-radius:12px; padding:12px;
-  position:relative;
 }
 
 .card img {
@@ -52,15 +51,16 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 
 .badge {
   position:absolute;
-  top:8px; right:8px;
+  bottom:8px;
+  right:8px;
   background:#dc2626;
   color:white;
-  width:28px; height:28px;
   border-radius:50%;
+  width:28px;
+  height:28px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:14px;
   font-weight:bold;
 }
 
@@ -92,42 +92,32 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 <div id="app">
 <header>
   📦 Maikman Models
-  <div>
-    <button onclick="toggleTheme()">🌓</button>
-    <button onclick="openSettings()">⚙️</button>
-  </div>
+  <button onclick="toggleTheme()">🌓</button>
 </header>
 
 <div id="controls">
   <input id="search" placeholder="Buscar por código, fabricante o modelo">
-  <button onclick="openModal()">➕ Añadir</button>
+  <button onclick="openModal()">➕ Añadir nuevo modelo</button>
   <button onclick="logout()">Salir</button>
 </div>
 
 <div id="grid"></div>
 </div>
 
-<!-- MODAL MODELO -->
+<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle">Nuevo modelo</h3>
     <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
     <input id="modelo" placeholder="Modelo">
-    <input id="fotoURL" placeholder="URL imagen (opcional)">
+
+    <b>Imagen</b>
+    <input id="fotoURL" placeholder="URL de la imagen (opcional)">
     <input type="file" id="fotoFile" accept="image/*">
+
     <button onclick="guardarModelo()">Guardar</button>
     <button onclick="closeModal()">Cancelar</button>
-  </div>
-</div>
-
-<!-- MODAL SETTINGS -->
-<div id="settings" class="modal">
-  <div class="modal-content">
-    <h3>Configuración</h3>
-    <button onclick="exportCSV()">⬇️ Exportar CSV</button>
-    <button onclick="exportExcel()">⬇️ Exportar Excel</button>
-    <button onclick="closeSettings()">Cerrar</button>
   </div>
 </div>
 
@@ -146,20 +136,21 @@ const firebaseConfig = {
   appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+const appFB = initializeApp(firebaseConfig);
+const auth = getAuth(appFB);
+const db = getFirestore(appFB);
+const storage = getStorage(appFB);
 
 const loginBox = document.getElementById("login");
 const appBox = document.getElementById("app");
+const modal = document.getElementById("modal");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
 
 let modelos = [];
 let editId = null;
 
-/* AUTH */
+/* LOGIN */
 window.login = () =>
   signInWithEmailAndPassword(auth,email.value,password.value)
   .catch(()=>error.innerText="Credenciales incorrectas");
@@ -167,8 +158,8 @@ window.login = () =>
 window.logout = () => signOut(auth);
 
 onAuthStateChanged(auth,user=>{
-  loginBox.style.display = user?"none":"block";
-  appBox.style.display = user?"block":"none";
+  loginBox.style.display = user ? "none" : "block";
+  appBox.style.display = user ? "block" : "none";
   if(user) cargarModelos();
 });
 
@@ -176,10 +167,6 @@ onAuthStateChanged(auth,user=>{
 window.toggleTheme = () => document.body.classList.toggle("light");
 window.verPassword = () =>
   password.type = password.type==="password"?"text":"password";
-
-/* SETTINGS */
-window.openSettings = ()=> settings.style.display="flex";
-window.closeSettings = ()=> settings.style.display="none";
 
 /* MODAL */
 window.openModal = m=>{
@@ -205,24 +192,17 @@ async function cargarModelos(){
 function pintar(){
   const q=search.value.toLowerCase();
   grid.innerHTML="";
-
-  const map = {};
-  modelos.forEach(m=>{
-    const key = (m.codigo||"")+"|"+(m.fabricante||"");
-    map[key]=(map[key]||0)+1;
-  });
-
   modelos.filter(m =>
     (m.codigo||"").toLowerCase().includes(q) ||
     (m.fabricante||"").toLowerCase().includes(q) ||
     (m.modelo||"").toLowerCase().includes(q)
   ).forEach(m=>{
-    const key=(m.codigo||"")+"|"+(m.fabricante||"");
-    const dup=map[key];
     grid.innerHTML+=`
     <div class="card">
-      ${dup>1?`<div class="badge">${dup}</div>`:""}
-      <img src="${m.foto||'https://via.placeholder.com/300x200?text=Sin+imagen'}">
+      <div style="position:relative">
+        <img src="${m.foto||''}">
+        ${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
+      </div>
       <b>${m.modelo||"Sin nombre"}</b><br>
       <small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
       <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
@@ -233,8 +213,24 @@ function pintar(){
 
 /* SAVE */
 window.guardarModelo = async ()=>{
+  const existente = modelos.find(m =>
+    (m.codigo && m.codigo === codigo.value) ||
+    (
+      m.fabricante.toLowerCase() === fabricante.value.toLowerCase() &&
+      m.modelo.toLowerCase() === modelo.value.toLowerCase()
+    )
+  );
+
+  if(existente && !editId){
+    if(!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
+    await updateDoc(doc(db,"modelos",existente.id),{
+      duplicados:(existente.duplicados||1)+1
+    });
+    closeModal(); cargarModelos(); return;
+  }
+
   let fotoFinal="";
-  if(fotoURL.value.trim()) fotoFinal=fotoURL.value.trim();
+  if(fotoURL.value) fotoFinal=fotoURL.value;
   else if(fotoFile.files[0]){
     const r=ref(storage,"modelos/"+Date.now());
     await uploadBytes(r,fotoFile.files[0]);
@@ -245,18 +241,17 @@ window.guardarModelo = async ()=>{
     codigo:codigo.value,
     fabricante:fabricante.value,
     modelo:modelo.value,
-    foto:fotoFinal
+    foto:fotoFinal,
+    duplicados:1
   };
 
-  editId
-    ? await updateDoc(doc(db,"modelos",editId),data)
-    : await addDoc(collection(db,"modelos"),data);
+  if(editId) await updateDoc(doc(db,"modelos",editId),data);
+  else await addDoc(collection(db,"modelos"),data);
 
-  closeModal();
-  cargarModelos();
+  closeModal(); cargarModelos();
 };
 
-window.editar = m => openModal(m);
+window.editar = m=>openModal(m);
 window.borrar = async id=>{
   if(confirm("¿Borrar modelo?")){
     await deleteDoc(doc(db,"modelos",id));
@@ -265,32 +260,6 @@ window.borrar = async id=>{
 };
 
 search.addEventListener("input",pintar);
-
-/* EXPORTS */
-window.exportCSV = ()=>{
-  let csv="Código,Fabricante,Modelo\n";
-  modelos.forEach(m=>{
-    csv+=`"${m.codigo}","${m.fabricante}","${m.modelo}"\n`;
-  });
-  download(csv,"modelos.csv","text/csv");
-};
-
-window.exportExcel = ()=>{
-  let html="<table><tr><th>Código</th><th>Fabricante</th><th>Modelo</th></tr>";
-  modelos.forEach(m=>{
-    html+=`<tr><td>${m.codigo}</td><td>${m.fabricante}</td><td>${m.modelo}</td></tr>`;
-  });
-  html+="</table>";
-  download(html,"modelos.xls","application/vnd.ms-excel");
-};
-
-function download(data,name,type){
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([data],{type}));
-  a.download=name;
-  a.click();
-}
 </script>
-
 </body>
 </html>
