@@ -1,201 +1,222 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Maikman Models</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-    /* 🔴 TU CONFIG REAL DE FIREBASE 🔴 */
-    const firebaseConfig = {
-   apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-    authDomain: "maikmanmodelsstock.firebaseapp.com",
-    projectId: "maikmanmodelsstock",
-    storageBucket: "maikmanmodelsstock.firebasestorage.app",
-    messagingSenderId: "871520809912",
-    appId: "1:871520809912:web:4042f15ef200832a95d54d"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    window.auth = auth;
-    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-    window.signOut = signOut;
-    window.onAuthStateChanged = onAuthStateChanged;
-  </script>
 
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: system-ui, Arial, sans-serif;
       background: #111;
       color: #eee;
     }
+
     header {
-      background: #222;
-      padding: 10px;
+      background: #1c1c1c;
+      padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    button {
-      padding: 8px 12px;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
+
+    h1, h2, h3 {
+      margin: 0 0 10px 0;
     }
+
+    button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #3b82f6;
+      color: white;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: #444;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+
     #loginScreen, #appScreen {
       display: none;
       padding: 20px;
+      max-width: 420px;
+      margin: auto;
     }
-    input {
-      padding: 8px;
-      width: 100%;
-      margin-bottom: 10px;
-    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
+      gap: 14px;
       margin-top: 20px;
     }
+
     .card {
       background: #1e1e1e;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.4);
     }
+
     .card b {
+      font-size: 16px;
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 6px;
     }
   </style>
 </head>
 
 <body>
 
-<!-- 🔐 LOGIN -->
+<!-- LOGIN -->
 <div id="loginScreen">
-  <h2>Maikman Models · Login</h2>
+  <h2>Maikman Models</h2>
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Contraseña">
-  <button onclick="login()">Entrar</button>
-  <p id="loginError" style="color:red"></p>
+  <button id="loginBtn">Entrar</button>
+  <p id="loginError" style="color:#f87171"></p>
 </div>
 
-<!-- 🚀 APP -->
+<!-- APP -->
 <div id="appScreen">
   <header>
     <h3>Maikman Models</h3>
-    <button onclick="logout()">Salir</button>
+    <button id="logoutBtn" class="secondary">Salir</button>
   </header>
 
-  <h4>Añadir modelo (EAN manual)</h4>
-  <input type="text" id="eanInput" placeholder="Código de barras / EAN">
-  <button onclick="buscar()">Buscar en Scalemates</button>
-  <p id="status"></p>
+  <h3>Añadir modelo</h3>
+
+  <input id="codigo" placeholder="Código">
+  <input id="fabricante" placeholder="Fabricante">
+  <input id="modelo" placeholder="Modelo">
+
+  <button id="addBtn">Guardar modelo</button>
 
   <div class="grid" id="cards"></div>
 </div>
 
-<script>
-/* =====================
-   AUTH CONTROL
-===================== */
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loginScreen.style.display = "none";
-    appScreen.style.display = "block";
-    renderCards();
-  } else {
-    appScreen.style.display = "none";
-    loginScreen.style.display = "block";
-  }
-});
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-function login() {
-  const email = email.value;
-  const password = password.value;
+  /* 🔥 FIREBASE REAL (TUS DATOS) 🔥 */
+  const firebaseConfig = {
+    apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+    authDomain: "maikmanmodelsstock.firebaseapp.com",
+    projectId: "maikmanmodelsstock",
+    storageBucket: "maikmanmodelsstock.firebasestorage.app",
+    messagingSenderId: "871520809912",
+    appId: "1:871520809912:web:4042f15ef200832a95d54d"
+  };
 
-  signInWithEmailAndPassword(auth, email, password)
-    .catch(err => {
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const loginScreen = document.getElementById("loginScreen");
+  const appScreen = document.getElementById("appScreen");
+  const cardsDiv = document.getElementById("cards");
+
+  /* ======================
+     AUTH
+  ====================== */
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      loginScreen.style.display = "none";
+      appScreen.style.display = "block";
+      renderCards();
+    } else {
+      appScreen.style.display = "none";
+      loginScreen.style.display = "block";
+    }
+  });
+
+  document.getElementById("loginBtn").onclick = () => {
+    signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    ).catch(err => {
       loginError.textContent = err.message;
     });
-}
+  };
 
-function logout() {
-  signOut(auth);
-}
+  document.getElementById("logoutBtn").onclick = () => {
+    signOut(auth);
+  };
 
-/* =====================
-   TARJETAS (LOCAL)
-===================== */
-function getCards() {
-  return JSON.parse(localStorage.getItem("maikman_cards") || "[]");
-}
+  /* ======================
+     MODELOS (localStorage)
+  ====================== */
+  function getModels() {
+    return JSON.parse(localStorage.getItem("maikman_models") || "[]");
+  }
 
-function saveCards(cards) {
-  localStorage.setItem("maikman_cards", JSON.stringify(cards));
-}
+  function saveModels(models) {
+    localStorage.setItem("maikman_models", JSON.stringify(models));
+  }
 
-function renderCards() {
-  const container = document.getElementById("cards");
-  container.innerHTML = "";
-  getCards().forEach(c => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <b>${c.model}</b>
-      Marca: ${c.brand}<br>
-      Escala: ${c.scale}<br>
-      EAN: ${c.ean}
-    `;
-    container.appendChild(div);
-  });
-}
+  function renderCards() {
+    cardsDiv.innerHTML = "";
+    getModels().forEach((m, i) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <b>${m.modelo}</b>
+        Código: ${m.codigo}<br>
+        Fabricante: ${m.fabricante}
+        <div class="actions">
+          <button class="secondary" onclick="deleteModel(${i})">Borrar</button>
+        </div>
+      `;
+      cardsDiv.appendChild(div);
+    });
+  }
 
-/* =====================
-   SCALEMATES SEARCH
-===================== */
-async function buscar() {
-  const ean = eanInput.value.trim();
-  if (!ean) return;
+  window.deleteModel = (index) => {
+    const models = getModels();
+    models.splice(index, 1);
+    saveModels(models);
+    renderCards();
+  };
 
-  status.textContent = "Buscando en Scalemates…";
+  document.getElementById("addBtn").onclick = () => {
+    const codigo = codigoInput.value || codigo.value;
+    const fabricante = fabricanteInput?.value || fabricante.value;
+    const modelo = modeloInput?.value || modelo.value;
 
-  try {
-    const url = `https://scalemates-proxy.yotracuentadeinstagram.workers.dev/?query=${encodeURIComponent(ean)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Sin resultados");
+    if (!codigo || !fabricante || !modelo) return;
 
-    const html = await res.text();
-
-    // Extracción simple (robusta)
-    const brand = (html.match(/Brand<\/td><td[^>]*>(.*?)<\/td>/i) || [])[1] || "Desconocida";
-    const scale = (html.match(/Scale<\/td><td[^>]*>(.*?)<\/td>/i) || [])[1] || "—";
-    const model = (html.match(/<h1[^>]*>(.*?)<\/h1>/i) || [])[1] || "Modelo Scalemates";
-
-    const cards = getCards();
-    cards.push({ ean, brand, scale, model });
-    saveCards(cards);
+    const models = getModels();
+    models.push({ codigo, fabricante, modelo });
+    saveModels(models);
     renderCards();
 
-    status.textContent = "Modelo añadido ✔";
-    eanInput.value = "";
-  } catch (e) {
-    status.textContent = "No se encontró el modelo";
-  }
-}
+    codigoInput.value = "";
+    fabricanteInput.value = "";
+    modeloInput.value = "";
+  };
 </script>
 
 </body>
