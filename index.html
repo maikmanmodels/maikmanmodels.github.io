@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Maikman Models Stock</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 :root {
@@ -16,83 +15,63 @@ body.light {
 body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); }
 
 header {
-  padding:20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:22px;
-  font-weight:bold;
+  padding:20px; display:flex; justify-content:space-between;
+  align-items:center; font-size:22px; font-weight:bold;
 }
 
 button {
-  background:var(--accent);
-  border:none;
-  padding:8px 14px;
-  border-radius:6px;
-  cursor:pointer;
-  color:white;
+  background:var(--accent); border:none; padding:8px 14px;
+  border-radius:6px; cursor:pointer; color:white;
 }
 
-input, select {
-  padding:8px;
-  border-radius:6px;
-  border:none;
-  width:100%;
-}
+input { padding:8px; border-radius:6px; border:none; width:100%; }
 
 #login {
-  max-width:320px;
-  margin:80px auto;
-  background:var(--card);
-  padding:20px;
-  border-radius:12px;
+  max-width:320px; margin:80px auto; background:var(--card);
+  padding:20px; border-radius:12px;
 }
 
 #app { display:none; }
 
-#controls {
-  display:flex;
-  gap:10px;
-  padding:20px;
-  flex-wrap:wrap;
-}
+#controls { display:flex; gap:10px; padding:20px; flex-wrap:wrap; }
 
 #grid {
   display:grid;
-  gap:16px;
-  padding:20px;
+  grid-template-columns:repeat(var(--cols,auto-fill),minmax(260px,1fr));
+  gap:16px; padding:20px;
 }
 
 .card {
-  background:var(--card);
-  border-radius:12px;
-  padding:12px;
+  background:var(--card); border-radius:12px; padding:12px;
+  position:relative;
 }
 
 .card img {
-  width:100%;
-  height:200px;
-  object-fit:cover;
-  border-radius:8px;
+  width:100%; height:200px; object-fit:cover; border-radius:8px;
+}
+
+.badge {
+  position:absolute;
+  top:8px; right:8px;
+  background:#dc2626;
+  color:white;
+  width:28px; height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:bold;
 }
 
 .modal {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
+  position:fixed; inset:0; background:rgba(0,0,0,.6);
+  display:none; align-items:center; justify-content:center;
 }
 
 .modal-content {
-  background:var(--card);
-  padding:20px;
-  width:340px;
-  border-radius:12px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+  background:var(--card); padding:20px; width:340px;
+  border-radius:12px; display:flex; flex-direction:column; gap:10px;
 }
 </style>
 </head>
@@ -114,14 +93,15 @@ input, select {
 <header>
   📦 Maikman Models
   <div>
+    <button onclick="toggleTheme()">🌓</button>
     <button onclick="openSettings()">⚙️</button>
-    <button onclick="logout()">Salir</button>
   </div>
 </header>
 
 <div id="controls">
   <input id="search" placeholder="Buscar por código, fabricante o modelo">
-  <button onclick="openModal()">➕ Añadir nuevo modelo</button>
+  <button onclick="openModal()">➕ Añadir</button>
+  <button onclick="logout()">Salir</button>
 </div>
 
 <div id="grid"></div>
@@ -134,37 +114,19 @@ input, select {
     <input id="codigo" placeholder="Código">
     <input id="fabricante" placeholder="Fabricante">
     <input id="modelo" placeholder="Modelo">
-
-    <b>Imagen</b>
-    <input id="fotoURL" placeholder="URL de la imagen (opcional)">
+    <input id="fotoURL" placeholder="URL imagen (opcional)">
     <input type="file" id="fotoFile" accept="image/*">
-
     <button onclick="guardarModelo()">Guardar</button>
     <button onclick="closeModal()">Cancelar</button>
   </div>
 </div>
 
-<!-- MODAL AJUSTES -->
+<!-- MODAL SETTINGS -->
 <div id="settings" class="modal">
   <div class="modal-content">
-    <h3>⚙️ Configuración</h3>
-
-    <label>
-      Tema
-      <select onchange="setTheme(this.value)">
-        <option value="dark">Oscuro</option>
-        <option value="light">Claro</option>
-      </select>
-    </label>
-
-    <label id="columnsLabel">
-      Tarjetas por fila (PC)
-      <select onchange="setColumns(this.value)">
-        <option>1</option><option>2</option><option>3</option>
-        <option>4</option><option>5</option>
-      </select>
-    </label>
-
+    <h3>Configuración</h3>
+    <button onclick="exportCSV()">⬇️ Exportar CSV</button>
+    <button onclick="exportExcel()">⬇️ Exportar Excel</button>
     <button onclick="closeSettings()">Cerrar</button>
   </div>
 </div>
@@ -184,20 +146,20 @@ const firebaseConfig = {
   appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const fbApp = initializeApp(firebaseConfig);
-const auth = getAuth(fbApp);
-const db = getFirestore(fbApp);
-const storage = getStorage(fbApp);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-const loginBox = document.getElementById("login");
-const appBox = document.getElementById("app");
+const loginBox = login;
+const appBox = app;
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
 
 let modelos = [];
 let editId = null;
 
-/* ===== AUTH ===== */
+/* AUTH */
 window.login = () =>
   signInWithEmailAndPassword(auth,email.value,password.value)
   .catch(()=>error.innerText="Credenciales incorrectas");
@@ -205,39 +167,21 @@ window.login = () =>
 window.logout = () => signOut(auth);
 
 onAuthStateChanged(auth,user=>{
-  loginBox.style.display = user ? "none" : "block";
-  appBox.style.display = user ? "block" : "none";
+  loginBox.style.display = user?"none":"block";
+  appBox.style.display = user?"block":"none";
   if(user) cargarModelos();
 });
 
-/* ===== RESPONSIVE GRID ===== */
-function isMobile(){ return window.innerWidth < 768; }
-
-function aplicarGrid(){
-  const cols = isMobile() ? 1 : localStorage.getItem("cols") || 3;
-  grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
-  document.getElementById("columnsLabel").style.display =
-    isMobile() ? "none" : "block";
-}
-window.addEventListener("resize", aplicarGrid);
-
-/* ===== THEME ===== */
-window.setTheme = t=>{
-  document.body.classList.toggle("light", t==="light");
-  localStorage.setItem("theme",t);
-};
+/* UI */
+window.toggleTheme = () => document.body.classList.toggle("light");
 window.verPassword = () =>
   password.type = password.type==="password"?"text":"password";
 
-/* ===== SETTINGS ===== */
+/* SETTINGS */
 window.openSettings = ()=> settings.style.display="flex";
 window.closeSettings = ()=> settings.style.display="none";
-window.setColumns = c=>{
-  localStorage.setItem("cols",c);
-  aplicarGrid();
-};
 
-/* ===== MODAL MODELO ===== */
+/* MODAL */
 window.openModal = m=>{
   modal.style.display="flex";
   modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
@@ -250,26 +194,35 @@ window.openModal = m=>{
 };
 window.closeModal = ()=> modal.style.display="none";
 
-/* ===== DATA ===== */
+/* DATA */
 async function cargarModelos(){
   modelos=[];
   const snap=await getDocs(collection(db,"modelos"));
   snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
   pintar();
-  aplicarGrid();
 }
 
 function pintar(){
   const q=search.value.toLowerCase();
   grid.innerHTML="";
+
+  const map = {};
+  modelos.forEach(m=>{
+    const key = (m.codigo||"")+"|"+(m.fabricante||"");
+    map[key]=(map[key]||0)+1;
+  });
+
   modelos.filter(m =>
     (m.codigo||"").toLowerCase().includes(q) ||
     (m.fabricante||"").toLowerCase().includes(q) ||
     (m.modelo||"").toLowerCase().includes(q)
   ).forEach(m=>{
+    const key=(m.codigo||"")+"|"+(m.fabricante||"");
+    const dup=map[key];
     grid.innerHTML+=`
     <div class="card">
-      <img src="${m.foto||''}">
+      ${dup>1?`<div class="badge">${dup}</div>`:""}
+      <img src="${m.foto||'https://via.placeholder.com/300x200?text=Sin+imagen'}">
       <b>${m.modelo||"Sin nombre"}</b><br>
       <small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
       <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
@@ -278,20 +231,26 @@ function pintar(){
   });
 }
 
-/* ===== SAVE ===== */
+/* SAVE */
 window.guardarModelo = async ()=>{
   let fotoFinal="";
-  if(fotoURL.value.trim()) fotoFinal = fotoURL.value.trim();
+  if(fotoURL.value.trim()) fotoFinal=fotoURL.value.trim();
   else if(fotoFile.files[0]){
-    const r = ref(storage,"modelos/"+Date.now());
+    const r=ref(storage,"modelos/"+Date.now());
     await uploadBytes(r,fotoFile.files[0]);
-    fotoFinal = await getDownloadURL(r);
+    fotoFinal=await getDownloadURL(r);
   }
 
-  const data={ codigo:codigo.value||"", fabricante:fabricante.value||"", modelo:modelo.value||"", foto:fotoFinal };
+  const data={
+    codigo:codigo.value,
+    fabricante:fabricante.value,
+    modelo:modelo.value,
+    foto:fotoFinal
+  };
 
-  if(editId) await updateDoc(doc(db,"modelos",editId),data);
-  else await addDoc(collection(db,"modelos"),data);
+  editId
+    ? await updateDoc(doc(db,"modelos",editId),data)
+    : await addDoc(collection(db,"modelos"),data);
 
   closeModal();
   cargarModelos();
@@ -307,8 +266,30 @@ window.borrar = async id=>{
 
 search.addEventListener("input",pintar);
 
-/* INIT */
-if(localStorage.getItem("theme")==="light") document.body.classList.add("light");
+/* EXPORTS */
+window.exportCSV = ()=>{
+  let csv="Código,Fabricante,Modelo\n";
+  modelos.forEach(m=>{
+    csv+=`"${m.codigo}","${m.fabricante}","${m.modelo}"\n`;
+  });
+  download(csv,"modelos.csv","text/csv");
+};
+
+window.exportExcel = ()=>{
+  let html="<table><tr><th>Código</th><th>Fabricante</th><th>Modelo</th></tr>";
+  modelos.forEach(m=>{
+    html+=`<tr><td>${m.codigo}</td><td>${m.fabricante}</td><td>${m.modelo}</td></tr>`;
+  });
+  html+="</table>";
+  download(html,"modelos.xls","application/vnd.ms-excel");
+};
+
+function download(data,name,type){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([data],{type}));
+  a.download=name;
+  a.click();
+}
 </script>
 
 </body>
