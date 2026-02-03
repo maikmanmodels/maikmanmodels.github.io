@@ -184,13 +184,13 @@ const firebaseConfig = {
   appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const storage = getStorage(fbApp);
 
-const loginBox = login;
-const appBox = app;
+const loginBox = document.getElementById("login");
+const appBox = document.getElementById("app");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
 
@@ -205,18 +205,16 @@ window.login = () =>
 window.logout = () => signOut(auth);
 
 onAuthStateChanged(auth,user=>{
-  loginBox.style.display = user?"none":"block";
-  appBox.style.display = user?"block":"none";
+  loginBox.style.display = user ? "none" : "block";
+  appBox.style.display = user ? "block" : "none";
   if(user) cargarModelos();
 });
 
 /* ===== RESPONSIVE GRID ===== */
-function isMobile(){
-  return window.innerWidth < 768;
-}
+function isMobile(){ return window.innerWidth < 768; }
 
 function aplicarGrid(){
-  let cols = isMobile() ? 1 : localStorage.getItem("cols") || 3;
+  const cols = isMobile() ? 1 : localStorage.getItem("cols") || 3;
   grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
   document.getElementById("columnsLabel").style.display =
     isMobile() ? "none" : "block";
@@ -283,9 +281,8 @@ function pintar(){
 /* ===== SAVE ===== */
 window.guardarModelo = async ()=>{
   let fotoFinal="";
-  if(fotoURL.value.trim()){
-    fotoFinal = fotoURL.value.trim();
-  } else if(fotoFile.files[0]){
+  if(fotoURL.value.trim()) fotoFinal = fotoURL.value.trim();
+  else if(fotoFile.files[0]){
     const r = ref(storage,"modelos/"+Date.now());
     await uploadBytes(r,fotoFile.files[0]);
     fotoFinal = await getDownloadURL(r);
@@ -310,9 +307,8 @@ window.borrar = async id=>{
 
 search.addEventListener("input",pintar);
 
-/* ===== INIT ===== */
-const savedTheme = localStorage.getItem("theme");
-if(savedTheme==="light") document.body.classList.add("light");
+/* INIT */
+if(localStorage.getItem("theme")==="light") document.body.classList.add("light");
 </script>
 
 </body>
