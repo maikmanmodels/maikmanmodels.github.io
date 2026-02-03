@@ -135,6 +135,12 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {getFirestore,collection,addDoc,getDocs,updateDoc,deleteDoc,doc}
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+const modal = document.getElementById("modal");
+const paintModal = document.getElementById("paintModal");
+const settings = document.getElementById("settings");
+const login = document.getElementById("login");
+const appBox = document.getElementById("app");
+
 const firebaseConfig={
   apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
   authDomain:"maikmanmodelsstock.firebaseapp.com",
@@ -160,8 +166,10 @@ window.login=()=>signInWithEmailAndPassword(auth,email.value,password.value)
 window.logout=()=>signOut(auth);
 
 onAuthStateChanged(auth,u=>{
-  login.style.display=u?"none":"block";
-  app.style.display=u?"block":"none";
+login.style.display = u ? "none" : "block";
+appBox.style.display = u ? "block" : "none";
+
+
   if(u)cargar();
 });
 
