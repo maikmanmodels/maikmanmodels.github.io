@@ -281,7 +281,7 @@ applyConfig();
 
 // Diccionario de pinturas (amplía según necesites)
 const paintsDict = {
-             'X-1': { name: 'Negro', color: '#000000' },
+               'X-1': { name: 'Negro', color: '#000000' },
             'X-2': { name: 'Blanco', color: '#FFFFFF' },
             'X-3': { name: 'Azul Real', color: '#003087' },
             'X-4': { name: 'Azul', color: '#0055A4' },
@@ -554,7 +554,6 @@ const paintsDict = {
             'TS-98': { name: 'Amarillo Puro Brillante', color: '#FFFF00' },
             'TS-99': { name: 'Marrón IJN Mate', color: '#5C4033' },
             'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
-
 };
 
 /* LOGIN */
@@ -628,7 +627,11 @@ window.closeModal = ()=> modal.style.display="none";
 
 /* MODAL PINTURAS */
 window.openPaintsModal = m => {
-  currentModel = {...m};
+  if (!m || !m.id) {
+    alert("Error: Modelo inválido");
+    return;
+  }
+  currentModel = { ...m, paints: Array.isArray(m.paints) ? [...m.paints] : [] };
   paintsModal.style.display = "flex";
   document.getElementById("currentModelName").innerText = 
     (m.codigo ? m.codigo + " – " : "") + (m.modelo || "Modelo sin nombre");
@@ -656,21 +659,21 @@ function renderPaintsList() {
   const list = document.getElementById("paintsList");
   list.innerHTML = "";
 
-  let paints = currentModel.paints || [];
+  const paints = Array.isArray(currentModel?.paints) ? currentModel.paints : [];
   if (paints.length === 0) {
     list.innerHTML = '<p style="color:#9ca3af;text-align:center;">Aún no hay pinturas añadidas</p>';
     return;
   }
 
   // Ordenar
-  paints = sortPaints(paints);
+  const sortedPaints = sortPaints(paints);
 
   // Limitar columnas visibles (pero todas las pinturas se guardan)
-  const columnsToShow = Math.min(maxColumns, Math.ceil(paints.length / itemsPerColumn));
+  const columnsToShow = Math.min(maxColumns, Math.ceil(sortedPaints.length / itemsPerColumn));
 
   const columns = [];
-  for (let i = 0; i < paints.length; i += itemsPerColumn) {
-    columns.push(paints.slice(i, i + itemsPerColumn));
+  for (let i = 0; i < sortedPaints.length; i += itemsPerColumn) {
+    columns.push(sortedPaints.slice(i, i + itemsPerColumn));
   }
 
   // Mostrar solo las primeras N columnas según config
@@ -679,7 +682,7 @@ function renderPaintsList() {
     colDiv.className = "paints-column";
 
     columnPaints.forEach((code, relIdx) => {
-      const globalIndex = colIdx * itemsPerColumn + relIdx;
+      const globalIndex = sortedPaints.indexOf(code); // Usar índice del array ordenado para borrar el correcto
       const p = paintsDict[code];
       if (!p) return;
 
@@ -705,30 +708,61 @@ function renderPaintsList() {
     more.style.color = "#9ca3af";
     more.style.padding = "20px";
     more.style.alignSelf = "center";
-    more.textContent = `+ ${paints.length - (columnsToShow * itemsPerColumn)} colores más`;
+    more.textContent = `+ ${sortedPaints.length - (columnsToShow * itemsPerColumn)} colores más`;
     list.appendChild(more);
   }
 }
 
 window.deletePaint = index => {
+  if (!Array.isArray(currentModel.paints)) currentModel.paints = [];
   currentModel.paints.splice(index, 1);
   renderPaintsList();
 };
 
 window.savePaints = async () => {
-  const input = document.getElementById("newPaints").value;
-  if (input.trim()) {
-    const newCodes = input.split(',')
-      .map(normalizeCode)
-      .filter(code => code && paintsDict[code] && !currentModel.paints.includes(code));
-    
-    if (newCodes.length > 0) {
-      currentModel.paints = [...(currentModel.paints || []), ...newCodes];
-      document.getElementById("newPaints").value = "";
-      renderPaintsList();
-    }
+  if (!currentModel || !currentModel.id) {
+    console.error("No hay modelo seleccionado para guardar pinturas");
+    alert("Error: No se encontró el modelo. Intenta abrir el modal de pinturas de nuevo.");
+    closePaintsModal();
+    return;
   }
-  await updateDoc(doc(db, "modelos", currentModel.id), { paints: currentModel.paints || [] });
+
+  const input = document.getElementById("newPaints").value.trim();
+  if (!input) {
+    // Si no hay nada nuevo, solo guardamos el estado actual (por si se borraron items)
+    await updateDoc(doc(db, "modelos", currentModel.id), { 
+      paints: currentModel.paints || [] 
+    });
+    closePaintsModal();
+    cargarModelos();
+    return;
+  }
+
+  const newCodes = input.split(',')
+    .map(c => normalizeCode(c))
+    .filter(code => {
+      if (!code) return false;
+      if (!paintsDict[code]) return false;
+      // Aseguramos que paints sea siempre array
+      const existing = Array.isArray(currentModel.paints) ? currentModel.paints : [];
+      return !existing.includes(code);
+    });
+
+  if (newCodes.length > 0) {
+    // Creamos una copia segura del array
+    currentModel.paints = [
+      ...(Array.isArray(currentModel.paints) ? currentModel.paints : []),
+      ...newCodes
+    ];
+    document.getElementById("newPaints").value = "";
+    renderPaintsList();
+  }
+
+  // Siempre guardamos el array actual (puede haber borrados)
+  await updateDoc(doc(db, "modelos", currentModel.id), { 
+    paints: currentModel.paints || [] 
+  });
+
   closePaintsModal();
   cargarModelos();
 };
