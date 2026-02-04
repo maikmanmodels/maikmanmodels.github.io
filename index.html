@@ -2,116 +2,120 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Maikman Models Stock</title>
+<title>Maikman Models</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 body {
+  margin: 0;
   font-family: Arial, sans-serif;
-  background:#1e2e45;
-  color:white;
-  margin:0;
+  background: #2f4b6c;
+  color: white;
 }
-.hidden { display:none; }
+.hidden { display: none; }
 
 header {
-  background:#0f1c2e;
-  padding:10px;
-  text-align:center;
-  font-weight:bold;
+  padding: 10px;
+  background: #1f354d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 button {
-  padding:6px 10px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #3bc0ff;
+  color: black;
+  cursor: pointer;
+}
+button.danger { background: #ff4b4b; }
+
+#models {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+  padding: 10px;
 }
 
-input {
-  padding:6px;
-  border-radius:5px;
-  border:none;
-  width:100%;
-}
-
-.model {
-  background:#2b3f5f;
-  margin:10px;
-  padding:10px;
-  border-radius:8px;
+.card {
+  background: #1f354d;
+  padding: 10px;
+  border-radius: 8px;
 }
 
 .paint-row {
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:5px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
 }
 
 .paint-color {
-  width:20px;
-  height:20px;
-  border:1px solid #fff;
-}
-
-.paint-remove {
-  background:red;
-  color:white;
-  border-radius:50%;
-  width:22px;
-  height:22px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid #000;
 }
 
 .modal {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
-.modal-box {
-  background:#304b6f;
-  padding:15px;
-  width:300px;
-  border-radius:10px;
+.modal-content {
+  background: #2f4b6c;
+  padding: 15px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
 }
 </style>
 </head>
+
 <body>
 
-<header>Maikman Models Stock</header>
-
+<!-- LOGIN -->
 <div id="login">
-  <h3>Login</h3>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Entrar</button>
+  <h2>Acceso</h2>
+  <input id="email" placeholder="Email"><br><br>
+  <input id="password" type="password" placeholder="Contraseña"><br><br>
+  <button id="loginBtn">Entrar</button>
 </div>
 
+<!-- APP -->
 <div id="app" class="hidden">
-  <h3>Modelos</h3>
-  <input id="newModelName" placeholder="Nombre modelo">
-  <button onclick="addModel()">Añadir modelo</button>
+  <header>
+    <strong>Maikman Models</strong>
+    <button id="logoutBtn">Salir</button>
+  </header>
+
+  <div style="padding:10px">
+    <button id="addModelBtn">Añadir modelo</button>
+  </div>
+
   <div id="models"></div>
 </div>
 
 <!-- MODAL PINTURAS -->
 <div id="paintModal" class="modal hidden">
-  <div class="modal-box">
+  <div class="modal-content">
     <h3>Pinturas Tamiya</h3>
-    <input id="paintInput" placeholder="X-1, XF16, TS-14">
-    <div id="paintList"></div>
-    <button onclick="savePaints()">Guardar</button>
+    <input id="paintInput" placeholder="X-1, XF16, LP-21...">
+    <div id="paintList"></div><br>
+    <button id="savePaintsBtn">Guardar</button>
     <button onclick="closePaintModal()">Cerrar</button>
   </div>
 </div>
 
-<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
@@ -122,378 +126,126 @@ const firebaseConfig = {
   appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
+const appFB = initializeApp(firebaseConfig);
+const auth = getAuth(appFB);
+const db = getFirestore(appFB);
 
-const PAINTS = /* 👇 PEGADO EXACTAMENTE TU LISTADO 👇 */ {
-            'X-1': { name: 'Negro', color: '#000000' },
-            'X-2': { name: 'Blanco', color: '#FFFFFF' },
-            'X-3': { name: 'Azul Real', color: '#003087' },
-            'X-4': { name: 'Azul', color: '#0055A4' },
-            'X-5': { name: 'Verde', color: '#008000' },
-            'X-6': { name: 'Naranja', color: '#FF6200' },
-            'X-7': { name: 'Rojo', color: '#FF0000' },
-            'X-8': { name: 'Amarillo Limón', color: '#FFFF00' },
-            'X-9': { name: 'Marrón', color: '#4A2C2A' },
-            'X-10': { name: 'Gris Cañón', color: '#3F3F3F' },
-            'X-11': { name: 'Plateado Cromo', color: '#C0C0C0' },
-            'X-12': { name: 'Dorado', color: '#FFD700' },
-            'X-13': { name: 'Azul Metálico', color: '#0047AB' },
-            'X-14': { name: 'Azul Cielo', color: '#87CEEB' },
-            'X-15': { name: 'Verde Claro', color: '#90EE90' },
-            'X-16': { name: 'Púrpura', color: '#800080' },
-            'X-17': { name: 'Rosa', color: '#FF69B4' },
-            'X-18': { name: 'Negro Satinado', color: '#2F2F2F' },
-            'X-19': { name: 'Humo', color: '#6A6A6A' },
-            'X-21': { name: 'Base Plana', color: '#D3D3D3' },
-            'X-22': { name: 'Transparente', color: '#F5F6F5' },
-            'X-23': { name: 'Azul Claro', color: '#ADD8E6' },
-            'X-25': { name: 'Verde Claro', color: '#98FB98' },
-            'X-26': { name: 'Naranja Claro', color: '#FFA500' },
-            'X-27': { name: 'Rojo Claro', color: '#FF4040' },
-            'X-28': { name: 'Verde Parque', color: '#355E3B' },
-            'X-31': { name: 'Dorado Titanio', color: '#D4A017' },
-            'X-32': { name: 'Plateado Titanio', color: '#B7B7B7' },
-            'X-33': { name: 'Bronce', color: '#8C7853' },
-            'X-34': { name: 'Marrón Metálico', color: '#6F4E37' },
-            'XF-1': { name: 'Negro Mate', color: '#1C2526' },
-            'XF-2': { name: 'Blanco Mate', color: '#E8ECEF' },
-            'XF-3': { name: 'Amarillo Mate', color: '#FFC107' },
-            'XF-4': { name: 'Amarillo Verdoso Mate', color: '#9ACD32' },
-            'XF-5': { name: 'Verde Mate', color: '#355E3B' },
-            'XF-6': { name: 'Cobre Mate', color: '#B87333' },
-            'XF-7': { name: 'Rojo Mate', color: '#8B0000' },
-            'XF-8': { name: 'Azul Mate', color: '#003087' },
-            'XF-9': { name: 'Marrón Casco Mate', color: '#4A3728' },
-            'XF-10': { name: 'Marrón Mate', color: '#8B4513' },
-            'XF-11': { name: 'Verde J.N. Mate', color: '#2E4A2E' },
-            'XF-12': { name: 'Gris J.N. Mate', color: '#6B7280' },
-            'XF-13': { name: 'Verde J.A. Mate', color: '#3A5F3A' },
-            'XF-14': { name: 'Gris J.A. Mate', color: '#6D8299' },
-            'XF-15': { name: 'Carne Mate', color: '#F4C7B8' },
-            'XF-16': { name: 'Aluminio Mate', color: '#A9A9A9' },
-            'XF-17': { name: 'Azul Marino Mate', color: '#2C3E50' },
-            'XF-18': { name: 'Gris Medio Mate', color: '#6B7280' },
-            'XF-19': { name: 'Gris Cielo Mate', color: '#B0C4DE' },
-            'XF-20': { name: 'Gris Medio Mate', color: '#808080' },
-            'XF-21': { name: 'Cielo Mate', color: '#87CEEB' },
-            'XF-22': { name: 'Gris RLM Mate', color: '#5A6A62' },
-            'XF-23': { name: 'Azul Claro Mate', color: '#ADD8E6' },
-            'XF-24': { name: 'Gris Oscuro Mate', color: '#4B5E40' },
-            'XF-25': { name: 'Verde Claro Mate', color: '#98FB98' },
-            'XF-26': { name: 'Verde Oscuro Mate', color: '#2E4A2E' },
-            'XF-27': { name: 'Verde Negro Mate', color: '#1A2521' },
-            'XF-28': { name: 'Cobre Oscuro Mate', color: '#6F4E37' },
-            'XF-29': { name: 'Gris Verdoso Mate', color: '#5A6A62' },
-            'XF-49': { name: 'Caqui Mate', color: '#8A7F2D' },
-            'XF-50': { name: 'Azul Campo Mate', color: '#4682B4' },
-            'XF-51': { name: 'Caqui Drab Mate', color: '#6B4E31' },
-            'XF-52': { name: 'Tierra Mate', color: '#5C4033' },
-            'XF-53': { name: 'Gris Neutral Mate', color: '#808080' },
-            'XF-54': { name: 'Gris Marino Mate', color: '#536878' },
-            'XF-55': { name: 'Tierra Cubierta Mate', color: '#8B5A2B' },
-            'XF-56': { name: 'Gris Metálico Mate', color: '#6A6A6A' },
-            'XF-57': { name: 'Buff Mate', color: '#F4A460' },
-            'XF-58': { name: 'Verde Olivo Mate', color: '#4A7043' },
-            'XF-59': { name: 'Amarillo Desierto Mate', color: '#DEB887' },
-            'XF-60': { name: 'Amarillo Oscuro Mate', color: '#B8860B' },
-            'XF-61': { name: 'Verde Oscuro Mate', color: '#2F4F2F' },
-            'XF-62': { name: 'Verde Olivo Drab Mate', color: '#4B5320' },
-            'XF-63': { name: 'Gris Alemán Mate', color: '#4F4F4F' },
-            'XF-64': { name: 'Marrón Rojizo Mate', color: '#5C2F2F' },
-            'XF-65': { name: 'Gris Mate', color: '#6B7280' },
-            'XF-66': { name: 'Gris Claro Mate', color: '#D3D3D3' },
-            'XF-67': { name: 'Verde NATO Mate', color: '#3A403B' },
-            'XF-68': { name: 'Marrón NATO Mate', color: '#4A3728' },
-            'XF-69': { name: 'Negro NATO Mate', color: '#1C2526' },
-            'XF-70': { name: 'Gris Oscuro Mate', color: '#3F4F3F' },
-            'XF-71': { name: 'Verde Cabina Mate', color: '#4A7043' },
-            'XF-72': { name: 'Marrón JGSDF Mate', color: '#5C4033' },
-            'XF-73': { name: 'Verde Oscuro JGSDF Mate', color: '#2E4A2E' },
-            'XF-74': { name: 'Verde Olivo JGSDF Mate', color: '#4A7043' },
-            'XF-75': { name: 'Gris IJN Mate', color: '#6B7280' },
-            'XF-76': { name: 'Gris Verde IJN Mate', color: '#5A6A62' },
-            'XF-77': { name: 'Gris Marino IJN Mate', color: '#536878' },
-            'XF-78': { name: 'Madera Mate', color: '#8B5A2B' },
-            'XF-79': { name: 'Lino Mate', color: '#F5F5DC' },
-            'XF-80': { name: 'Gris Real Mate', color: '#4682B4' },
-            'XF-81': { name: 'Verde Oscuro RAF Mate', color: '#2F4F2F' },
-            'XF-82': { name: 'Gris Océano RAF Mate', color: '#6B7280' },
-            'XF-83': { name: 'Gris Marino RAF Mate', color: '#536878' },
-            'XF-84': { name: 'Marrón Oscuro Mate', color: '#4A3728' },
-            'XF-85': { name: 'Negro Goma Mate', color: '#1C2526' },
-            'XF-86': { name: 'Transparente Mate', color: '#F5F6F5' },
-            'LP-1': { name: 'Negro', color: '#000000' },
-            'LP-2': { name: 'Blanco', color: '#FFFFFF' },
-            'LP-3': { name: 'Azul', color: '#0000FF' },
-            'LP-4': { name: 'Amarillo', color: '#FFFF00' },
-            'LP-5': { name: 'Rojo', color: '#FF0000' },
-            'LP-6': { name: 'Plateado', color: '#C0C0C0' },
-            'LP-7': { name: 'Dorado', color: '#FFD700' },
-            'LP-8': { name: 'Naranja', color: '#FF4500' },
-            'LP-9': { name: 'Transparente', color: '#F5F6F5' },
-            'LP-10': { name: 'Negro Matejo', color: '#1C2526' },
-            'LP-11': { name: 'Plateado (Hoja)', color: '#B7B7B7' },
-            'LP-12': { name: 'Gris IJN', color: '#6B7280' },
-            'LP-13': { name: 'Gris IJN (Sajo)', color: '#536878' },
-            'LP-14': { name: 'Gris IJN (Mate)', color: '#5A6A62' },
-            'LP-15': { name: 'Verde Matejo', color: '#008000' },
-            'LP-16': { name: 'Marrón Matejo', color: '#8B4513' },
-            'LP-17': { name: 'Verde Mate', color: '#355E3B' },
-            'LP-18': { name: 'Marrón Mate', color: '#4A3728' },
-            'LP-19': { name: 'Gris Cañón', color: '#3F4F4F' },
-            'LP-20': { name: 'Gris Claro', color: '#D3D3D3' },
-            'LP-21': { name: 'Verde Italiano', color: '#2E4A2E' },
-            'LP-22': { name: 'Rojo Italiano', color: '#8B0000' },
-            'LP-23': { name: 'Azul Claro', color: '#ADD8E6' },
-            'LP-24': { name: 'Azul Marino', color: '#2C3E50' },
-            'LP-25': { name: 'Marrón (JGSDF)', color: '#5C4033' },
-            'LP-26': { name: 'Verde Oscuro (JGSDF)', color: '#2E4A2E' },
-            'LP-27': { name: 'Gris Alemán', color: '#4F4F4F' },
-            'LP-28': { name: 'Verde Olivo', color: '#4A7043' },
-            'LP-29': { name: 'Verde Casco', color: '#2F4F2F' },
-            'LP-30': { name: 'Blanco Mate', color: '#E8ECEF' },
-            'LP-31': { name: 'Plateado Chispa', color: '#A9A9A9' },
-            'LP-32': { name: 'Gris Claro (IJN)', color: '#B0C4DE' },
-            'LP-33': { name: 'Gris Kure (IJN)', color: '#6D8299' },
-            'LP-34': { name: 'Azul Metálico', color: '#0047AB' },
-            'LP-35': { name: 'Base Plana', color: '#D3D3D3' },
-            'LP-36': { name: 'Azul Oscuro', color: '#003087' },
-            'LP-37': { name: 'Gris Claro Mate', color: '#B0C4DE' },
-            'LP-38': { name: 'Mica Plateada', color: '#C0C0C0' },
-            'LP-39': { name: 'Amarillo Brillante', color: '#FFC107' },
-            'LP-40': { name: 'Negro Metálico', color: '#2F2F2F' },
-            'LP-41': { name: 'Rojo Mica', color: '#8B0000' },
-            'LP-42': { name: 'Azul Mica', color: '#003087' },
-            'LP-43': { name: 'Azul Claro', color: '#4682B4' },
-            'LP-44': { name: 'Verde Metálico', color: '#008080' },
-            'LP-45': { name: 'Verde Perla', color: '#2E8B57' },
-            'LP-46': { name: 'Rojo Transparente', color: '#FF4040' },
-            'LP-47': { name: 'Azul Transparente', color: '#4169E1' },
-            'LP-48': { name: 'Verde Transparente', color: '#32CD32' },
-            'LP-49': { name: 'Amarillo Transparente', color: '#FFFF99' },
-            'LP-50': { name: 'Naranja Transparente', color: '#FFA500' },
-            'LP-51': { name: 'Humo', color: '#6A6A6A' },
-            'LP-52': { name: 'Rojo Metálico', color: '#8B0000' },
-            'LP-53': { name: 'Gris Titanio', color: '#B7B7B7' },
-            'LP-54': { name: 'Verde Oscuro Mate', color: '#2F4F2F' },
-            'LP-55': { name: 'Gris Oscuro Mate', color: '#3F4F4F' },
-            'LP-56': { name: 'Caqui Mate', color: '#8A7F2D' },
-            'LP-57': { name: 'Amarillo Desierto Mate', color: '#DEB887' },
-            'LP-58': { name: 'Verde NATO Mate', color: '#3A403B' },
-            'LP-59': { name: 'Marrón Nato Mate', color: '#4A3728' },
-            'LP-60': { name: 'Gris Metálico', color: '#6A6A6A' },
-            'LP-61': { name: 'Gris Mate (JGSDF)', color: '#6B7280' },
-            'LP-62': { name: 'Tierra Mate', color: '#5C4033' },
-            'LP-63': { name: 'Verde Mate (IJN)', color: '#2E4A2E' },
-            'LP-64': { name: 'Negro Mate Goma', color: '#1C2526' },
-            'LP-65': { name: 'Gris Mate', color: '#808080' },
-            'LP-66': { name: 'Gris Claro Mate', color: '#D3D3D3' },
-            'LP-67': { name: 'Madera Mate', color: '#8B5A2B' },
-            'LP-68': { name: 'Amarillo Mate', color: '#FFC107' },
-            'LP-69': { name: 'Verde Olivo Mate', color: '#4A7043' },
-            'LP-70': { name: 'Rojo Mate', color: '#8B0000' },
-            'LP-71': { name: 'Azul Mate', color: '#003087' },
-            'LP-72': { name: 'Marrón Mate', color: '#8B4513' },
-            'LP-73': { name: 'Gris Cielo Mate', color: '#B0C4DE' },
-            'LP-74': { name: 'Bronce Mate', color: '#8C7853' },
-            'LP-75': { name: 'Verde Mica', color: '#2E8B57' },
-            'LP-76': { name: 'Verde Mica', color: '#2E8B57' },
-            'TS-1': { name: 'Rojo Marrón', color: '#8B0000' },
-            'TS-2': { name: 'Verde Oscuro', color: '#2F4F2F' },
-            'TS-3': { name: 'Marrón Oscuro', color: '#4A3728' },
-            'TS-4': { name: 'Gris Alemán', color: '#4F4F4F' },
-            'TS-5': { name: 'Verde Olivo Mate', color: '#4A7043' },
-            'TS-6': { name: 'Negro Mate', color: '#1C2526' },
-            'TS-7': { name: 'Amarillo Brillante', color: '#FFC107' },
-            'TS-8': { name: 'Rojo Italiano', color: '#8B0000' },
-            'TS-9': { name: 'Marrón Italiano', color: '#5C4033' },
-            'TS-10': { name: 'Azul Francés', color: '#003087' },
-            'TS-11': { name: 'Granate', color: '#800020' },
-            'TS-12': { name: 'Naranja', color: '#FF6200' },
-            'TS-13': { name: 'Transparente', color: '#F5F6F5' },
-            'TS-14': { name: 'Negro', color: '#000000' },
-            'TS-15': { name: 'Azul', color: '#0000FF' },
-            'TS-16': { name: 'Amarillo', color: '#FFFF00' },
-            'TS-17': { name: 'Aluminio Brillante', color: '#A9A9A9' },
-            'TS-18': { name: 'Rojo Metálico', color: '#8B0000' },
-            'TS-19': { name: 'Azul Metálico', color: '#0047AB' },
-            'TS-20': { name: 'Verde Metálico', color: '#008080' },
-            'TS-21': { name: 'Dorado', color: '#FFD700' },
-            'TS-22': { name: 'Gris Claro', color: '#D3D3D3' },
-            'TS-23': { name: 'Azul Claro', color: '#ADD8E6' },
-            'TS-24': { name: 'Púrpura', color: '#800080' },
-            'TS-25': { name: 'Rosa', color: '#FF69B4' },
-            'TS-26': { name: 'Blanco Puro', color: '#FFFFFF' },
-            'TS-27': { name: 'Blanco Mate', color: '#E8ECEF' },
-            'TS-28': { name: 'Verde Olivo Mate', color: '#4A7043' },
-            'TS-29': { name: 'Rojo Mate', color: '#8B0000' },
-            'TS-30': { name: 'Plateado', color: '#C0C0C0' },
-            'TS-31': { name: 'Naranja Brillante', color: '#FFA500' },
-            'TS-32': { name: 'Gris Haze', color: '#6B7280' },
-            'TS-33': { name: 'Gris Mate', color: '#808080' },
-            'TS-34': { name: 'Verde Camuflaje', color: '#2E4A2E' },
-            'TS-35': { name: 'Verde Parque', color: '#355E3B' },
-            'TS-36': { name: 'Rojo Fluorescente', color: '#FF4040' },
-            'TS-37': { name: 'Gris Lava', color: '#4F4F4F' },
-            'TS-38': { name: 'Gris Cañón', color: '#3F4F3F' },
-            'TS-39': { name: 'Rojo Mica', color: '#8B0000' },
-            'TS-40': { name: 'Negro Metálico', color: '#2F2F2F' },
-            'TS-41': { name: 'Rojo Coral', color: '#FF4040' },
-            'TS-42': { name: 'Gris Claro Mica', color: '#B0C4DE' },
-            'TS-43': { name: 'Verde Brillante', color: '#008000' },
-            'TS-44': { name: 'Azul Brillante', color: '#4169E1' },
-            'TS-45': { name: 'Blanco Perla', color: '#F5F5DC' },
-            'TS-46': { name: 'Amarillo Claro', color: '#FFFF99' },
-            'TS-47': { name: 'Amarillo Cromo', color: '#FFC107' },
-            'TS-48': { name: 'Gris Cañón Mate', color: '#3F4F4F' },
-            'TS-49': { name: 'Rojo Brillante', color: '#FF0000' },
-            'TS-50': { name: 'Azul Mica', color: '#003087' },
-            'TS-51': { name: 'Azul Racing', color: '#0047AB' },
-            'TS-52': { name: 'Púrpura Caramelo', color: '#800080' },
-            'TS-53': { name: 'Azul Océano Profundo', color: '#2C3E50' },
-            'TS-54': { name: 'Gris Claro Metálico', color: '#B7B7B7' },
-            'TS-55': { name: 'Azul Oscuro Mate', color: '#003087' },
-            'TS-56': { name: 'Naranja Brillante Mate', color: '#FFA500' },
-            'TS-57': { name: 'Azul Grisáceo Mate', color: '#6D8299' },
-            'TS-58': { name: 'Naranja Perla Claro', color: '#FFA500' },
-            'TS-59': { name: 'Rojo Perla Claro', color: '#FF4040' },
-            'TS-60': { name: 'Verde Perla', color: '#2E8B57' },
-            'TS-61': { name: 'Verde NATO', color: '#3A403B' },
-            'TS-62': { name: 'Marrón NATO', color: '#4A3728' },
-            'TS-63': { name: 'Negro NATO', color: '#1C2526' },
-            'TS-64': { name: 'Mica Verde Oscuro', color: '#2E4A2E' },
-            'TS-65': { name: 'Plateado Perla', color: '#C0C0C0' },
-            'TS-66': { name: 'Gris Kure', color: '#6D8299' },
-            'TS-67': { name: 'Gris Sasebo', color: '#536878' },
-            'TS-68': { name: 'Marrón Madera', color: '#8B5A2B' },
-            'TS-69': { name: 'Gris Lino', color: '#F5F5DC' },
-            'TS-70': { name: 'Verde Olivo JGSDF', color: '#4A7043' },
-            'TS-71': { name: 'Humo', color: '#6A6A6A' },
-            'TS-72': { name: 'Transparente Azul', color: '#4169E1' },
-            'TS-73': { name: 'Transparente Naranja', color: '#FFA500' },
-            'TS-74': { name: 'Transparente Rojo', color: '#FF4040' },
-            'TS-75': { name: 'Champán Dorado', color: '#D4A017' },
-            'TS-76': { name: 'Gris Mica', color: '#6B7280' },
-            'TS-77': { name: 'Gris Mate', color: '#808080' },
-            'TS-78': { name: 'Gris Campo', color: '#6B7280' },
-            'TS-79': { name: 'Negro Satinado', color: '#2F2F2F' },
-            'TS-80': { name: 'Base Plana', color: '#D3D3D3' },
-            'TS-81': { name: 'Azul Real Mate', color: '#003087' },
-            'TS-82': { name: 'Negro Goma Mate', color: '#1C2526' },
-            'TS-83': { name: 'Plateado Metálico', color: '#A9A9A9' },
-            'TS-84': { name: 'Dorado Metálico', color: '#FFD700' },
-            'TS-85': { name: 'Rojo Ferrari Brillante', color: '#FF0000' },
-            'TS-86': { name: 'Rojo Puro Brillante', color: '#FF0000' },
-            'TS-87': { name: 'Gris Titanio', color: '#B7B7B7' },
-            'TS-88': { name: 'Plateado Titanio', color: '#B7B7B7' },
-            'TS-89': { name: 'Azul Perla', color: '#4682B4' },
-            'TS-90': { name: 'Marrón Mate JGSDF', color: '#5C4033' },
-            'TS-91': { name: 'Verde Oscuro JGSDF', color: '#2E4A2E' },
-            'TS-92': { name: 'Naranja Metálico', color: '#FFA500' },
-            'TS-93': { name: 'Azul Puro Brillante', color: '#0000FF' },
-            'TS-94': { name: 'Gris Metálico', color: '#6A6A6A' },
-            'TS-95': { name: 'Rojo Metálico Puro', color: '#8B0000' },
-            'TS-96': { name: 'Naranja Fluorescente', color: '#FF4500' },
-            'TS-97': { name: 'Amarillo Perla', color: '#FFFF99' },
-            'TS-98': { name: 'Amarillo Puro Brillante', color: '#FFFF00' },
-            'TS-99': { name: 'Marrón IJN Mate', color: '#5C4033' },
-            'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
-
-};
+const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+const modelsDiv = document.getElementById("models");
 
 let currentModelId = null;
-let currentPaints = {};
+let currentPaints = [];
 
-onAuthStateChanged(auth, user => {
-  if (user) {
-    login.classList.add("hidden");
-    app.classList.remove("hidden");
-    loadModels();
+const PAINTS = {
+  "X-1":{name:"Negro",color:"#000000"},
+  "X-2":{name:"Blanco",color:"#FFFFFF"},
+  "XF-16":{name:"Aluminio Mate",color:"#A9A9A9"},
+  "LP-21":{name:"Rojo Italiano",color:"#8B0000"},
+  "TS-14":{name:"Negro",color:"#000000"}
+};
+
+function normalize(code){
+  code = code.toUpperCase().replace(/\s+/g,"");
+  if(!code.includes("-")){
+    code = code.replace(/([A-Z]+)(\d+)/,"$1-$2");
   }
+  return code;
+}
+
+onAuthStateChanged(auth, user=>{
+  loginDiv.classList.toggle("hidden", !!user);
+  appDiv.classList.toggle("hidden", !user);
+  if(user) loadModels();
 });
 
-window.login = () =>
-  signInWithEmailAndPassword(auth,email.value,password.value);
+document.getElementById("loginBtn").onclick = ()=>{
+  signInWithEmailAndPassword(auth,
+    email.value,
+    password.value
+  );
+};
 
-window.addModel = async () => {
+document.getElementById("logoutBtn").onclick = ()=> signOut(auth);
+
+document.getElementById("addModelBtn").onclick = async ()=>{
   await addDoc(collection(db,"models"),{
-    name:newModelName.value,
-    paints:{}
+    name:"Nuevo modelo",
+    paints:[]
   });
-  newModelName.value="";
   loadModels();
 };
 
 async function loadModels(){
-  models.innerHTML="";
+  modelsDiv.innerHTML="";
   const snap = await getDocs(collection(db,"models"));
   snap.forEach(d=>{
     const m=d.data();
     const div=document.createElement("div");
-    div.className="model";
+    div.className="card";
     div.innerHTML=`
-      <b>${m.name}</b><br>
-      <button onclick="openPaintModal('${d.id}',${JSON.stringify(m.paints||{})})">Pinturas</button>
-      <button onclick="deleteModel('${d.id}')">Eliminar</button>
+      <strong>${m.name}</strong><br><br>
+      <button onclick="openPaintModal('${d.id}')">Pinturas</button>
+      <button class="danger" onclick="deleteModel('${d.id}')">Eliminar</button>
     `;
-    models.appendChild(div);
+    modelsDiv.appendChild(div);
   });
 }
 
-window.deleteModel = async id => {
+window.deleteModel=async(id)=>{
   await deleteDoc(doc(db,"models",id));
   loadModels();
 };
 
-window.openPaintModal = (id, paints) => {
+window.openPaintModal=async(id)=>{
   currentModelId=id;
-  currentPaints={...paints};
+  const snap=await getDocs(collection(db,"models"));
+  snap.forEach(d=>{
+    if(d.id===id) currentPaints=d.data().paints||[];
+  });
+  renderPaints();
   paintModal.classList.remove("hidden");
-  renderPaintList();
 };
 
-function normalize(code){
-  code=code.toUpperCase().replace(/[^A-Z0-9]/g,"");
-  const m=code.match(/(X|XF|LP|TS)(\d+)/);
-  return m?`${m[1]}-${m[2]}`:null;
-}
-
-function renderPaintList(){
+function renderPaints(){
   paintList.innerHTML="";
-  Object.keys(currentPaints).forEach(code=>{
-    const p=PAINTS[code];
-    if(!p)return;
+  currentPaints.forEach(p=>{
+    const d=PAINTS[p];
     const row=document.createElement("div");
     row.className="paint-row";
     row.innerHTML=`
-      <button class="paint-remove" onclick="removePaint('${code}')">X</button>
-      <div class="paint-color" style="background:${p.color}"></div>
-      <b>${code}</b> ${p.name}
+      <button class="danger" onclick="removePaint('${p}')">X</button>
+      <div class="paint-color" style="background:${d.color}"></div>
+      ${p} - ${d.name}
     `;
     paintList.appendChild(row);
   });
 }
 
-window.removePaint = code => {
-  delete currentPaints[code];
-  renderPaintList();
+window.removePaint=(p)=>{
+  currentPaints=currentPaints.filter(x=>x!==p);
+  renderPaints();
 };
 
-window.savePaints = async () => {
-  paintInput.value.split(",").forEach(raw=>{
-    const c=normalize(raw.trim());
-    if(c && PAINTS[c]) currentPaints[c]=true;
+window.savePaints=async()=>{
+  if(!currentModelId) return;
+  const values=paintInput.value.split(",");
+  values.forEach(v=>{
+    const n=normalize(v);
+    if(PAINTS[n] && !currentPaints.includes(n)){
+      currentPaints.push(n);
+    }
   });
-  await setDoc(doc(db,"models",currentModelId),{paints:currentPaints},{merge:true});
+  await updateDoc(doc(db,"models",currentModelId),{
+    paints:currentPaints
+  });
   paintInput.value="";
-  renderPaintList();
+  renderPaints();
 };
 
-window.closePaintModal = () => {
+window.closePaintModal=()=>{
   paintModal.classList.add("hidden");
-  loadModels();
+  currentModelId=null;
 };
 </script>
 </body>
