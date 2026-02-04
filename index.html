@@ -7,6 +7,7 @@
 <style>
 :root {
 --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8;
+--min-card-width: 260px;
 }
 body.light {
 --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb;
@@ -37,7 +38,7 @@ padding:20px; border-radius:12px;
 
 #grid {
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(var(--min-card-width),1fr));
 gap:16px; padding:20px;
 }
 
@@ -73,6 +74,80 @@ display:none; align-items:center; justify-content:center;
 background:var(--card); padding:20px; width:340px;
 border-radius:12px; display:flex; flex-direction:column; gap:10px;
 }
+
+/* Estilos para modal de pinturas */
+#paintsModal .modal-content {
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+#paintsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 16px 0;
+}
+
+.paints-column {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.paints-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+}
+
+.paints-item button {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 6px;
+}
+
+.paints-color {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+#paintsModal input#newPaints {
+  margin-bottom: 16px;
+}
+
+/* Estilos para modal de configuración */
+#configModal .modal-content {
+  width: 400px;
+}
+
+#configModal h4 {
+  margin: 16px 0 8px;
+  font-size: 18px;
+}
+
+#configModal label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+#configModal input[type="number"] {
+  width: 80px;
+}
 </style>
 </head>
 
@@ -92,7 +167,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <div id="app">
 <header>
 📦 Maikman Models
-<button onclick="toggleTheme()">🌓</button>
+<button onclick="openConfigModal()">⚙️</button>
 </header>
 
 <div id="controls">
@@ -124,11 +199,34 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <!-- MODAL PINTURAS -->
 <div id="paintsModal" class="modal">
 <div class="modal-content">
-<h3>Pinturas Tamiya</h3>
-<input id="newPaints" placeholder="X-1, XF2, ts-14...">
+<h3>Pinturas Tamiya para <span id="currentModelName"></span></h3>
+<input id="newPaints" placeholder="X-1, XF-16, ts-14, LP21... (separados por coma)">
 <div id="paintsList"></div>
-<button onclick="savePaints()">Guardar</button>
-<button onclick="closePaintsModal()">Cerrar</button>
+<div style="display:flex; gap:10px; margin-top:16px;">
+  <button onclick="savePaints()" style="flex:1;">Guardar</button>
+  <button onclick="closePaintsModal()" style="flex:1;">Cerrar</button>
+</div>
+</div>
+</div>
+
+<!-- MODAL CONFIGURACIÓN -->
+<div id="configModal" class="modal">
+<div class="modal-content">
+<h3>Configuración</h3>
+<div>
+<h4>Tema</h4>
+<button onclick="toggleTheme()">🌓 Cambiar tema</button>
+</div>
+<div>
+<h4>Modelos</h4>
+<label>Tarjetas por fila (aprox.): <input id="configCardsPerRow" type="number" min="1" max="8" step="1"></label>
+</div>
+<div>
+<h4>Pinturas</h4>
+<label>Items por columna: <input id="configItemsPerColumn" type="number" min="5" max="30" step="1"></label>
+</div>
+<button onclick="saveConfig()">Guardar</button>
+<button onclick="closeConfigModal()">Cancelar</button>
 </div>
 </div>
 
@@ -156,12 +254,17 @@ const loginBox = document.getElementById("login");
 const appBox = document.getElementById("app");
 const modal = document.getElementById("modal");
 const paintsModal = document.getElementById("paintsModal");
+const configModal = document.getElementById("configModal");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
 
 let modelos = [];
 let editId = null;
 let currentModel = null;
+let itemsPerColumn = parseInt(localStorage.getItem('itemsPerColumn')) || 10;
+let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
+
+applyConfig();
 
 // Diccionario de pinturas (ampliar según sea necesario)
 const paintsDict = {
@@ -438,7 +541,6 @@ const paintsDict = {
             'TS-98': { name: 'Amarillo Puro Brillante', color: '#FFFF00' },
             'TS-99': { name: 'Marrón IJN Mate', color: '#5C4033' },
             'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
-
 };
 
 /* LOGIN */
@@ -455,9 +557,39 @@ if(user) cargarModelos();
 });
 
 /* UI */
-window.toggleTheme = () => document.body.classList.toggle("light");
+window.toggleTheme = () => {
+  document.body.classList.toggle("light");
+  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+};
+
 window.verPassword = () =>
 password.type = password.type==="password"?"text":"password";
+
+/* CONFIG */
+function applyConfig() {
+  document.documentElement.style.setProperty('--min-card-width', `calc(100% / ${cardsPerRow} - 32px)`);
+  const theme = localStorage.getItem('theme') || 'dark';
+  if (theme === 'light') document.body.classList.add('light');
+  else document.body.classList.remove('light');
+}
+
+window.openConfigModal = () => {
+  configModal.style.display = 'flex';
+  document.getElementById('configCardsPerRow').value = cardsPerRow;
+  document.getElementById('configItemsPerColumn').value = itemsPerColumn;
+};
+
+window.closeConfigModal = () => configModal.style.display = 'none';
+
+window.saveConfig = () => {
+  cardsPerRow = parseInt(document.getElementById('configCardsPerRow').value) || 4;
+  itemsPerColumn = parseInt(document.getElementById('configItemsPerColumn').value) || 10;
+  localStorage.setItem('cardsPerRow', cardsPerRow);
+  localStorage.setItem('itemsPerColumn', itemsPerColumn);
+  applyConfig();
+  closeConfigModal();
+  pintar(); // Refrescar grid
+};
 
 /* MODAL MODELO */
 window.openModal = m=>{
@@ -474,8 +606,10 @@ window.closeModal = ()=> modal.style.display="none";
 
 /* MODAL PINTURAS */
 window.openPaintsModal = m => {
-  currentModel = {...m}; // Copia para editar localmente
+  currentModel = {...m};
   paintsModal.style.display = "flex";
+  document.getElementById("currentModelName").innerText = 
+    (m.codigo ? m.codigo + " – " : "") + (m.modelo || "Modelo sin nombre");
   renderPaintsList();
 };
 
@@ -484,17 +618,42 @@ window.closePaintsModal = () => paintsModal.style.display = "none";
 function renderPaintsList() {
   const list = document.getElementById("paintsList");
   list.innerHTML = "";
-  (currentModel.paints || []).forEach((code, index) => {
-    const p = paintsDict[code];
-    if (p) {
-      list.innerHTML += `
-        <div style="display:flex; align-items:center; gap:10px;">
-          <button style="background:none; border:none; color:red; cursor:pointer;" onclick="deletePaint(${index})">X</button>
-          <div style="width:20px; height:20px; background:${p.color}; border:1px solid #ccc;"></div>
-          ${code} ${p.name}
-        </div>
+
+  const paints = currentModel.paints || [];
+  if (paints.length === 0) {
+    list.innerHTML = '<p style="color:#9ca3af;text-align:center;">Aún no hay pinturas añadidas</p>';
+    return;
+  }
+
+  // Dividimos en grupos de itemsPerColumn
+  const columns = [];
+  for (let i = 0; i < paints.length; i += itemsPerColumn) {
+    columns.push(paints.slice(i, i + itemsPerColumn));
+  }
+
+  columns.forEach(columnPaints => {
+    const colDiv = document.createElement("div");
+    colDiv.className = "paints-column";
+
+    columnPaints.forEach((code, relativeIndex) => {
+      const globalIndex = columns.indexOf(columnPaints) * itemsPerColumn + relativeIndex;
+      const p = paintsDict[code];
+      if (!p) return;
+
+      const item = document.createElement("div");
+      item.className = "paints-item";
+
+      item.innerHTML = `
+        <button onclick="deletePaint(${globalIndex})">X</button>
+        <div class="paints-color" style="background:${p.color};"></div>
+        <span style="font-family:monospace;">${code}</span>
+        <span>${p.name}</span>
       `;
-    }
+
+      colDiv.appendChild(item);
+    });
+
+    list.appendChild(colDiv);
   });
 }
 
@@ -597,7 +756,6 @@ else await addDoc(collection(db,"modelos"),data);
 closeModal(); cargarModelos();
 };
 
-window.editar = m=>openModal(m);
 window.borrar = async id=>{
 if(confirm("¿Borrar modelo?")){
 await deleteDoc(doc(db,"modelos",id));
