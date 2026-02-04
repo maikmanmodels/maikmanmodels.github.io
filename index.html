@@ -6,29 +6,29 @@
 
 <style>
 :root {
-  --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8;
+--bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8;
 }
 body.light {
-  --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb;
+--bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb;
 }
 * { box-sizing:border-box; transition:.3s; }
 body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); }
 
 header {
-  padding:20px; display:flex; justify-content:space-between;
-  align-items:center; font-size:22px; font-weight:bold;
+padding:20px; display:flex; justify-content:space-between;
+align-items:center; font-size:22px; font-weight:bold;
 }
 
 button {
-  background:var(--accent); border:none; padding:8px 14px;
-  border-radius:6px; cursor:pointer; color:white;
+background:var(--accent); border:none; padding:8px 14px;
+border-radius:6px; cursor:pointer; color:white;
 }
 
 input { padding:8px; border-radius:6px; border:none; width:100%; }
 
 #login {
-  max-width:320px; margin:80px auto; background:var(--card);
-  padding:20px; border-radius:12px;
+max-width:320px; margin:80px auto; background:var(--card);
+padding:20px; border-radius:12px;
 }
 
 #app { display:none; }
@@ -36,42 +36,42 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 #controls { display:flex; gap:10px; padding:20px; }
 
 #grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:16px; padding:20px;
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:16px; padding:20px;
 }
 
 .card {
-  background:var(--card); border-radius:12px; padding:12px;
+background:var(--card); border-radius:12px; padding:12px;
 }
 
 .card img {
-  width:100%; height:200px; object-fit:cover; border-radius:8px;
+width:100%; height:200px; object-fit:cover; border-radius:8px;
 }
 
 .badge {
-  position:absolute;
-  bottom:8px;
-  right:8px;
-  background:#dc2626;
-  color:white;
-  border-radius:50%;
-  width:28px;
-  height:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
+position:absolute;
+bottom:8px;
+right:8px;
+background:#dc2626;
+color:white;
+border-radius:50%;
+width:28px;
+height:28px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
 }
 
 .modal {
-  position:fixed; inset:0; background:rgba(0,0,0,.6);
-  display:none; align-items:center; justify-content:center;
+position:fixed; inset:0; background:rgba(0,0,0,.6);
+display:none; align-items:center; justify-content:center;
 }
 
 .modal-content {
-  background:var(--card); padding:20px; width:340px;
-  border-radius:12px; display:flex; flex-direction:column; gap:10px;
+background:var(--card); padding:20px; width:340px;
+border-radius:12px; display:flex; flex-direction:column; gap:10px;
 }
 </style>
 </head>
@@ -80,45 +80,56 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 
 <!-- LOGIN -->
 <div id="login">
-  <h2>Acceso</h2>
-  <input id="email" type="email" placeholder="Email"><br><br>
-  <input id="password" type="password" placeholder="Contraseña">
-  <label><input type="checkbox" onclick="verPassword()"> Ver contraseña</label><br><br>
-  <button onclick="login()">Entrar</button>
-  <p id="error" style="color:red;"></p>
+<h2>Acceso</h2>
+<input id="email" type="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Contraseña">
+<label><input type="checkbox" onclick="verPassword()"> Ver contraseña</label><br><br>
+<button onclick="login()">Entrar</button>
+<p id="error" style="color:red;"></p>
 </div>
 
 <!-- APP -->
 <div id="app">
 <header>
-  📦 Maikman Models
-  <button onclick="toggleTheme()">🌓</button>
+📦 Maikman Models
+<button onclick="toggleTheme()">🌓</button>
 </header>
 
 <div id="controls">
-  <input id="search" placeholder="Buscar por código, fabricante o modelo">
-  <button onclick="openModal()">➕ Añadir nuevo modelo</button>
-  <button onclick="logout()">Salir</button>
+<input id="search" placeholder="Buscar por código, fabricante o modelo">
+<button onclick="openModal()">➕ Añadir nuevo modelo</button>
+<button onclick="logout()">Salir</button>
 </div>
 
 <div id="grid"></div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL MODELO -->
 <div id="modal" class="modal">
-  <div class="modal-content">
-    <h3 id="modalTitle">Nuevo modelo</h3>
-    <input id="codigo" placeholder="Código">
-    <input id="fabricante" placeholder="Fabricante">
-    <input id="modelo" placeholder="Modelo">
+<div class="modal-content">
+<h3 id="modalTitle">Nuevo modelo</h3>
+<input id="codigo" placeholder="Código">
+<input id="fabricante" placeholder="Fabricante">
+<input id="modelo" placeholder="Modelo">
 
-    <b>Imagen</b>
-    <input id="fotoURL" placeholder="URL de la imagen (opcional)">
-    <input type="file" id="fotoFile" accept="image/*">
+<b>Imagen</b>
+<input id="fotoURL" placeholder="URL de la imagen (opcional)">
+<input type="file" id="fotoFile" accept="image/*">
 
-    <button onclick="guardarModelo()">Guardar</button>
-    <button onclick="closeModal()">Cancelar</button>
-  </div>
+<button onclick="guardarModelo()">Guardar</button>
+<button onclick="closeModal()">Cancelar</button>
+</div>
+</div>
+
+<!-- MODAL PINTURAS -->
+<div id="paintsModal" class="modal">
+<div class="modal-content">
+<h3>Pinturas Tamiya</h3>
+<input id="newPaints" placeholder="X-1, XF2, ts-14...">
+<div id="paintsList"></div>
+<button onclick="savePaints()">Guardar</button>
+<button onclick="closePaintsModal()">Cerrar</button>
+</div>
 </div>
 
 <script type="module">
@@ -128,12 +139,12 @@ import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-  authDomain:"maikmanmodelsstock.firebaseapp.com",
-  projectId:"maikmanmodelsstock",
-  storageBucket:"maikmanmodelsstock.appspot.com",
-  messagingSenderId:"871520809912",
-  appId:"1:871520809912:web:4042f15ef200832a95d54d"
+apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+authDomain:"maikmanmodelsstock.firebaseapp.com",
+projectId:"maikmanmodelsstock",
+storageBucket:"maikmanmodelsstock.appspot.com",
+messagingSenderId:"871520809912",
+appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -144,119 +155,194 @@ const storage = getStorage(appFB);
 const loginBox = document.getElementById("login");
 const appBox = document.getElementById("app");
 const modal = document.getElementById("modal");
+const paintsModal = document.getElementById("paintsModal");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
 
 let modelos = [];
 let editId = null;
+let currentModel = null;
+
+// Diccionario de pinturas (ampliar según sea necesario)
+const paintsDict = {
+  'X-1': { name: 'Negro', color: '#000000' },
+  'X-2': { name: 'Blanco', color: '#FFFFFF' },
+  'X-3': { name: 'Azul Real', color: '#003087' },
+  'XF-16': { name: 'Aluminio Mate', color: '#A9A9A9' },
+  'XF-17': { name: 'Azul Marino Mate', color: '#2C3E50' },
+  'XF-18': { name: 'Gris Medio Mate', color: '#6B7280' },
+  'LP-21': { name: 'Rojo Italiano', color: '#B22222' },
+  // Añadir más pinturas aquí con nombres en español y hex aproximados
+  'TS-14': { name: 'Negro', color: '#1F1F1F' },
+  'LP-1': { name: 'Negro', color: '#000000' },
+  'LP-2': { name: 'Blanco', color: '#FFFFFF' },
+  'LP-3': { name: 'Negro Mate', color: '#000000' },
+  'LP-4': { name: 'Blanco Mate', color: '#FFFFFF' },
+  // ... (añadir el resto del listado traducido al español)
+};
 
 /* LOGIN */
 window.login = () =>
-  signInWithEmailAndPassword(auth,email.value,password.value)
-  .catch(()=>error.innerText="Credenciales incorrectas");
+signInWithEmailAndPassword(auth,email.value,password.value)
+.catch(()=>error.innerText="Credenciales incorrectas");
 
 window.logout = () => signOut(auth);
 
 onAuthStateChanged(auth,user=>{
-  loginBox.style.display = user ? "none" : "block";
-  appBox.style.display = user ? "block" : "none";
-  if(user) cargarModelos();
+loginBox.style.display = user ? "none" : "block";
+appBox.style.display = user ? "block" : "none";
+if(user) cargarModelos();
 });
 
 /* UI */
 window.toggleTheme = () => document.body.classList.toggle("light");
 window.verPassword = () =>
-  password.type = password.type==="password"?"text":"password";
+password.type = password.type==="password"?"text":"password";
 
-/* MODAL */
+/* MODAL MODELO */
 window.openModal = m=>{
-  modal.style.display="flex";
-  modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
-  codigo.value = m?.codigo || "";
-  fabricante.value = m?.fabricante || "";
-  modelo.value = m?.modelo || "";
-  fotoURL.value = "";
-  fotoFile.value = "";
-  editId = m?.id || null;
+modal.style.display="flex";
+modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
+codigo.value = m?.codigo || "";
+fabricante.value = m?.fabricante || "";
+modelo.value = m?.modelo || "";
+fotoURL.value = "";
+fotoFile.value = "";
+editId = m?.id || null;
 };
 window.closeModal = ()=> modal.style.display="none";
 
-/* DATA */
-async function cargarModelos(){
-  modelos=[];
-  const snap=await getDocs(collection(db,"modelos"));
-  snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
-  pintar();
-}
+/* MODAL PINTURAS */
+window.openPaintsModal = m => {
+  currentModel = {...m}; // Copia para editar localmente
+  paintsModal.style.display = "flex";
+  renderPaintsList();
+};
 
-function pintar(){
-  const q=search.value.toLowerCase();
-  grid.innerHTML="";
-  modelos.filter(m =>
-    (m.codigo||"").toLowerCase().includes(q) ||
-    (m.fabricante||"").toLowerCase().includes(q) ||
-    (m.modelo||"").toLowerCase().includes(q)
-  ).forEach(m=>{
-    grid.innerHTML+=`
-    <div class="card">
-      <div style="position:relative">
-        <img src="${m.foto||''}">
-        ${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
-      </div>
-      <b>${m.modelo||"Sin nombre"}</b><br>
-      <small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
-      <button onclick='editar(${JSON.stringify(m)})'>✏️</button>
-      <button onclick="borrar('${m.id}')">🗑️</button>
-    </div>`;
+window.closePaintsModal = () => paintsModal.style.display = "none";
+
+function renderPaintsList() {
+  const list = document.getElementById("paintsList");
+  list.innerHTML = "";
+  (currentModel.paints || []).forEach((code, index) => {
+    const p = paintsDict[code];
+    if (p) {
+      list.innerHTML += `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button style="background:none; border:none; color:red; cursor:pointer;" onclick="deletePaint(${index})">X</button>
+          <div style="width:20px; height:20px; background:${p.color}; border:1px solid #ccc;"></div>
+          ${code} ${p.name}
+        </div>
+      `;
+    }
   });
 }
 
-/* SAVE */
+window.deletePaint = index => {
+  currentModel.paints.splice(index, 1);
+  renderPaintsList();
+};
+
+window.savePaints = async () => {
+  const input = document.getElementById("newPaints").value;
+  if (input) {
+    const newCodes = input.split(',').map(normalizeCode).filter(code => code && paintsDict[code] && !(currentModel.paints || []).includes(code));
+    currentModel.paints = [...(currentModel.paints || []), ...newCodes];
+    document.getElementById("newPaints").value = "";
+    renderPaintsList();
+  }
+  await updateDoc(doc(db, "modelos", currentModel.id), { paints: currentModel.paints });
+  closePaintsModal();
+  cargarModelos();
+};
+
+function normalizeCode(c) {
+  if (!c) return '';
+  c = c.trim().toUpperCase().replace(/ /g, '');
+  if (!c.includes('-')) {
+    const match = c.match(/^([A-Z]+)([\d]+)/);
+    if (match) c = match[1] + '-' + match[2];
+  }
+  return c;
+}
+
+/* DATA */
+async function cargarModelos(){
+modelos=[];
+const snap=await getDocs(collection(db,"modelos"));
+snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
+pintar();
+}
+
+function pintar(){
+const q=search.value.toLowerCase();
+grid.innerHTML="";
+modelos.filter(m =>
+(m.codigo||"").toLowerCase().includes(q) ||
+(m.fabricante||"").toLowerCase().includes(q) ||
+(m.modelo||"").toLowerCase().includes(q)
+).forEach(m=>{
+grid.innerHTML+=
+`<div class="card">
+<div style="position:relative">
+<img src="${m.foto||''}">
+${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
+</div>
+<b>${m.modelo||"Sin nombre"}</b><br>
+<small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
+<button onclick='openModal(${JSON.stringify(m)})'>✏️</button>
+<button onclick="borrar('${m.id}')">🗑️</button>
+<button onclick='openPaintsModal(${JSON.stringify(m)})'>🎨</button>
+</div>`;
+});
+}
+
+/* SAVE MODELO */
 window.guardarModelo = async ()=>{
-  const existente = modelos.find(m =>
-    (m.codigo && m.codigo === codigo.value) ||
-    (
-      m.fabricante.toLowerCase() === fabricante.value.toLowerCase() &&
-      m.modelo.toLowerCase() === modelo.value.toLowerCase()
-    )
-  );
+const existente = modelos.find(m =>
+(m.codigo && m.codigo === codigo.value) ||
+(
+m.fabricante.toLowerCase() === fabricante.value.toLowerCase() &&
+m.modelo.toLowerCase() === modelo.value.toLowerCase()
+)
+);
 
-  if(existente && !editId){
-    if(!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
-    await updateDoc(doc(db,"modelos",existente.id),{
-      duplicados:(existente.duplicados||1)+1
-    });
-    closeModal(); cargarModelos(); return;
-  }
+if(existente && !editId){
+if(!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
+await updateDoc(doc(db,"modelos",existente.id),{
+duplicados:(existente.duplicados||1)+1
+});
+closeModal(); cargarModelos(); return;
+}
 
-  let fotoFinal="";
-  if(fotoURL.value) fotoFinal=fotoURL.value;
-  else if(fotoFile.files[0]){
-    const r=ref(storage,"modelos/"+Date.now());
-    await uploadBytes(r,fotoFile.files[0]);
-    fotoFinal=await getDownloadURL(r);
-  }
+let fotoFinal="";
+if(fotoURL.value) fotoFinal=fotoURL.value;
+else if(fotoFile.files[0]){
+const r=ref(storage,"modelos/"+Date.now());
+await uploadBytes(r,fotoFile.files[0]);
+fotoFinal=await getDownloadURL(r);
+}
 
-  const data={
-    codigo:codigo.value,
-    fabricante:fabricante.value,
-    modelo:modelo.value,
-    foto:fotoFinal,
-    duplicados:1
-  };
+const data={
+codigo:codigo.value,
+fabricante:fabricante.value,
+modelo:modelo.value,
+foto:fotoFinal,
+duplicados:1
+};
 
-  if(editId) await updateDoc(doc(db,"modelos",editId),data);
-  else await addDoc(collection(db,"modelos"),data);
+if(editId) await updateDoc(doc(db,"modelos",editId),data);
+else await addDoc(collection(db,"modelos"),data);
 
-  closeModal(); cargarModelos();
+closeModal(); cargarModelos();
 };
 
 window.editar = m=>openModal(m);
 window.borrar = async id=>{
-  if(confirm("¿Borrar modelo?")){
-    await deleteDoc(doc(db,"modelos",id));
-    cargarModelos();
-  }
+if(confirm("¿Borrar modelo?")){
+await deleteDoc(doc(db,"modelos",id));
+cargarModelos();
+}
 };
 
 search.addEventListener("input",pintar);
