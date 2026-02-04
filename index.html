@@ -2,120 +2,86 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Maikman Models</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maikman Models Stock</title>
 
 <style>
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background: #2f4b6c;
-  color: white;
+  background:#f4f4f4;
+  margin:0;
+  padding:20px;
 }
-.hidden { display: none; }
 
-header {
-  padding: 10px;
-  background: #1f354d;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+.hidden { display:none; }
 
 button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  background: #3bc0ff;
-  color: black;
-  cursor: pointer;
-}
-button.danger { background: #ff4b4b; }
-
-#models {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 10px;
-  padding: 10px;
+  margin:2px;
+  padding:6px 10px;
+  cursor:pointer;
 }
 
-.card {
-  background: #1f354d;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.paint-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0;
-}
-
-.paint-color {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 1px solid #000;
+#models div {
+  background:white;
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:6px;
 }
 
 .modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
+
 .modal-content {
-  background: #2f4b6c;
-  padding: 15px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 400px;
+  background:white;
+  padding:20px;
+  width:400px;
+  border-radius:8px;
 }
 </style>
 </head>
 
 <body>
 
+<h1>Maikman Models</h1>
+
 <!-- LOGIN -->
 <div id="login">
-  <h2>Acceso</h2>
-  <input id="email" placeholder="Email"><br><br>
-  <input id="password" type="password" placeholder="Contraseña"><br><br>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
   <button id="loginBtn">Entrar</button>
 </div>
 
 <!-- APP -->
 <div id="app" class="hidden">
-  <header>
-    <strong>Maikman Models</strong>
-    <button id="logoutBtn">Salir</button>
-  </header>
-
-  <div style="padding:10px">
-    <button id="addModelBtn">Añadir modelo</button>
-  </div>
+  <h2>Modelos</h2>
+  <input id="modelName" placeholder="Nuevo modelo">
+  <button onclick="addModel()">Añadir modelo</button>
 
   <div id="models"></div>
 </div>
 
 <!-- MODAL PINTURAS -->
-<div id="paintModal" class="modal hidden">
+<div id="paintModal" class="modal">
   <div class="modal-content">
     <h3>Pinturas Tamiya</h3>
-    <input id="paintInput" placeholder="X-1, XF16, LP-21...">
-    <div id="paintList"></div><br>
-    <button id="savePaintsBtn">Guardar</button>
+    <p>Ej: x1, xf-3, lp5, ts13</p>
+    <textarea id="paintInput" style="width:100%;height:80px;"></textarea>
+    <br><br>
+    <button onclick="savePaints()">Guardar</button>
     <button onclick="closePaintModal()">Cerrar</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
@@ -126,127 +92,100 @@ const firebaseConfig = {
   appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
-const appFB = initializeApp(firebaseConfig);
-const auth = getAuth(appFB);
-const db = getFirestore(appFB);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const loginDiv = document.getElementById("login");
 const appDiv = document.getElementById("app");
 const modelsDiv = document.getElementById("models");
 
-let currentModelId = null;
-let currentPaints = [];
+let currentPaintModelId = null;
 
-const PAINTS = {
-  "X-1":{name:"Negro",color:"#000000"},
-  "X-2":{name:"Blanco",color:"#FFFFFF"},
-  "XF-16":{name:"Aluminio Mate",color:"#A9A9A9"},
-  "LP-21":{name:"Rojo Italiano",color:"#8B0000"},
-  "TS-14":{name:"Negro",color:"#000000"}
-};
-
-function normalize(code){
-  code = code.toUpperCase().replace(/\s+/g,"");
-  if(!code.includes("-")){
-    code = code.replace(/([A-Z]+)(\d+)/,"$1-$2");
-  }
-  return code;
-}
-
-onAuthStateChanged(auth, user=>{
-  loginDiv.classList.toggle("hidden", !!user);
-  appDiv.classList.toggle("hidden", !user);
-  if(user) loadModels();
-});
-
-document.getElementById("loginBtn").onclick = ()=>{
-  signInWithEmailAndPassword(auth,
+document.getElementById("loginBtn").onclick = () => {
+  signInWithEmailAndPassword(
+    auth,
     email.value,
     password.value
   );
 };
 
-document.getElementById("logoutBtn").onclick = ()=> signOut(auth);
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginDiv.classList.add("hidden");
+    appDiv.classList.remove("hidden");
+    loadModels();
+  }
+});
 
-document.getElementById("addModelBtn").onclick = async ()=>{
-  await addDoc(collection(db,"models"),{
-    name:"Nuevo modelo",
-    paints:[]
-  });
-  loadModels();
-};
-
-async function loadModels(){
-  modelsDiv.innerHTML="";
+async function loadModels() {
+  modelsDiv.innerHTML = "";
   const snap = await getDocs(collection(db,"models"));
-  snap.forEach(d=>{
-    const m=d.data();
-    const div=document.createElement("div");
-    div.className="card";
-    div.innerHTML=`
-      <strong>${m.name}</strong><br><br>
-      <button onclick="openPaintModal('${d.id}')">Pinturas</button>
-      <button class="danger" onclick="deleteModel('${d.id}')">Eliminar</button>
+
+  snap.forEach(d => {
+    const m = d.data();
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <b>${m.name}</b><br>
+      Pinturas: ${(m.paints || []).join(", ") || "—"}<br>
+      <button onclick="openPaintModal('${d.id}', '${(m.paints||[]).join(",")}')">🎨 Pinturas</button>
+      <button onclick="deleteModel('${d.id}')">❌</button>
     `;
+
     modelsDiv.appendChild(div);
   });
 }
 
-window.deleteModel=async(id)=>{
+window.addModel = async () => {
+  if (!modelName.value) return;
+  await addDoc(collection(db,"models"), {
+    name: modelName.value,
+    paints:[]
+  });
+  modelName.value="";
+  loadModels();
+};
+
+window.deleteModel = async id => {
   await deleteDoc(doc(db,"models",id));
   loadModels();
 };
 
-window.openPaintModal=async(id)=>{
-  currentModelId=id;
-  const snap=await getDocs(collection(db,"models"));
-  snap.forEach(d=>{
-    if(d.id===id) currentPaints=d.data().paints||[];
-  });
-  renderPaints();
-  paintModal.classList.remove("hidden");
+window.openPaintModal = (id, paints) => {
+  currentPaintModelId = id;
+  paintInput.value = paints;
+  paintModal.style.display = "flex";
 };
 
-function renderPaints(){
-  paintList.innerHTML="";
-  currentPaints.forEach(p=>{
-    const d=PAINTS[p];
-    const row=document.createElement("div");
-    row.className="paint-row";
-    row.innerHTML=`
-      <button class="danger" onclick="removePaint('${p}')">X</button>
-      <div class="paint-color" style="background:${d.color}"></div>
-      ${p} - ${d.name}
-    `;
-    paintList.appendChild(row);
-  });
+window.closePaintModal = () => {
+  paintModal.style.display = "none";
+  currentPaintModelId = null;
+};
+
+function normalizePaint(p) {
+  p = p.trim().toUpperCase().replace("-", "");
+  const m = p.match(/^(X|XF|LP|TS)(\d+)$/);
+  return m ? `${m[1]}-${m[2]}` : null;
 }
 
-window.removePaint=(p)=>{
-  currentPaints=currentPaints.filter(x=>x!==p);
-  renderPaints();
-};
+window.savePaints = async () => {
+  if (!currentPaintModelId) return;
 
-window.savePaints=async()=>{
-  if(!currentModelId) return;
-  const values=paintInput.value.split(",");
-  values.forEach(v=>{
-    const n=normalize(v);
-    if(PAINTS[n] && !currentPaints.includes(n)){
-      currentPaints.push(n);
-    }
-  });
-  await updateDoc(doc(db,"models",currentModelId),{
-    paints:currentPaints
-  });
-  paintInput.value="";
-  renderPaints();
-};
+  const raw = paintInput.value.split(",");
+  const normalized = [...new Set(
+    raw.map(normalizePaint).filter(Boolean)
+  )];
 
-window.closePaintModal=()=>{
-  paintModal.classList.add("hidden");
-  currentModelId=null;
+  await updateDoc(
+    doc(db,"models",currentPaintModelId),
+    { paints: normalized }
+  );
+
+  closePaintModal();
+  loadModels();
 };
 </script>
+
 </body>
 </html>
