@@ -203,7 +203,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <div id="paintsModal" class="modal">
 <div class="modal-content">
 <h3>Pinturas Tamiya para <span id="currentModelName"></span></h3>
-<input id="newPaints" placeholder="Ej: x-1, xf16, ts-14, lp-21 (separados por coma)">
+<input id="newPaints" placeholder="Ej: 9, h11, x-1, ts-14, lp21 (separados por coma)">
 <div id="paintsList"></div>
 <div style="display:flex; gap:12px; margin-top:20px;">
   <button onclick="savePaints()" style="flex:1; padding:12px;">Guardar cambios</button>
@@ -279,9 +279,39 @@ let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
 
 applyConfig();
 
-// Diccionario de pinturas (amplía según necesites)
+// Mapa Gunze H → Tamiya (basado en tablas estándar y tu imagen)
+const gunzeToTamiya = {
+  '1':  'X-2',   // H1 White
+  '2':  'X-1',   // H2 Black
+  '3':  'X-7',   // H3 Red
+  '4':  'X-8',   // H4 Yellow
+  '5':  'X-3',   // H5 Blue
+  '6':  'X-5',   // H6 Green
+  '7':  'X-9',   // H7 Brown
+  '8':  'X-11',  // H8 Silver
+  '9':  'X-12',  // H9 Gold
+  '10': 'XF-6',  // H10 Copper
+  '11': 'XF-2',  // H11 Flat White
+  '12': 'XF-1',  // H2 Black Matt
+  '13': 'XF-7',  // H3 Red Matt
+  '14': 'XF-4',  // H4 Orange Matt
+  '18': 'X-10',  // H18 Steel / Gun Metal
+  '25': 'X-14',  // H25 Sky Blue
+  '32': 'XF54',  // H32 Dark Gray
+  '51': 'XF-12', // H51 Light Gull Grey
+  '52': 'XF-53', // H52 Neutral Grey
+  '53': 'XF-53', // H53 Neutral Grey
+  '76': 'XF-84', // H76 Burnt Iron
+  '90': 'X-27',  // H90 Clear Red
+  '92': 'X-26',  // H92 Clear Orange
+  '93': 'X-23',  // H93 Clear Blue
+  '94': 'X-25',  // H94 Clear Green
+  '95': 'XF-19'  // H95 Smoke Grey
+};
+
+// Diccionario Tamiya ampliado
 const paintsDict = {
-               'X-1': { name: 'Negro', color: '#000000' },
+            'X-1': { name: 'Negro', color: '#000000' },
             'X-2': { name: 'Blanco', color: '#FFFFFF' },
             'X-3': { name: 'Azul Real', color: '#003087' },
             'X-4': { name: 'Azul', color: '#0055A4' },
@@ -609,7 +639,7 @@ window.saveConfig = () => {
 
   applyConfig();
   closeConfigModal();
-  pintar(); // refrescar visual de tarjetas
+  pintar();
 };
 
 /* MODAL MODELO */
@@ -665,10 +695,8 @@ function renderPaintsList() {
     return;
   }
 
-  // Ordenar
   const sortedPaints = sortPaints(paints);
 
-  // Limitar columnas visibles (pero todas las pinturas se guardan)
   const columnsToShow = Math.min(maxColumns, Math.ceil(sortedPaints.length / itemsPerColumn));
 
   const columns = [];
@@ -676,13 +704,12 @@ function renderPaintsList() {
     columns.push(sortedPaints.slice(i, i + itemsPerColumn));
   }
 
-  // Mostrar solo las primeras N columnas según config
   columns.slice(0, columnsToShow).forEach((columnPaints, colIdx) => {
     const colDiv = document.createElement("div");
     colDiv.className = "paints-column";
 
     columnPaints.forEach((code, relIdx) => {
-      const globalIndex = sortedPaints.indexOf(code); // Usar índice del array ordenado para borrar el correcto
+      const globalIndex = sortedPaints.indexOf(code);
       const p = paintsDict[code];
       if (!p) return;
 
@@ -702,7 +729,6 @@ function renderPaintsList() {
     list.appendChild(colDiv);
   });
 
-  // Si hay más columnas ocultas, indicarlo
   if (columns.length > columnsToShow) {
     const more = document.createElement("div");
     more.style.color = "#9ca3af";
@@ -729,7 +755,6 @@ window.savePaints = async () => {
 
   const input = document.getElementById("newPaints").value.trim();
   if (!input) {
-    // Si no hay nada nuevo, solo guardamos el estado actual (por si se borraron items)
     await updateDoc(doc(db, "modelos", currentModel.id), { 
       paints: currentModel.paints || [] 
     });
@@ -743,13 +768,11 @@ window.savePaints = async () => {
     .filter(code => {
       if (!code) return false;
       if (!paintsDict[code]) return false;
-      // Aseguramos que paints sea siempre array
       const existing = Array.isArray(currentModel.paints) ? currentModel.paints : [];
       return !existing.includes(code);
     });
 
   if (newCodes.length > 0) {
-    // Creamos una copia segura del array
     currentModel.paints = [
       ...(Array.isArray(currentModel.paints) ? currentModel.paints : []),
       ...newCodes
@@ -758,7 +781,6 @@ window.savePaints = async () => {
     renderPaintsList();
   }
 
-  // Siempre guardamos el array actual (puede haber borrados)
   await updateDoc(doc(db, "modelos", currentModel.id), { 
     paints: currentModel.paints || [] 
   });
@@ -769,11 +791,20 @@ window.savePaints = async () => {
 
 function normalizeCode(c) {
   if (!c) return '';
-  c = c.trim().toUpperCase().replace(/ /g, '');
+  c = c.trim().toUpperCase().replace(/ /g, '').replace(/^H/i, '');
+
+  // Si es solo número Gunze → convertir a Tamiya
+  if (/^\d+$/.test(c)) {
+    const tamiya = gunzeToTamiya[c];
+    if (tamiya) return tamiya;
+  }
+
+  // Normal Tamiya
   if (!c.includes('-')) {
     const match = c.match(/^([A-Z]+)([\d]+)/);
     if (match) c = match[1] + '-' + match[2];
   }
+
   return c;
 }
 
