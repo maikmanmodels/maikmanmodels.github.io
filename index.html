@@ -75,7 +75,6 @@ background:var(--card); padding:20px; width:340px;
 border-radius:12px; display:flex; flex-direction:column; gap:10px;
 }
 
-/* Pinturas modal */
 #paintsModal .modal-content {
   width: 90%;
   max-width: 1400px;
@@ -127,12 +126,6 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
   flex-shrink: 0;
 }
 
-#paintsModal input#newPaints {
-  margin-bottom: 20px;
-  font-size: 16px;
-}
-
-/* Config modal */
 #configModal .modal-content {
   width: 420px;
 }
@@ -271,13 +264,11 @@ let modelos = [];
 let editId = null;
 let currentModel = null;
 
-// Config persistente
 let itemsPerColumn = parseInt(localStorage.getItem('itemsPerColumn')) || 10;
 let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
 
 applyConfig();
 
-// Gunze → Tamiya (para conversión al añadir)
 const gunzeToTamiya = {
   '1': 'X-2', '2': 'X-1', '3': 'X-7', '5': 'X-3', '7': 'X-9',
   '8': 'X-11', '9': 'X-12', '10': 'XF-6', '11': 'XF-2', '18': 'X-10',
@@ -285,15 +276,13 @@ const gunzeToTamiya = {
   '90': 'X-27', '92': 'X-26', '93': 'X-23', '94': 'X-25', '95': 'XF-19'
 };
 
-// Tamiya → Gunze (para mostrar "Hxx / X-xx Nombre" si existe equivalente)
 const tamiyaToGunze = {};
 for (const [g, t] of Object.entries(gunzeToTamiya)) {
-  tamiyaToGunze[t] = g;  // ej: 'X-12' → '9'
+  tamiyaToGunze[t] = g;
 }
 
-// Diccionario Tamiya (con nombres en español)
 const paintsDict = {
-               'X-1': { name: 'Negro', color: '#000000' },
+            'X-1': { name: 'Negro', color: '#000000' },
             'X-2': { name: 'Blanco', color: '#FFFFFF' },
             'X-3': { name: 'Azul Real', color: '#003087' },
             'X-4': { name: 'Azul', color: '#0055A4' },
@@ -568,30 +557,6 @@ const paintsDict = {
             'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
 };
 
-/* LOGIN */
-window.login = () =>
-signInWithEmailAndPassword(auth,email.value,password.value)
-.catch(()=>error.innerText="Credenciales incorrectas");
-
-window.logout = () => signOut(auth);
-
-onAuthStateChanged(auth,user=>{
-loginBox.style.display = user ? "none" : "block";
-appBox.style.display = user ? "block" : "none";
-if(user) cargarModelos();
-});
-
-/* UI */
-window.toggleTheme = () => {
-  document.body.classList.toggle("light");
-  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
-  document.getElementById('currentTheme').innerText = document.body.classList.contains('light') ? 'Claro' : 'Oscuro';
-};
-
-window.verPassword = () =>
-password.type = password.type==="password"?"text":"password";
-
-/* CONFIG */
 function applyConfig() {
   document.documentElement.style.setProperty('--min-card-width', `calc((100% - 40px) / ${cardsPerRow} - 16px)`);
   const theme = localStorage.getItem('theme') || 'dark';
@@ -601,6 +566,31 @@ function applyConfig() {
   }
 }
 
+/* LOGIN */
+window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+  .catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
+
+window.logout = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  loginBox.style.display = user ? "none" : "block";
+  appBox.style.display = user ? "block" : "none";
+  if (user) cargarModelos();
+});
+
+/* UI */
+window.toggleTheme = () => {
+  document.body.classList.toggle("light");
+  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  document.getElementById('currentTheme').innerText = document.body.classList.contains('light') ? 'Claro' : 'Oscuro';
+};
+
+window.verPassword = () => {
+  const pw = document.getElementById('password');
+  pw.type = pw.type === "password" ? "text" : "password";
+};
+
+/* CONFIG */
 window.openConfigModal = () => {
   configModal.style.display = 'flex';
   document.getElementById('configCardsPerRow').value = cardsPerRow;
@@ -612,34 +602,29 @@ window.closeConfigModal = () => configModal.style.display = 'none';
 window.saveConfig = () => {
   cardsPerRow = Math.max(1, Math.min(8, parseInt(document.getElementById('configCardsPerRow').value) || 4));
   itemsPerColumn = Math.max(5, Math.min(30, parseInt(document.getElementById('configItemsPerColumn').value) || 10));
-
   localStorage.setItem('cardsPerRow', cardsPerRow);
   localStorage.setItem('itemsPerColumn', itemsPerColumn);
-
   applyConfig();
   closeConfigModal();
   pintar();
 };
 
 /* MODAL MODELO */
-window.openModal = m=>{
-modal.style.display="flex";
-modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
-codigo.value = m?.codigo || "";
-fabricante.value = m?.fabricante || "";
-modelo.value = m?.modelo || "";
-fotoURL.value = "";
-fotoFile.value = "";
-editId = m?.id || null;
+window.openModal = m => {
+  modal.style.display = "flex";
+  document.getElementById('modalTitle').innerText = m ? "Editar modelo" : "Nuevo modelo";
+  document.getElementById('codigo').value = m?.codigo || "";
+  document.getElementById('fabricante').value = m?.fabricante || "";
+  document.getElementById('modelo').value = m?.modelo || "";
+  document.getElementById('fotoURL').value = "";
+  document.getElementById('fotoFile').value = "";
+  editId = m?.id || null;
 };
-window.closeModal = ()=> modal.style.display="none";
+window.closeModal = () => modal.style.display = "none";
 
 /* MODAL PINTURAS */
 window.openPaintsModal = m => {
-  if (!m || !m.id) {
-    alert("Error: Modelo inválido");
-    return;
-  }
+  if (!m || !m.id) return alert("Error: Modelo inválido");
   currentModel = { ...m, paints: Array.isArray(m.paints) ? [...m.paints] : [] };
   paintsModal.style.display = "flex";
   document.getElementById("currentModelName").innerText = 
@@ -657,9 +642,7 @@ function sortPaints(codes) {
     const sa = seriesOrder[pa[0]] || 99;
     const sb = seriesOrder[pb[0]] || 99;
     if (sa !== sb) return sa - sb;
-    const na = parseInt(pa[1]) || 9999;
-    const nb = parseInt(pb[1]) || 9999;
-    return na - nb;
+    return (parseInt(pa[1]) || 9999) - (parseInt(pb[1]) || 9999);
   });
 }
 
@@ -680,28 +663,31 @@ function renderPaintsList() {
     columns.push(sortedPaints.slice(i, i + itemsPerColumn));
   }
 
-  columns.forEach((columnPaints, colIdx) => {
+  columns.forEach(columnPaints => {
     const colDiv = document.createElement("div");
     colDiv.className = "paints-column";
 
-    columnPaints.forEach((code, relIdx) => {
-      const globalIndex = sortedPaints.indexOf(code);
+    columnPaints.forEach(code => {
       const p = paintsDict[code];
       if (!p) return;
 
-      // Buscar si tiene equivalente Gunze
       const gunze = tamiyaToGunze[code] || '';
       const displayCode = gunze ? `${gunze} / ${code}` : code;
 
       const item = document.createElement("div");
       item.className = "paints-item";
-
       item.innerHTML = `
-        <button onclick="deletePaint(${globalIndex})">X</button>
+        <button class="delete-btn">X</button>
         <div class="paints-color" style="background:${p.color};"></div>
         <span style="font-family:monospace; min-width:80px;">${displayCode}</span>
         <span>${p.name}</span>
       `;
+
+      item.querySelector('.delete-btn').addEventListener('click', () => {
+        const idx = currentModel.paints.indexOf(code);
+        if (idx > -1) currentModel.paints.splice(idx, 1);
+        renderPaintsList();
+      });
 
       colDiv.appendChild(item);
     });
@@ -710,40 +696,26 @@ function renderPaintsList() {
   });
 }
 
-window.deletePaint = index => {
-  if (!Array.isArray(currentModel.paints)) currentModel.paints = [];
-  currentModel.paints.splice(index, 1);
-  renderPaintsList();
-};
-
 window.savePaints = async () => {
   if (!currentModel || !currentModel.id) {
-    console.error("No hay modelo seleccionado");
     alert("Error: No se encontró el modelo.");
     closePaintsModal();
     return;
   }
 
   const input = document.getElementById("newPaints").value.trim();
-  if (!input) {
-    await updateDoc(doc(db, "modelos", currentModel.id), { paints: currentModel.paints || [] });
-    closePaintsModal();
-    cargarModelos();
-    return;
-  }
+  if (input) {
+    const newCodes = input.split(',').map(normalizeCode)
+      .filter(code => code && paintsDict[code] && !currentModel.paints.includes(code));
 
-  const newCodes = input.split(',')
-    .map(c => normalizeCode(c))
-    .filter(code => code && paintsDict[code] && !(currentModel.paints || []).includes(code));
-
-  if (newCodes.length > 0) {
-    currentModel.paints = [...(currentModel.paints || []), ...newCodes];
-    document.getElementById("newPaints").value = "";
-    renderPaintsList();
+    if (newCodes.length > 0) {
+      currentModel.paints.push(...newCodes);
+      document.getElementById("newPaints").value = "";
+      renderPaintsList();
+    }
   }
 
   await updateDoc(doc(db, "modelos", currentModel.id), { paints: currentModel.paints || [] });
-
   closePaintsModal();
   cargarModelos();
 };
@@ -761,88 +733,108 @@ function normalizeCode(c) {
     const match = c.match(/^([A-Z]+)([\d]+)/);
     if (match) c = match[1] + '-' + match[2];
   }
-
   return c;
 }
 
 /* DATA */
-async function cargarModelos(){
-  modelos=[];
-  const snap=await getDocs(collection(db,"modelos"));
-  snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
+async function cargarModelos() {
+  modelos = [];
+  const snap = await getDocs(collection(db, "modelos"));
+  snap.forEach(d => modelos.push({ id: d.id, ...d.data() }));
   pintar();
 }
 
-function pintar(){
-  const q=search.value.toLowerCase();
-  grid.innerHTML="";
-  modelos.filter(m =>
-    (m.codigo||"").toLowerCase().includes(q) ||
-    (m.fabricante||"").toLowerCase().includes(q) ||
-    (m.modelo||"").toLowerCase().includes(q)
-  ).forEach(m=>{
-    grid.innerHTML+=
-    `<div class="card">
-    <div style="position:relative">
-    <img src="${m.foto||''}">
-    ${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
-    </div>
-    <b>${m.modelo||"Sin nombre"}</b><br>
-    <small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
-    <button onclick='openModal(${JSON.stringify(m)})'>✏️</button>
-    <button onclick="borrar('${m.id}')">🗑️</button>
-    <button onclick='openPaintsModal(${JSON.stringify(m)})'>🎨</button>
-    </div>`;
+function pintar() {
+  const q = search.value.toLowerCase();
+  grid.innerHTML = "";
+
+  const filtered = modelos.filter(m =>
+    (m.codigo || "").toLowerCase().includes(q) ||
+    (m.fabricante || "").toLowerCase().includes(q) ||
+    (m.modelo || "").toLowerCase().includes(q)
+  );
+
+  filtered.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    card.innerHTML = `
+      <div style="position:relative">
+        <img src="${m.foto || ''}" style="width:100%; height:200px; object-fit:cover; border-radius:8px;">
+        ${m.duplicados > 1 ? `<div class="badge">${m.duplicados}</div>` : ''}
+      </div>
+      <b>${m.modelo || "Sin nombre"}</b><br>
+      <small>${m.fabricante || "—"} · ${m.codigo || "—"}</small><br><br>
+    `;
+
+    // Botones con event listeners (seguro)
+    const btnEdit = document.createElement('button');
+    btnEdit.textContent = '✏️';
+    btnEdit.onclick = () => openModal(m);
+
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = '🗑️';
+    btnDelete.onclick = () => borrar(m.id);
+
+    const btnPaint = document.createElement('button');
+    btnPaint.textContent = '🎨';
+    btnPaint.onclick = () => openPaintsModal(m);
+
+    card.append(btnEdit, btnDelete, btnPaint);
+    grid.appendChild(card);
   });
 }
 
-window.guardarModelo = async ()=>{
+/* SAVE MODELO */
+window.guardarModelo = async () => {
+  // ... (código igual que antes, sin cambios)
   const existente = modelos.find(m =>
-    (m.codigo && m.codigo === codigo.value) ||
+    (m.codigo && m.codigo === document.getElementById('codigo').value) ||
     (
-      m.fabricante.toLowerCase() === fabricante.value.toLowerCase() &&
-      m.modelo.toLowerCase() === modelo.value.toLowerCase()
+      m.fabricante?.toLowerCase() === document.getElementById('fabricante').value.toLowerCase() &&
+      m.modelo?.toLowerCase() === document.getElementById('modelo').value.toLowerCase()
     )
   );
 
-  if(existente && !editId){
-    if(!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
-    await updateDoc(doc(db,"modelos",existente.id),{
-      duplicados:(existente.duplicados||1)+1
-    });
-    closeModal(); cargarModelos(); return;
+  if (existente && !editId) {
+    if (!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
+    await updateDoc(doc(db, "modelos", existente.id), { duplicados: (existente.duplicados || 1) + 1 });
+    closeModal();
+    cargarModelos();
+    return;
   }
 
-  let fotoFinal="";
-  if(fotoURL.value) fotoFinal=fotoURL.value;
-  else if(fotoFile.files[0]){
-    const r=ref(storage,"modelos/"+Date.now());
-    await uploadBytes(r,fotoFile.files[0]);
-    fotoFinal=await getDownloadURL(r);
+  let fotoFinal = "";
+  if (document.getElementById('fotoURL').value) fotoFinal = document.getElementById('fotoURL').value;
+  else if (document.getElementById('fotoFile').files[0]) {
+    const r = ref(storage, "modelos/" + Date.now());
+    await uploadBytes(r, document.getElementById('fotoFile').files[0]);
+    fotoFinal = await getDownloadURL(r);
   }
 
-  const data={
-    codigo:codigo.value,
-    fabricante:fabricante.value,
-    modelo:modelo.value,
-    foto:fotoFinal,
-    duplicados:1
+  const data = {
+    codigo: document.getElementById('codigo').value,
+    fabricante: document.getElementById('fabricante').value,
+    modelo: document.getElementById('modelo').value,
+    foto: fotoFinal,
+    duplicados: 1
   };
 
-  if(editId) await updateDoc(doc(db,"modelos",editId),data);
-  else await addDoc(collection(db,"modelos"),data);
+  if (editId) await updateDoc(doc(db, "modelos", editId), data);
+  else await addDoc(collection(db, "modelos"), data);
 
-  closeModal(); cargarModelos();
+  closeModal();
+  cargarModelos();
 };
 
-window.borrar = async id=>{
-  if(confirm("¿Borrar modelo?")){
-    await deleteDoc(doc(db,"modelos",id));
+window.borrar = async id => {
+  if (confirm("¿Borrar modelo?")) {
+    await deleteDoc(doc(db, "modelos", id));
     cargarModelos();
   }
 };
 
-search.addEventListener("input",pintar);
+search.addEventListener("input", pintar);
 </script>
 </body>
 </html>
