@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Maikman Models Stock</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
 --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8;
@@ -63,64 +62,64 @@ background:var(--card); padding:20px; width:340px;
 border-radius:12px; display:flex; flex-direction:column; gap:10px;
 }
 #paintsModal .modal-content {
-  width: 90%;
-  max-width: 1400px;
-  max-height: 92vh;
-  overflow-y: auto;
-  padding: 24px;
+&nbsp;&nbsp;width: 90%;
+&nbsp;&nbsp;max-width: 1400px;
+&nbsp;&nbsp;max-height: 92vh;
+&nbsp;&nbsp;overflow-y: auto;
+&nbsp;&nbsp;padding: 24px;
 }
 #paintsList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-  margin: 20px 0;
+&nbsp;&nbsp;display: flex;
+&nbsp;&nbsp;flex-wrap: wrap;
+&nbsp;&nbsp;gap: 32px;
+&nbsp;&nbsp;margin: 20px 0;
 }
 .paints-column {
-  flex: 1;
-  min-width: 240px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+&nbsp;&nbsp;flex: 1;
+&nbsp;&nbsp;min-width: 240px;
+&nbsp;&nbsp;display: flex;
+&nbsp;&nbsp;flex-direction: column;
+&nbsp;&nbsp;gap: 10px;
 }
 .paints-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.06);
-  font-size: 14px;
+&nbsp;&nbsp;display: flex;
+&nbsp;&nbsp;align-items: center;
+&nbsp;&nbsp;gap: 12px;
+&nbsp;&nbsp;padding: 6px 10px;
+&nbsp;&nbsp;border-radius: 6px;
+&nbsp;&nbsp;background: rgba(255,255,255,0.06);
+&nbsp;&nbsp;font-size: 14px;
 }
 .paints-item button {
-  background: none;
-  border: none;
-  color: #ef4444;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 0 8px;
+&nbsp;&nbsp;background: none;
+&nbsp;&nbsp;border: none;
+&nbsp;&nbsp;color: #ef4444;
+&nbsp;&nbsp;font-weight: bold;
+&nbsp;&nbsp;cursor: pointer;
+&nbsp;&nbsp;font-size: 18px;
+&nbsp;&nbsp;padding: 0 8px;
 }
 .paints-color {
-  width: 28px;
-  height: 28px;
-  border: 1px solid #4b5563;
-  border-radius: 6px;
-  flex-shrink: 0;
+&nbsp;&nbsp;width: 28px;
+&nbsp;&nbsp;height: 28px;
+&nbsp;&nbsp;border: 1px solid #4b5563;
+&nbsp;&nbsp;border-radius: 6px;
+&nbsp;&nbsp;flex-shrink: 0;
 }
 #configModal .modal-content {
-  width: 420px;
+&nbsp;&nbsp;width: 420px;
 }
 #configModal h4 {
-  margin: 20px 0 10px;
-  font-size: 18px;
+&nbsp;&nbsp;margin: 20px 0 10px;
+&nbsp;&nbsp;font-size: 18px;
 }
 #configModal label {
-  display: block;
-  margin-bottom: 12px;
+&nbsp;&nbsp;display: block;
+&nbsp;&nbsp;margin-bottom: 12px;
 }
 #configModal input[type="number"] {
-  width: 90px;
-  padding: 6px;
+&nbsp;&nbsp;width: 90px;
+&nbsp;&nbsp;padding: 6px;
 }
 </style>
 </head>
@@ -168,8 +167,8 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <input id="newPaints" placeholder="Ej: 9, h2, x-1, ts-14 (separados por coma)">
 <div id="paintsList"></div>
 <div style="display:flex; gap:12px; margin-top:20px;">
-  <button onclick="savePaints()" style="flex:1; padding:12px;">Guardar cambios</button>
-  <button onclick="closePaintsModal()" style="flex:1; padding:12px;">Cerrar</button>
+&nbsp;&nbsp;<button onclick="savePaints()" style="flex:1; padding:12px;">Guardar cambios</button>
+&nbsp;&nbsp;<button onclick="closePaintsModal()" style="flex:1; padding:12px;">Cerrar</button>
 </div>
 </div>
 </div>
@@ -189,14 +188,10 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <h4>Pinturas</h4>
 <label>Items por columna: <input id="configItemsPerColumn" type="number" min="5" max="30" step="1"></label>
 </div>
-<div>
-<h4>Datos</h4>
-<button onclick="exportarModelos()">Exportar a Excel</button>
-<label for="importFile">Importar desde Excel: <input type="file" id="importFile" accept=".xlsx,.xls"></label>
-<button onclick="importarModelos()">Importar</button>
+<div style="margin-top:20px; display:flex; gap:12px;">
+&nbsp;&nbsp;<button onclick="saveConfig()" style="flex:1;">Guardar</button>
+&nbsp;&nbsp;<button onclick="closeConfigModal()" style="flex:1;">Cancelar</button>
 </div>
-<button onclick="saveConfig()">Guardar</button>
-<button onclick="closeConfigModal()">Cancelar</button>
 </div>
 </div>
 <script type="module">
@@ -204,7 +199,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
 const firebaseConfig = {
 apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
 authDomain:"maikmanmodelsstock.firebaseapp.com",
@@ -213,12 +207,10 @@ storageBucket:"maikmanmodelsstock.appspot.com",
 messagingSenderId:"871520809912",
 appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
-
 const appFB = initializeApp(firebaseConfig);
 const auth = getAuth(appFB);
 const db = getFirestore(appFB);
 const storage = getStorage(appFB);
-
 const loginBox = document.getElementById("login");
 const appBox = document.getElementById("app");
 const modal = document.getElementById("modal");
@@ -226,228 +218,530 @@ const paintsModal = document.getElementById("paintsModal");
 const configModal = document.getElementById("configModal");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
-
 let modelos = [];
 let editId = null;
 let currentModel = null;
-
 let itemsPerColumn = parseInt(localStorage.getItem('itemsPerColumn')) || 10;
 let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
-
 applyConfig();
-
-// Gunze to Tamiya map
 const gunzeToTamiya = {
-  '1': 'X-2',
-  '2': 'X-1',
-  '3': 'X-7',
-  '5': 'X-3',
-  '7': 'X-9',
-  '8': 'X-11',
-  '9': 'X-12',
-  '10': 'XF-6',
-  '11': 'XF-2',
-  '18': 'X-10',
-  '25': 'X-14',
-  '51': 'XF-12',
-  '52': 'XF-53',
-  '53': 'XF-53',
-  '76': 'XF-84',
-  '90': 'X-27',
-  '92': 'X-26',
-  '93': 'X-23',
-  '94': 'X-25',
-  '95': 'XF-19'
+&nbsp;&nbsp;'1': 'X-2', '2': 'X-1', '3': 'X-7', '4': 'X-8', '5': 'X-4', '6': 'X-5', '7': 'X-9', '8': 'X-11', '9': 'X-12', '10': 'XF-6',
+&nbsp;&nbsp;'11': 'XF-2', '12': 'XF-1', '13': 'XF-7', '14': 'X-6', '15': 'X-3', '16': 'XF-4', '17': 'XF-64', '18': 'X-10', '19': 'X-17', '20': 'X-10',
+&nbsp;&nbsp;'21': 'LP-2', '22': 'XF-20', '23': 'XF-7', '25': 'X-14', '28': 'LP-40',
+&nbsp;&nbsp;'30': 'X-22', '33': 'XF-1', '47': 'X-27', '49': 'X-26', '50': 'X-23',
+&nbsp;&nbsp;'51': 'XF-12', '52': 'XF-53', '53': 'XF-53', '59': 'X-6', '62': 'XF-2', '76': 'XF-84', '88': 'X-13',
+&nbsp;&nbsp;'90': 'X-27', '91': 'X-24', '92': 'X-26', '93': 'X-23', '94': 'X-25', '95': 'XF-19'
 };
-
 const tamiyaToGunze = {};
 for (const [g, t] of Object.entries(gunzeToTamiya)) {
-  tamiyaToGunze[t] = g;
+&nbsp;&nbsp;tamiyaToGunze[t] = g;
 }
-
-// Paints dictionary
 const paintsDict = {
-  'X-1': { name: 'Negro', color: '#000000' },
-  'X-2': { name: 'Blanco', color: '#FFFFFF' },
-  'X-3': { name: 'Azul Real', color: '#003087' },
-  'X-7': { name: 'Rojo', color: '#FF0000' },
-  'X-8': { name: 'Amarillo Limón', color: '#FFFF00' },
-  'XF-16': { name: 'Aluminio Mate', color: '#A9A9A9' },
-  'XF-17': { name: 'Azul Marino Mate', color: '#2C3E50' },
-  'XF-18': { name: 'Gris Medio Mate', color: '#6B7280' },
-  'LP-21': { name: 'Rojo Italiano', color: '#B22222' },
-  // Add all other paints as needed
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-1': { name: 'Negro', color: '#000000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-2': { name: 'Blanco', color: '#FFFFFF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-3': { name: 'Azul Real', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-4': { name: 'Azul', color: '#0055A4' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-5': { name: 'Verde', color: '#008000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-6': { name: 'Naranja', color: '#FF6200' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-7': { name: 'Rojo', color: '#FF0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-8': { name: 'Amarillo Limón', color: '#FFFF00' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-9': { name: 'Marrón', color: '#4A2C2A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-10': { name: 'Gris Cañón', color: '#3F3F3F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-11': { name: 'Plateado Cromo', color: '#C0C0C0' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-12': { name: 'Dorado', color: '#FFD700' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-13': { name: 'Azul Metálico', color: '#0047AB' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-14': { name: 'Azul Cielo', color: '#87CEEB' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-15': { name: 'Verde Claro', color: '#90EE90' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-16': { name: 'Púrpura', color: '#800080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-17': { name: 'Rosa', color: '#FF69B4' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-18': { name: 'Negro Satinado', color: '#2F2F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-19': { name: 'Humo', color: '#6A6A6A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-21': { name: 'Base Plana', color: '#D3D3D3' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-22': { name: 'Transparente', color: '#F5F6F5' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-23': { name: 'Azul Claro', color: '#ADD8E6' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-25': { name: 'Verde Claro', color: '#98FB98' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-26': { name: 'Naranja Claro', color: '#FFA500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-27': { name: 'Rojo Claro', color: '#FF4040' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-28': { name: 'Verde Parque', color: '#355E3B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-31': { name: 'Dorado Titanio', color: '#D4A017' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-32': { name: 'Plateado Titanio', color: '#B7B7B7' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-33': { name: 'Bronce', color: '#8C7853' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'X-34': { name: 'Marrón Metálico', color: '#6F4E37' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-1': { name: 'Negro Mate', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-2': { name: 'Blanco Mate', color: '#E8ECEF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-3': { name: 'Amarillo Mate', color: '#FFC107' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-4': { name: 'Amarillo Verdoso Mate', color: '#9ACD32' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-5': { name: 'Verde Mate', color: '#355E3B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-6': { name: 'Cobre Mate', color: '#B87333' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-7': { name: 'Rojo Mate', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-8': { name: 'Azul Mate', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-9': { name: 'Marrón Casco Mate', color: '#4A3728' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-10': { name: 'Marrón Mate', color: '#8B4513' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-11': { name: 'Verde J.N. Mate', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-12': { name: 'Gris J.N. Mate', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-13': { name: 'Verde J.A. Mate', color: '#3A5F3A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-14': { name: 'Gris J.A. Mate', color: '#6D8299' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-15': { name: 'Carne Mate', color: '#F4C7B8' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-16': { name: 'Aluminio Mate', color: '#A9A9A9' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-17': { name: 'Azul Marino Mate', color: '#2C3E50' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-18': { name: 'Gris Medio Mate', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-19': { name: 'Gris Cielo Mate', color: '#B0C4DE' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-20': { name: 'Gris Medio Mate', color: '#808080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-21': { name: 'Cielo Mate', color: '#87CEEB' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-22': { name: 'Gris RLM Mate', color: '#5A6A62' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-23': { name: 'Azul Claro Mate', color: '#ADD8E6' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-24': { name: 'Gris Oscuro Mate', color: '#4B5E40' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-25': { name: 'Verde Claro Mate', color: '#98FB98' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-26': { name: 'Verde Oscuro Mate', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-27': { name: 'Verde Negro Mate', color: '#1A2521' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-28': { name: 'Cobre Oscuro Mate', color: '#6F4E37' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-29': { name: 'Gris Verdoso Mate', color: '#5A6A62' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-49': { name: 'Caqui Mate', color: '#8A7F2D' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-50': { name: 'Azul Campo Mate', color: '#4682B4' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-51': { name: 'Caqui Drab Mate', color: '#6B4E31' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-52': { name: 'Tierra Mate', color: '#5C4033' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-53': { name: 'Gris Neutral Mate', color: '#808080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-54': { name: 'Gris Marino Mate', color: '#536878' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-55': { name: 'Tierra Cubierta Mate', color: '#8B5A2B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-56': { name: 'Gris Metálico Mate', color: '#6A6A6A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-57': { name: 'Buff Mate', color: '#F4A460' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-58': { name: 'Verde Olivo Mate', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-59': { name: 'Amarillo Desierto Mate', color: '#DEB887' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-60': { name: 'Amarillo Oscuro Mate', color: '#B8860B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-61': { name: 'Verde Oscuro Mate', color: '#2F4F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-62': { name: 'Verde Olivo Drab Mate', color: '#4B5320' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-63': { name: 'Gris Alemán Mate', color: '#4F4F4F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-64': { name: 'Marrón Rojizo Mate', color: '#5C2F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-65': { name: 'Gris Mate', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-66': { name: 'Gris Claro Mate', color: '#D3D3D3' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-67': { name: 'Verde NATO Mate', color: '#3A403B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-68': { name: 'Marrón NATO Mate', color: '#4A3728' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-69': { name: 'Negro NATO Mate', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-70': { name: 'Gris Oscuro Mate', color: '#3F4F3F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-71': { name: 'Verde Cabina Mate', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-72': { name: 'Marrón JGSDF Mate', color: '#5C4033' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-73': { name: 'Verde Oscuro JGSDF Mate', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-74': { name: 'Verde Olivo JGSDF Mate', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-75': { name: 'Gris IJN Mate', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-76': { name: 'Gris Verde IJN Mate', color: '#5A6A62' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-77': { name: 'Gris Marino IJN Mate', color: '#536878' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-78': { name: 'Madera Mate', color: '#8B5A2B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-79': { name: 'Lino Mate', color: '#F5F5DC' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-80': { name: 'Gris Real Mate', color: '#4682B4' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-81': { name: 'Verde Oscuro RAF Mate', color: '#2F4F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-82': { name: 'Gris Océano RAF Mate', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-83': { name: 'Gris Marino RAF Mate', color: '#536878' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-84': { name: 'Marrón Oscuro Mate', color: '#4A3728' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-85': { name: 'Negro Goma Mate', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'XF-86': { name: 'Transparente Mate', color: '#F5F6F5' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-1': { name: 'Negro', color: '#000000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-2': { name: 'Blanco', color: '#FFFFFF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-3': { name: 'Azul', color: '#0000FF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-4': { name: 'Amarillo', color: '#FFFF00' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-5': { name: 'Rojo', color: '#FF0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-6': { name: 'Plateado', color: '#C0C0C0' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-7': { name: 'Dorado', color: '#FFD700' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-8': { name: 'Naranja', color: '#FF4500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-9': { name: 'Transparente', color: '#F5F6F5' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-10': { name: 'Negro Matejo', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-11': { name: 'Plateado (Hoja)', color: '#B7B7B7' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-12': { name: 'Gris IJN', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-13': { name: 'Gris IJN (Sajo)', color: '#536878' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-14': { name: 'Gris IJN (Mate)', color: '#5A6A62' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-15': { name: 'Verde Matejo', color: '#008000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-16': { name: 'Marrón Matejo', color: '#8B4513' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-17': { name: 'Verde Mate', color: '#355E3B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-18': { name: 'Marrón Mate', color: '#4A3728' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-19': { name: 'Gris Cañón', color: '#3F4F4F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-20': { name: 'Gris Claro', color: '#D3D3D3' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-21': { name: 'Verde Italiano', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-22': { name: 'Rojo Italiano', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-23': { name: 'Azul Claro', color: '#ADD8E6' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-24': { name: 'Azul Marino', color: '#2C3E50' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-25': { name: 'Marrón (JGSDF)', color: '#5C4033' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-26': { name: 'Verde Oscuro (JGSDF)', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-27': { name: 'Gris Alemán', color: '#4F4F4F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-28': { name: 'Verde Olivo', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-29': { name: 'Verde Casco', color: '#2F4F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-30': { name: 'Blanco Mate', color: '#E8ECEF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-31': { name: 'Plateado Chispa', color: '#A9A9A9' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-32': { name: 'Gris Claro (IJN)', color: '#B0C4DE' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-33': { name: 'Gris Kure (IJN)', color: '#6D8299' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-34': { name: 'Azul Metálico', color: '#0047AB' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-35': { name: 'Base Plana', color: '#D3D3D3' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-36': { name: 'Azul Oscuro', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-37': { name: 'Gris Claro Mate', color: '#B0C4DE' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-38': { name: 'Mica Plateada', color: '#C0C0C0' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-39': { name: 'Amarillo Brillante', color: '#FFC107' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-40': { name: 'Negro Metálico', color: '#2F2F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-41': { name: 'Rojo Mica', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-42': { name: 'Azul Mica', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-43': { name: 'Azul Claro', color: '#4682B4' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-44': { name: 'Verde Metálico', color: '#008080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-45': { name: 'Verde Perla', color: '#2E8B57' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-46': { name: 'Rojo Transparente', color: '#FF4040' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-47': { name: 'Azul Transparente', color: '#4169E1' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-48': { name: 'Verde Transparente', color: '#32CD32' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-49': { name: 'Amarillo Transparente', color: '#FFFF99' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-50': { name: 'Naranja Transparente', color: '#FFA500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-51': { name: 'Humo', color: '#6A6A6A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-52': { name: 'Rojo Metálico', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-53': { name: 'Gris Titanio', color: '#B7B7B7' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-54': { name: 'Verde Oscuro Mate', color: '#2F4F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-55': { name: 'Gris Oscuro Mate', color: '#3F4F4F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-56': { name: 'Caqui Mate', color: '#8A7F2D' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-57': { name: 'Amarillo Desierto Mate', color: '#DEB887' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-58': { name: 'Verde NATO Mate', color: '#3A403B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-59': { name: 'Marrón Nato Mate', color: '#4A3728' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-60': { name: 'Gris Metálico', color: '#6A6A6A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-61': { name: 'Gris Mate (JGSDF)', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-62': { name: 'Tierra Mate', color: '#5C4033' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-63': { name: 'Verde Mate (IJN)', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-64': { name: 'Negro Mate Goma', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-65': { name: 'Gris Mate', color: '#808080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-66': { name: 'Gris Claro Mate', color: '#D3D3D3' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-67': { name: 'Madera Mate', color: '#8B5A2B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-68': { name: 'Amarillo Mate', color: '#FFC107' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-69': { name: 'Verde Olivo Mate', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-70': { name: 'Rojo Mate', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-71': { name: 'Azul Mate', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-72': { name: 'Marrón Mate', color: '#8B4513' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-73': { name: 'Gris Cielo Mate', color: '#B0C4DE' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-74': { name: 'Bronce Mate', color: '#8C7853' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-75': { name: 'Verde Mica', color: '#2E8B57' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'LP-76': { name: 'Verde Mica', color: '#2E8B57' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-1': { name: 'Rojo Marrón', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-2': { name: 'Verde Oscuro', color: '#2F4F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-3': { name: 'Marrón Oscuro', color: '#4A3728' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-4': { name: 'Gris Alemán', color: '#4F4F4F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-5': { name: 'Verde Olivo Mate', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-6': { name: 'Negro Mate', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-7': { name: 'Amarillo Brillante', color: '#FFC107' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-8': { name: 'Rojo Italiano', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-9': { name: 'Marrón Italiano', color: '#5C4033' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-10': { name: 'Azul Francés', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-11': { name: 'Granate', color: '#800020' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-12': { name: 'Naranja', color: '#FF6200' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-13': { name: 'Transparente', color: '#F5F6F5' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-14': { name: 'Negro', color: '#000000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-15': { name: 'Azul', color: '#0000FF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-16': { name: 'Amarillo', color: '#FFFF00' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-17': { name: 'Aluminio Brillante', color: '#A9A9A9' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-18': { name: 'Rojo Metálico', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-19': { name: 'Azul Metálico', color: '#0047AB' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-20': { name: 'Verde Metálico', color: '#008080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-21': { name: 'Dorado', color: '#FFD700' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-22': { name: 'Gris Claro', color: '#D3D3D3' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-23': { name: 'Azul Claro', color: '#ADD8E6' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-24': { name: 'Púrpura', color: '#800080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-25': { name: 'Rosa', color: '#FF69B4' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-26': { name: 'Blanco Puro', color: '#FFFFFF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-27': { name: 'Blanco Mate', color: '#E8ECEF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-28': { name: 'Verde Olivo Mate', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-29': { name: 'Rojo Mate', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-30': { name: 'Plateado', color: '#C0C0C0' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-31': { name: 'Naranja Brillante', color: '#FFA500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-32': { name: 'Gris Haze', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-33': { name: 'Gris Mate', color: '#808080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-34': { name: 'Verde Camuflaje', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-35': { name: 'Verde Parque', color: '#355E3B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-36': { name: 'Rojo Fluorescente', color: '#FF4040' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-37': { name: 'Gris Lava', color: '#4F4F4F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-38': { name: 'Gris Cañón', color: '#3F4F3F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-39': { name: 'Rojo Mica', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-40': { name: 'Negro Metálico', color: '#2F2F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-41': { name: 'Rojo Coral', color: '#FF4040' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-42': { name: 'Gris Claro Mica', color: '#B0C4DE' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-43': { name: 'Verde Brillante', color: '#008000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-44': { name: 'Azul Brillante', color: '#4169E1' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-45': { name: 'Blanco Perla', color: '#F5F5DC' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-46': { name: 'Amarillo Claro', color: '#FFFF99' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-47': { name: 'Amarillo Cromo', color: '#FFC107' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-48': { name: 'Gris Cañón Mate', color: '#3F4F4F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-49': { name: 'Rojo Brillante', color: '#FF0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-50': { name: 'Azul Mica', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-51': { name: 'Azul Racing', color: '#0047AB' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-52': { name: 'Púrpura Caramelo', color: '#800080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-53': { name: 'Azul Océano Profundo', color: '#2C3E50' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-54': { name: 'Gris Claro Metálico', color: '#B7B7B7' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-55': { name: 'Azul Oscuro Mate', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-56': { name: 'Naranja Brillante Mate', color: '#FFA500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-57': { name: 'Azul Grisáceo Mate', color: '#6D8299' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-58': { name: 'Naranja Perla Claro', color: '#FFA500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-59': { name: 'Rojo Perla Claro', color: '#FF4040' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-60': { name: 'Verde Perla', color: '#2E8B57' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-61': { name: 'Verde NATO', color: '#3A403B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-62': { name: 'Marrón NATO', color: '#4A3728' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-63': { name: 'Negro NATO', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-64': { name: 'Mica Verde Oscuro', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-65': { name: 'Plateado Perla', color: '#C0C0C0' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-66': { name: 'Gris Kure', color: '#6D8299' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-67': { name: 'Gris Sasebo', color: '#536878' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-68': { name: 'Marrón Madera', color: '#8B5A2B' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-69': { name: 'Gris Lino', color: '#F5F5DC' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-70': { name: 'Verde Olivo JGSDF', color: '#4A7043' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-71': { name: 'Humo', color: '#6A6A6A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-72': { name: 'Transparente Azul', color: '#4169E1' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-73': { name: 'Transparente Naranja', color: '#FFA500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-74': { name: 'Transparente Rojo', color: '#FF4040' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-75': { name: 'Champán Dorado', color: '#D4A017' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-76': { name: 'Gris Mica', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-77': { name: 'Gris Mate', color: '#808080' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-78': { name: 'Gris Campo', color: '#6B7280' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-79': { name: 'Negro Satinado', color: '#2F2F2F' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-80': { name: 'Base Plana', color: '#D3D3D3' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-81': { name: 'Azul Real Mate', color: '#003087' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-82': { name: 'Negro Goma Mate', color: '#1C2526' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-83': { name: 'Plateado Metálico', color: '#A9A9A9' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-84': { name: 'Dorado Metálico', color: '#FFD700' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-85': { name: 'Rojo Ferrari Brillante', color: '#FF0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-86': { name: 'Rojo Puro Brillante', color: '#FF0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-87': { name: 'Gris Titanio', color: '#B7B7B7' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-88': { name: 'Plateado Titanio', color: '#B7B7B7' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-89': { name: 'Azul Perla', color: '#4682B4' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-90': { name: 'Marrón Mate JGSDF', color: '#5C4033' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-91': { name: 'Verde Oscuro JGSDF', color: '#2E4A2E' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-92': { name: 'Naranja Metálico', color: '#FFA500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-93': { name: 'Azul Puro Brillante', color: '#0000FF' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-94': { name: 'Gris Metálico', color: '#6A6A6A' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-95': { name: 'Rojo Metálico Puro', color: '#8B0000' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-96': { name: 'Naranja Fluorescente', color: '#FF4500' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-97': { name: 'Amarillo Perla', color: '#FFFF99' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-98': { name: 'Amarillo Puro Brillante', color: '#FFFF00' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-99': { name: 'Marrón IJN Mate', color: '#5C4033' },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
 };
-
+function applyConfig() {
+&nbsp;&nbsp;document.documentElement.style.setProperty('--min-card-width', `calc((100% - 40px) / ${cardsPerRow} - 16px)`);
+&nbsp;&nbsp;const theme = localStorage.getItem('theme') || 'dark';
+&nbsp;&nbsp;document.body.classList.toggle('light', theme === 'light');
+&nbsp;&nbsp;if (document.getElementById('currentTheme')) {
+&nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('currentTheme').innerText = theme === 'light' ? 'Claro' : 'Oscuro';
+&nbsp;&nbsp;}
+}
 /* LOGIN */
-window.login = () =>
-signInWithEmailAndPassword(auth,email.value,password.value)
-.catch(()=>error.innerText="Credenciales incorrectas");
-
+window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+&nbsp;&nbsp;.catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
 window.logout = () => signOut(auth);
-
-onAuthStateChanged(auth,user=>{
-loginBox.style.display = user ? "none" : "block";
-appBox.style.display = user ? "block" : "none";
-if(user) cargarModelos();
+onAuthStateChanged(auth, user => {
+&nbsp;&nbsp;loginBox.style.display = user ? "none" : "block";
+&nbsp;&nbsp;appBox.style.display = user ? "block" : "none";
+&nbsp;&nbsp;if (user) cargarModelos();
 });
-
 /* UI */
-window.toggleTheme = () => document.body.classList.toggle("light");
-window.verPassword = () =>
-password.type = password.type==="password"?"text":"password";
-
-/* MODAL */
-window.openModal = m=>{
-modal.style.display="flex";
-modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
-codigo.value = m?.codigo || "";
-fabricante.value = m?.fabricante || "";
-modelo.value = m?.modelo || "";
-fotoURL.value = "";
-fotoFile.value = "";
-editId = m?.id || null;
+window.toggleTheme = () => {
+&nbsp;&nbsp;document.body.classList.toggle("light");
+&nbsp;&nbsp;localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+&nbsp;&nbsp;document.getElementById('currentTheme').innerText = document.body.classList.contains('light') ? 'Claro' : 'Oscuro';
 };
-window.closeModal = ()=> modal.style.display="none";
-
-/* DATA */
-async function cargarModelos(){
-modelos=[];
-const snap=await getDocs(collection(db,"modelos"));
-snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
-pintar();
-}
-
-function pintar(){
-const q=search.value.toLowerCase();
-grid.innerHTML="";
-modelos.filter(m =>
-(m.codigo||"").toLowerCase().includes(q) ||
-(m.fabricante||"").toLowerCase().includes(q) ||
-(m.modelo||"").toLowerCase().includes(q)
-).forEach(m=>{
-grid.innerHTML+=
-`<div class="card">
-<div style="position:relative">
-<img src="${m.foto||''}">
-${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
-</div>
-<b>${m.modelo||"Sin nombre"}</b><br>
-<small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
-<button onclick='openModal(${JSON.stringify(m)})'>✏️</button>
-<button onclick="borrar('${m.id}')">🗑️</button>
-<button onclick='openPaintsModal(${JSON.stringify(m)})'>🎨</button>
-</div>`;
-});
-}
-
-/* SAVE */
-window.guardarModelo = async ()=>{ 
-const existente = modelos.find(m =>
-(m.codigo && m.codigo === codigo.value) ||
-(
-m.fabricante.toLowerCase() === fabricante.value.toLowerCase() &&
-m.modelo.toLowerCase() === modelo.value.toLowerCase()
-)
-);
-
-if(existente && !editId){
-if(!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
-await updateDoc(doc(db,"modelos",existente.id),{
-duplicados:(existente.duplicados||1)+1
-});
-closeModal(); cargarModelos(); return;
-}
-
-let fotoFinal="";
-if(fotoURL.value) fotoFinal=fotoURL.value;
-else if(fotoFile.files[0]){
-const r=ref(storage,"modelos/"+Date.now());
-await uploadBytes(r,fotoFile.files[0]);
-fotoFinal=await getDownloadURL(r);
-}
-
-const data={
-codigo:codigo.value,
-fabricante:fabricante.value,
-modelo:modelo.value,
-foto:fotoFinal,
-duplicados:1
+window.verPassword = () => {
+&nbsp;&nbsp;const pw = document.getElementById('password');
+&nbsp;&nbsp;pw.type = pw.type === "password" ? "text" : "password";
 };
-
-if(editId) await updateDoc(doc(db,"modelos",editId),data);
-else await addDoc(collection(db,"modelos"),data);
-
-closeModal(); cargarModelos();
-};
-
-window.borrar = async id=>{
-if(confirm("¿Borrar modelo?")){
-await deleteDoc(doc(db,"modelos",id));
-cargarModelos();
-}
-};
-
-search.addEventListener("input",pintar);
-
 /* CONFIG */
-window.openConfigModal = () => configModal.style.display = 'flex';
+window.openConfigModal = () => {
+&nbsp;&nbsp;configModal.style.display = 'flex';
+&nbsp;&nbsp;document.getElementById('configCardsPerRow').value = cardsPerRow;
+&nbsp;&nbsp;document.getElementById('configItemsPerColumn').value = itemsPerColumn;
+};
 window.closeConfigModal = () => configModal.style.display = 'none';
 window.saveConfig = () => {
-  cardsPerRow = parseInt(document.getElementById('configCardsPerRow').value) || 4;
-  itemsPerColumn = parseInt(document.getElementById('configItemsPerColumn').value) || 10;
-  localStorage.setItem('cardsPerRow', cardsPerRow);
-  localStorage.setItem('itemsPerColumn', itemsPerColumn);
-  applyConfig();
-  closeConfigModal();
-  pintar();
+&nbsp;&nbsp;cardsPerRow = Math.max(1, Math.min(8, parseInt(document.getElementById('configCardsPerRow').value) || 4));
+&nbsp;&nbsp;itemsPerColumn = Math.max(5, Math.min(30, parseInt(document.getElementById('configItemsPerColumn').value) || 10));
+&nbsp;&nbsp;localStorage.setItem('cardsPerRow', cardsPerRow);
+&nbsp;&nbsp;localStorage.setItem('itemsPerColumn', itemsPerColumn);
+&nbsp;&nbsp;applyConfig();
+&nbsp;&nbsp;closeConfigModal();
+&nbsp;&nbsp;pintar();
 };
-
-/* EXPORT / IMPORT */
-window.exportarModelos = () => {
-  const data = modelos.map(m => ({
-    Código: m.codigo || '',
-    Fabricante: m.fabricante || '',
-    Modelo: m.modelo || '',
-    Imagen: m.foto || '',
-    Pinturas: (m.paints || []).join(',')
-  }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Modelos");
-  XLSX.writeFile(wb, 'maikman_models.xlsx');
+/* MODAL MODELO */
+window.openModal = m => {
+&nbsp;&nbsp;modal.style.display = "flex";
+&nbsp;&nbsp;document.getElementById('modalTitle').innerText = m ? "Editar modelo" : "Nuevo modelo";
+&nbsp;&nbsp;document.getElementById('codigo').value = m?.codigo || "";
+&nbsp;&nbsp;document.getElementById('fabricante').value = m?.fabricante || "";
+&nbsp;&nbsp;document.getElementById('modelo').value = m?.modelo || "";
+&nbsp;&nbsp;document.getElementById('fotoURL').value = "";
+&nbsp;&nbsp;document.getElementById('fotoFile').value = "";
+&nbsp;&nbsp;editId = m?.id || null;
 };
-
-window.importarModelos = () => {
-  const file = document.getElementById('importFile').files[0];
-  if (!file) return alert('Selecciona un archivo Excel.');
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const wb = XLSX.read(e.target.result, { type: 'binary' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { header: ['Código', 'Fabricante', 'Modelo', 'Imagen', 'Pinturas'] }).slice(1); // Skip header
-    for (const row of data) {
-      const paints = row.Pinturas ? row.Pinturas.split(',').map(normalizeCode).filter(code => code && paintsDict[code]) : [];
-      const existing = modelos.find(m => m.codigo === row.Código && m.fabricante.toLowerCase() === (row.Fabricante || '').toLowerCase() && m.modelo.toLowerCase() === (row.Modelo || '').toLowerCase());
-      const modelData = {
-        codigo: row.Código || '',
-        fabricante: row.Fabricante || '',
-        modelo: row.Modelo || '',
-        foto: row.Imagen || '',
-        paints,
-        duplicados: 1
-      };
-      if (existing) {
-        await updateDoc(doc(db, "modelos", existing.id), modelData);
-      } else {
-        await addDoc(collection(db, "modelos"), modelData);
-      }
-    }
-    alert('Importación completada.');
-    cargarModelos();
-  };
-  reader.readAsBinaryString(file);
+window.closeModal = () => modal.style.display = "none";
+/* MODAL PINTURAS */
+window.openPaintsModal = m => {
+&nbsp;&nbsp;if (!m || !m.id) return alert("Error: Modelo inválido");
+&nbsp;&nbsp;currentModel = { ...m, paints: Array.isArray(m.paints) ? [...m.paints] : [] };
+&nbsp;&nbsp;paintsModal.style.display = "flex";
+&nbsp;&nbsp;document.getElementById("currentModelName").innerText =
+&nbsp;&nbsp;&nbsp;&nbsp;(m.codigo ? m.codigo + " – " : "") + (m.modelo || "Modelo sin nombre");
+&nbsp;&nbsp;renderPaintsList();
 };
+window.closePaintsModal = () => paintsModal.style.display = "none";
+function sortPaints(codes) {
+&nbsp;&nbsp;const seriesOrder = { 'X':1, 'XF':2, 'TS':3, 'LP':4 };
+&nbsp;&nbsp;return [...codes].sort((a,b) => {
+&nbsp;&nbsp;&nbsp;&nbsp;const pa = a.toUpperCase().split('-');
+&nbsp;&nbsp;&nbsp;&nbsp;const pb = b.toUpperCase().split('-');
+&nbsp;&nbsp;&nbsp;&nbsp;const sa = seriesOrder[pa[0]] || 99;
+&nbsp;&nbsp;&nbsp;&nbsp;const sb = seriesOrder[pb[0]] || 99;
+&nbsp;&nbsp;&nbsp;&nbsp;if (sa !== sb) return sa - sb;
+&nbsp;&nbsp;&nbsp;&nbsp;return (parseInt(pa[1]) || 9999) - (parseInt(pb[1]) || 9999);
+&nbsp;&nbsp;});
+}
+function renderPaintsList() {
+&nbsp;&nbsp;const list = document.getElementById("paintsList");
+&nbsp;&nbsp;list.innerHTML = "";
+&nbsp;&nbsp;const paints = Array.isArray(currentModel?.paints) ? currentModel.paints : [];
+&nbsp;&nbsp;if (paints.length === 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;list.innerHTML = '<p style="color:#9ca3af;text-align:center;">Aún no hay pinturas añadidas</p>';
+&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;const sortedPaints = sortPaints(paints);
+&nbsp;&nbsp;const columns = [];
+&nbsp;&nbsp;for (let i = 0; i < sortedPaints.length; i += itemsPerColumn) {
+&nbsp;&nbsp;&nbsp;&nbsp;columns.push(sortedPaints.slice(i, i + itemsPerColumn));
+&nbsp;&nbsp;}
+&nbsp;&nbsp;columns.forEach(columnPaints => {
+&nbsp;&nbsp;&nbsp;&nbsp;const colDiv = document.createElement("div");
+&nbsp;&nbsp;&nbsp;&nbsp;colDiv.className = "paints-column";
+&nbsp;&nbsp;&nbsp;&nbsp;columnPaints.forEach(code => {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const p = paintsDict[code];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!p) return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const gunze = tamiyaToGunze[code] || '';
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const displayCode = gunze ? `${gunze} / ${code}` : code;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const item = document.createElement("div");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;item.className = "paints-item";
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;item.innerHTML = `
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="delete-btn">X</button>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="paints-color" style="background:${p.color};"></div>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family:monospace; min-width:80px;">${displayCode}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>${p.name}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;item.querySelector('.delete-btn').addEventListener('click', () => {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const idx = currentModel.paints.indexOf(code);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (idx > -1) currentModel.paints.splice(idx, 1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;renderPaintsList();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colDiv.appendChild(item);
+&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;list.appendChild(colDiv);
+&nbsp;&nbsp;});
+}
+window.savePaints = async () => {
+&nbsp;&nbsp;if (!currentModel || !currentModel.id) {
+&nbsp;&nbsp;&nbsp;&nbsp;alert("Error: No se encontró el modelo.");
+&nbsp;&nbsp;&nbsp;&nbsp;closePaintsModal();
+&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;const input = document.getElementById("newPaints").value.trim();
+&nbsp;&nbsp;if (input) {
+&nbsp;&nbsp;&nbsp;&nbsp;const newCodes = input.split(',').map(normalizeCode)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.filter(code => code && paintsDict[code] && !currentModel.paints.includes(code));
+&nbsp;&nbsp;&nbsp;&nbsp;if (newCodes.length > 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currentModel.paints.push(...newCodes);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.getElementById("newPaints").value = "";
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;renderPaintsList();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;}
+&nbsp;&nbsp;await updateDoc(doc(db, "modelos", currentModel.id), { paints: currentModel.paints || [] });
+&nbsp;&nbsp;closePaintsModal();
+&nbsp;&nbsp;cargarModelos();
+};
+function normalizeCode(c) {
+&nbsp;&nbsp;if (!c) return '';
+&nbsp;&nbsp;c = c.trim().toUpperCase().replace(/ /g, '').replace(/^H/i, '');
+&nbsp;&nbsp;if (/^\d+$/.test(c)) {
+&nbsp;&nbsp;&nbsp;&nbsp;const tamiya = gunzeToTamiya[c];
+&nbsp;&nbsp;&nbsp;&nbsp;if (tamiya) return tamiya;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;if (!c.includes('-')) {
+&nbsp;&nbsp;&nbsp;&nbsp;const match = c.match(/^([A-Z]+)([\d]+)/);
+&nbsp;&nbsp;&nbsp;&nbsp;if (match) c = match[1] + '-' + match[2];
+&nbsp;&nbsp;}
+&nbsp;&nbsp;return c;
+}
+/* DATA */
+async function cargarModelos() {
+&nbsp;&nbsp;modelos = [];
+&nbsp;&nbsp;const snap = await getDocs(collection(db, "modelos"));
+&nbsp;&nbsp;snap.forEach(d => modelos.push({ id: d.id, ...d.data() }));
+&nbsp;&nbsp;pintar();
+}
+function pintar() {
+&nbsp;&nbsp;const q = search.value.toLowerCase();
+&nbsp;&nbsp;grid.innerHTML = "";
+&nbsp;&nbsp;const filtered = modelos.filter(m =>
+&nbsp;&nbsp;&nbsp;&nbsp;(m.codigo || "").toLowerCase().includes(q) ||
+&nbsp;&nbsp;&nbsp;&nbsp;(m.fabricante || "").toLowerCase().includes(q) ||
+&nbsp;&nbsp;&nbsp;&nbsp;(m.modelo || "").toLowerCase().includes(q)
+&nbsp;&nbsp;);
+&nbsp;&nbsp;filtered.forEach(m => {
+&nbsp;&nbsp;&nbsp;&nbsp;const card = document.createElement('div');
+&nbsp;&nbsp;&nbsp;&nbsp;card.className = 'card';
+&nbsp;&nbsp;&nbsp;&nbsp;card.innerHTML = `
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div style="position:relative">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="${m.foto || ''}" style="width:100%; height:200px; object-fit:cover; border-radius:8px;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${m.duplicados > 1 ? `<div class="badge">${m.duplicados}</div>` : ''}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>${m.modelo || "Sin nombre"}</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>${m.fabricante || "—"} · ${m.codigo || "—"}</small><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;`;
+&nbsp;&nbsp;&nbsp;&nbsp;// Botones con event listeners (seguro)
+&nbsp;&nbsp;&nbsp;&nbsp;const btnEdit = document.createElement('button');
+&nbsp;&nbsp;&nbsp;&nbsp;btnEdit.textContent = '✏️';
+&nbsp;&nbsp;&nbsp;&nbsp;btnEdit.onclick = () => openModal(m);
+&nbsp;&nbsp;&nbsp;&nbsp;const btnDelete = document.createElement('button');
+&nbsp;&nbsp;&nbsp;&nbsp;btnDelete.textContent = '🗑️';
+&nbsp;&nbsp;&nbsp;&nbsp;btnDelete.onclick = () => borrar(m.id);
+&nbsp;&nbsp;&nbsp;&nbsp;const btnPaint = document.createElement('button');
+&nbsp;&nbsp;&nbsp;&nbsp;btnPaint.textContent = '🎨';
+&nbsp;&nbsp;&nbsp;&nbsp;btnPaint.onclick = () => openPaintsModal(m);
+&nbsp;&nbsp;&nbsp;&nbsp;card.append(btnEdit, btnDelete, btnPaint);
+&nbsp;&nbsp;&nbsp;&nbsp;grid.appendChild(card);
+&nbsp;&nbsp;});
+}
+/* SAVE MODELO */
+window.guardarModelo = async () => {
+&nbsp;&nbsp;// ... (código igual que antes, sin cambios)
+&nbsp;&nbsp;const existente = modelos.find(m =>
+&nbsp;&nbsp;&nbsp;&nbsp;(m.codigo && m.codigo === document.getElementById('codigo').value) ||
+&nbsp;&nbsp;&nbsp;&nbsp;(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m.fabricante?.toLowerCase() === document.getElementById('fabricante').value.toLowerCase() &&
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m.modelo?.toLowerCase() === document.getElementById('modelo').value.toLowerCase()
+&nbsp;&nbsp;&nbsp;&nbsp;)
+&nbsp;&nbsp;);
+&nbsp;&nbsp;if (existente && !editId) {
+&nbsp;&nbsp;&nbsp;&nbsp;if (!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
+&nbsp;&nbsp;&nbsp;&nbsp;await updateDoc(doc(db, "modelos", existente.id), { duplicados: (existente.duplicados || 1) + 1 });
+&nbsp;&nbsp;&nbsp;&nbsp;closeModal();
+&nbsp;&nbsp;&nbsp;&nbsp;cargarModelos();
+&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;let fotoFinal = "";
+&nbsp;&nbsp;if (document.getElementById('fotoURL').value) fotoFinal = document.getElementById('fotoURL').value;
+&nbsp;&nbsp;else if (document.getElementById('fotoFile').files[0]) {
+&nbsp;&nbsp;&nbsp;&nbsp;const r = ref(storage, "modelos/" + Date.now());
+&nbsp;&nbsp;&nbsp;&nbsp;await uploadBytes(r, document.getElementById('fotoFile').files[0]);
+&nbsp;&nbsp;&nbsp;&nbsp;fotoFinal = await getDownloadURL(r);
+&nbsp;&nbsp;}
+&nbsp;&nbsp;const data = {
+&nbsp;&nbsp;&nbsp;&nbsp;codigo: document.getElementById('codigo').value,
+&nbsp;&nbsp;&nbsp;&nbsp;fabricante: document.getElementById('fabricante').value,
+&nbsp;&nbsp;&nbsp;&nbsp;modelo: document.getElementById('modelo').value,
+&nbsp;&nbsp;&nbsp;&nbsp;foto: fotoFinal,
+&nbsp;&nbsp;&nbsp;&nbsp;duplicados: 1
+&nbsp;&nbsp;};
+&nbsp;&nbsp;if (editId) await updateDoc(doc(db, "modelos", editId), data);
+&nbsp;&nbsp;else await addDoc(collection(db, "modelos"), data);
+&nbsp;&nbsp;closeModal();
+&nbsp;&nbsp;cargarModelos();
+};
+window.borrar = async id => {
+&nbsp;&nbsp;if (confirm("¿Borrar modelo?")) {
+&nbsp;&nbsp;&nbsp;&nbsp;await deleteDoc(doc(db, "modelos", id));
+&nbsp;&nbsp;&nbsp;&nbsp;cargarModelos();
+&nbsp;&nbsp;}
+};
+search.addEventListener("input", pintar);
 </script>
 </body>
 </html>
