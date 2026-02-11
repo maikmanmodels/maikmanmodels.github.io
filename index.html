@@ -212,12 +212,12 @@ import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-  authDomain:"maikmanmodelsstock.firebaseapp.com",
-  projectId:"maikmanmodelsstock",
-  storageBucket:"maikmanmodelsstock.appspot.com",
-  messagingSenderId:"871520809912",
-  appId:"1:871520809912:web:4042f15ef200832a95d54d"
+  apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+  authDomain: "maikmanmodelsstock.firebaseapp.com",
+  projectId: "maikmanmodelsstock",
+  storageBucket: "maikmanmodelsstock.appspot.com",
+  messagingSenderId: "871520809912",
+  appId: "1:871520809912:web:4042f15ef200832a95d54d"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -241,7 +241,7 @@ let itemsPerColumn = parseInt(localStorage.getItem('itemsPerColumn')) || 10;
 let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
 
 // ────────────────────────────────────────────────
-// Definimos applyConfig ANTES de llamarla
+// 1. Definimos applyConfig ANTES de llamarla
 function applyConfig() {
   document.documentElement.style.setProperty('--min-card-width', `calc((100% - 40px) / ${cardsPerRow} - 16px)`);
   const theme = localStorage.getItem('theme') || 'dark';
@@ -252,13 +252,13 @@ function applyConfig() {
   }
 }
 
-// Llamamos a applyConfig DESPUÉS de definirla
+// 2. Llamamos DESPUÉS de definirla
 applyConfig();
 
 // ────────────────────────────────────────────────
 // Gunze → Tamiya
 const gunzeToTamiya = {
-  '1': 'X-2', 
+1': 'X-2', 
   '2': 'X-1', 
   '3': 'X-7', 
   '4': 'X-8', 
@@ -308,9 +308,9 @@ for (const [g, t] of Object.entries(gunzeToTamiya)) {
   tamiyaToGunze[t] = g;
 }
 
-// Diccionario de pinturas (ampliado con algunos más comunes)
+// Diccionario de pinturas
 const paintsDict = {
-             'X-1': { name: 'Negro', color: '#000000' },
+            'X-1': { name: 'Negro', color: '#000000' },
             'X-2': { name: 'Blanco', color: '#FFFFFF' },
             'X-3': { name: 'Azul Real', color: '#003087' },
             'X-4': { name: 'Azul', color: '#0055A4' },
@@ -583,12 +583,13 @@ const paintsDict = {
             'TS-98': { name: 'Amarillo Puro Brillante', color: '#FFFF00' },
             'TS-99': { name: 'Marrón IJN Mate', color: '#5C4033' },
             'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
+  // Añade más si los necesitas
 };
 
 /* LOGIN */
 window.login = () =>
-signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
-.catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
+  signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+    .catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
 
 window.logout = () => signOut(auth);
 
@@ -843,33 +844,72 @@ window.exportarModelos = () => {
   XLSX.writeFile(wb, 'maikman_models.xlsx');
 };
 
-window.importarModelos = () => {
+window.importarModelos = async () => {
   const file = document.getElementById('importFile').files[0];
   if (!file) return alert('Selecciona un archivo Excel.');
+
   const reader = new FileReader();
-  reader.onload = async e => {
-    const wb = XLSX.read(e.target.result, { type: 'binary' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { header: ['Código', 'Fabricante', 'Modelo', 'Imagen', 'Pinturas'] }).slice(1);
-    for (const row of data) {
-      const paints = row.Pinturas ? row.Pinturas.split(',').map(normalizeCode).filter(code => code && paintsDict[code]) : [];
-      const existing = modelos.find(m => m.codigo === row.Código && m.fabricante.toLowerCase() === (row.Fabricante || '').toLowerCase() && m.modelo.toLowerCase() === (row.Modelo || '').toLowerCase());
-      const modelData = {
-        codigo: row.Código || '',
-        fabricante: row.Fabricante || '',
-        modelo: row.Modelo || '',
-        foto: row.Imagen || '',
-        paints,
-        duplicados: 1
-      };
-      if (existing) {
-        await updateDoc(doc(db, "modelos", existing.id), modelData);
-      } else {
-        await addDoc(collection(db, "modelos"), modelData);
+  reader.onload = async (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { 
+        header: ['Código', 'Fabricante', 'Modelo', 'Imagen', 'Pinturas'] 
+      }).slice(1);
+
+      if (data.length === 0) {
+        alert('El archivo Excel está vacío o no tiene datos válidos.');
+        return;
       }
+
+      let imported = 0;
+      let updated = 0;
+
+      for (const row of data) {
+        const codigo = (row['Código'] || '').trim();
+        const fabricante = (row['Fabricante'] || '').trim();
+        const modelo = (row['Modelo'] || '').trim();
+        const foto = (row['Imagen'] || '').trim();
+        const pinturasStr = (row['Pinturas'] || '').trim();
+
+        const paints = pinturasStr 
+          ? pinturasStr.split(',').map(c => normalizeCode(c.trim())).filter(code => code && paintsDict[code]) 
+          : [];
+
+        const existing = modelos.find(m => 
+          m.codigo === codigo &&
+          m.fabricante.toLowerCase() === fabricante.toLowerCase() &&
+          m.modelo.toLowerCase() === modelo.toLowerCase()
+        );
+
+        const modelData = {
+          codigo,
+          fabricante,
+          modelo,
+          foto,
+          paints,
+          duplicados: 1
+        };
+
+        if (existing) {
+          await updateDoc(doc(db, "modelos", existing.id), modelData);
+          updated++;
+        } else {
+          await addDoc(collection(db, "modelos"), modelData);
+          imported++;
+        }
+      }
+
+      alert(`Importación finalizada:\n- ${imported} modelos nuevos\n- ${updated} modelos actualizados`);
+
+      // Refrescamos la lista
+      await cargarModelos();
+      pintar();
+
+    } catch (err) {
+      console.error('Error al importar:', err);
+      alert('Error al procesar el Excel. Revisa la consola.');
     }
-    alert('Importación completada.');
-    cargarModelos();
   };
   reader.readAsBinaryString(file);
 };
