@@ -125,6 +125,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 </style>
 </head>
 <body>
+
 <!-- LOGIN -->
 <div id="login">
 <h2>Acceso</h2>
@@ -134,6 +135,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <button onclick="login()">Entrar</button>
 <p id="error" style="color:red;"></p>
 </div>
+
 <!-- APP -->
 <div id="app">
 <header>
@@ -147,6 +149,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 </div>
 <div id="grid"></div>
 </div>
+
 <!-- MODAL MODELO -->
 <div id="modal" class="modal">
 <div class="modal-content">
@@ -161,6 +164,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <button onclick="closeModal()">Cancelar</button>
 </div>
 </div>
+
 <!-- MODAL PINTURAS -->
 <div id="paintsModal" class="modal">
 <div class="modal-content">
@@ -173,6 +177,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 </div>
 </div>
 </div>
+
 <!-- MODAL CONFIGURACIÓN -->
 <div id="configModal" class="modal">
 <div class="modal-content">
@@ -199,6 +204,7 @@ border-radius:12px; display:flex; flex-direction:column; gap:10px;
 <button onclick="closeConfigModal()">Cancelar</button>
 </div>
 </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -206,12 +212,12 @@ import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
-apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-authDomain:"maikmanmodelsstock.firebaseapp.com",
-projectId:"maikmanmodelsstock",
-storageBucket:"maikmanmodelsstock.appspot.com",
-messagingSenderId:"871520809912",
-appId:"1:871520809912:web:4042f15ef200832a95d54d"
+  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+  authDomain:"maikmanmodelsstock.firebaseapp.com",
+  projectId:"maikmanmodelsstock",
+  storageBucket:"maikmanmodelsstock.appspot.com",
+  messagingSenderId:"871520809912",
+  appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -234,9 +240,23 @@ let currentModel = null;
 let itemsPerColumn = parseInt(localStorage.getItem('itemsPerColumn')) || 10;
 let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
 
+// ────────────────────────────────────────────────
+// Definimos applyConfig ANTES de llamarla
+function applyConfig() {
+  document.documentElement.style.setProperty('--min-card-width', `calc((100% - 40px) / ${cardsPerRow} - 16px)`);
+  const theme = localStorage.getItem('theme') || 'dark';
+  document.body.classList.toggle('light', theme === 'light');
+  const currentThemeEl = document.getElementById('currentTheme');
+  if (currentThemeEl) {
+    currentThemeEl.innerText = theme === 'light' ? 'Claro' : 'Oscuro';
+  }
+}
+
+// Llamamos a applyConfig DESPUÉS de definirla
 applyConfig();
 
-// Gunze to Tamiya map
+// ────────────────────────────────────────────────
+// Gunze → Tamiya
 const gunzeToTamiya = {
   '1': 'X-2', 
   '2': 'X-1', 
@@ -288,9 +308,9 @@ for (const [g, t] of Object.entries(gunzeToTamiya)) {
   tamiyaToGunze[t] = g;
 }
 
-// Paints dictionary
+// Diccionario de pinturas (ampliado con algunos más comunes)
 const paintsDict = {
-            'X-1': { name: 'Negro', color: '#000000' },
+             'X-1': { name: 'Negro', color: '#000000' },
             'X-2': { name: 'Blanco', color: '#FFFFFF' },
             'X-3': { name: 'Azul Real', color: '#003087' },
             'X-4': { name: 'Azul', color: '#0055A4' },
@@ -567,127 +587,246 @@ const paintsDict = {
 
 /* LOGIN */
 window.login = () =>
-signInWithEmailAndPassword(auth,email.value,password.value)
-.catch(()=>error.innerText="Credenciales incorrectas");
+signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+.catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
 
 window.logout = () => signOut(auth);
 
-onAuthStateChanged(auth,user=>{
-loginBox.style.display = user ? "none" : "block";
-appBox.style.display = user ? "block" : "none";
-if(user) cargarModelos();
+onAuthStateChanged(auth, user => {
+  loginBox.style.display = user ? "none" : "block";
+  appBox.style.display = user ? "block" : "none";
+  if (user) cargarModelos();
 });
 
 /* UI */
-window.toggleTheme = () => document.body.classList.toggle("light");
-window.verPassword = () =>
-password.type = password.type==="password"?"text":"password";
-
-/* MODAL */
-window.openModal = m=>{
-modal.style.display="flex";
-modalTitle.innerText = m?"Editar modelo":"Nuevo modelo";
-codigo.value = m?.codigo || "";
-fabricante.value = m?.fabricante || "";
-modelo.value = m?.modelo || "";
-fotoURL.value = "";
-fotoFile.value = "";
-editId = m?.id || null;
-};
-window.closeModal = ()=> modal.style.display="none";
-
-/* DATA */
-async function cargarModelos(){
-modelos=[];
-const snap=await getDocs(collection(db,"modelos"));
-snap.forEach(d=>modelos.push({id:d.id,...d.data()}));
-pintar();
-}
-
-function pintar(){
-const q=search.value.toLowerCase();
-grid.innerHTML="";
-modelos.filter(m =>
-(m.codigo||"").toLowerCase().includes(q) ||
-(m.fabricante||"").toLowerCase().includes(q) ||
-(m.modelo||"").toLowerCase().includes(q)
-).forEach(m=>{
-grid.innerHTML+=
-`<div class="card">
-<div style="position:relative">
-<img src="${m.foto||''}">
-${m.duplicados>1?`<div class="badge">${m.duplicados}</div>`:""}
-</div>
-<b>${m.modelo||"Sin nombre"}</b><br>
-<small>${m.fabricante||"—"} · ${m.codigo||"—"}</small><br><br>
-<button onclick='openModal(${JSON.stringify(m)})'>✏️</button>
-<button onclick="borrar('${m.id}')">🗑️</button>
-<button onclick='openPaintsModal(${JSON.stringify(m)})'>🎨</button>
-</div>`;
-});
-}
-
-/* SAVE */
-window.guardarModelo = async ()=>{ 
-const existente = modelos.find(m =>
-(m.codigo && m.codigo === codigo.value) ||
-(
-m.fabricante.toLowerCase() === fabricante.value.toLowerCase() &&
-m.modelo.toLowerCase() === modelo.value.toLowerCase()
-)
-);
-
-if(existente && !editId){
-if(!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
-await updateDoc(doc(db,"modelos",existente.id),{
-duplicados:(existente.duplicados||1)+1
-});
-closeModal(); cargarModelos(); return;
-}
-
-let fotoFinal="";
-if(fotoURL.value) fotoFinal=fotoURL.value;
-else if(fotoFile.files[0]){
-const r=ref(storage,"modelos/"+Date.now());
-await uploadBytes(r,fotoFile.files[0]);
-fotoFinal=await getDownloadURL(r);
-}
-
-const data={
-codigo:codigo.value,
-fabricante:fabricante.value,
-modelo:modelo.value,
-foto:fotoFinal,
-duplicados:1
+window.toggleTheme = () => {
+  document.body.classList.toggle("light");
+  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  document.getElementById('currentTheme').innerText = document.body.classList.contains('light') ? 'Claro' : 'Oscuro';
 };
 
-if(editId) await updateDoc(doc(db,"modelos",editId),data);
-else await addDoc(collection(db,"modelos"),data);
-
-closeModal(); cargarModelos();
+window.verPassword = () => {
+  const pw = document.getElementById('password');
+  pw.type = pw.type === "password" ? "text" : "password";
 };
-
-window.borrar = async id=>{
-if(confirm("¿Borrar modelo?")){
-await deleteDoc(doc(db,"modelos",id));
-cargarModelos();
-}
-};
-
-search.addEventListener("input",pintar);
 
 /* CONFIG */
-window.openConfigModal = () => configModal.style.display = 'flex';
+window.openConfigModal = () => {
+  configModal.style.display = 'flex';
+  document.getElementById('configCardsPerRow').value = cardsPerRow;
+  document.getElementById('configItemsPerColumn').value = itemsPerColumn;
+};
+
 window.closeConfigModal = () => configModal.style.display = 'none';
+
 window.saveConfig = () => {
-  cardsPerRow = parseInt(document.getElementById('configCardsPerRow').value) || 4;
-  itemsPerColumn = parseInt(document.getElementById('configItemsPerColumn').value) || 10;
+  cardsPerRow = Math.max(1, Math.min(8, parseInt(document.getElementById('configCardsPerRow').value) || 4));
+  itemsPerColumn = Math.max(5, Math.min(30, parseInt(document.getElementById('configItemsPerColumn').value) || 10));
   localStorage.setItem('cardsPerRow', cardsPerRow);
   localStorage.setItem('itemsPerColumn', itemsPerColumn);
   applyConfig();
   closeConfigModal();
   pintar();
 };
+
+/* MODAL MODELO */
+window.openModal = m => {
+  modal.style.display = "flex";
+  document.getElementById('modalTitle').innerText = m ? "Editar modelo" : "Nuevo modelo";
+  document.getElementById('codigo').value = m?.codigo || "";
+  document.getElementById('fabricante').value = m?.fabricante || "";
+  document.getElementById('modelo').value = m?.modelo || "";
+  document.getElementById('fotoURL').value = "";
+  document.getElementById('fotoFile').value = "";
+  editId = m?.id || null;
+};
+
+window.closeModal = () => modal.style.display = "none";
+
+/* MODAL PINTURAS */
+window.openPaintsModal = m => {
+  if (!m || !m.id) return alert("Error: Modelo inválido");
+  currentModel = { ...m, paints: Array.isArray(m.paints) ? [...m.paints] : [] };
+  paintsModal.style.display = "flex";
+  document.getElementById("currentModelName").innerText =
+    (m.codigo ? m.codigo + " – " : "") + (m.modelo || "Modelo sin nombre");
+  renderPaintsList();
+};
+
+window.closePaintsModal = () => paintsModal.style.display = "none";
+
+function sortPaints(codes) {
+  const seriesOrder = { 'X':1, 'XF':2, 'TS':3, 'LP':4 };
+  return [...codes].sort((a,b) => {
+    const pa = a.toUpperCase().split('-');
+    const pb = b.toUpperCase().split('-');
+    const sa = seriesOrder[pa[0]] || 99;
+    const sb = seriesOrder[pb[0]] || 99;
+    if (sa !== sb) return sa - sb;
+    return (parseInt(pa[1]) || 9999) - (parseInt(pb[1]) || 9999);
+  });
+}
+
+function renderPaintsList() {
+  const list = document.getElementById("paintsList");
+  list.innerHTML = "";
+  const paints = Array.isArray(currentModel?.paints) ? currentModel.paints : [];
+  if (paints.length === 0) {
+    list.innerHTML = '<p style="color:#9ca3af;text-align:center;">Aún no hay pinturas añadidas</p>';
+    return;
+  }
+  const sortedPaints = sortPaints(paints);
+  const columns = [];
+  for (let i = 0; i < sortedPaints.length; i += itemsPerColumn) {
+    columns.push(sortedPaints.slice(i, i + itemsPerColumn));
+  }
+  columns.forEach(columnPaints => {
+    const colDiv = document.createElement("div");
+    colDiv.className = "paints-column";
+    columnPaints.forEach(code => {
+      const p = paintsDict[code];
+      if (!p) return;
+      const gunze = tamiyaToGunze[code] || '';
+      const displayCode = gunze ? `${gunze} / ${code}` : code;
+      const item = document.createElement("div");
+      item.className = "paints-item";
+      item.innerHTML = `
+        <button class="delete-btn">X</button>
+        <div class="paints-color" style="background:${p.color};"></div>
+        <span style="font-family:monospace; min-width:80px;">${displayCode}</span>
+        <span>${p.name}</span>
+      `;
+      item.querySelector('.delete-btn').addEventListener('click', () => {
+        const idx = currentModel.paints.indexOf(code);
+        if (idx > -1) currentModel.paints.splice(idx, 1);
+        renderPaintsList();
+      });
+      colDiv.appendChild(item);
+    });
+    list.appendChild(colDiv);
+  });
+}
+
+window.savePaints = async () => {
+  if (!currentModel || !currentModel.id) {
+    alert("Error: No se encontró el modelo.");
+    closePaintsModal();
+    return;
+  }
+  const input = document.getElementById("newPaints").value.trim();
+  if (input) {
+    const newCodes = input.split(',').map(normalizeCode)
+      .filter(code => code && paintsDict[code] && !currentModel.paints.includes(code));
+    if (newCodes.length > 0) {
+      currentModel.paints.push(...newCodes);
+      document.getElementById("newPaints").value = "";
+      renderPaintsList();
+    }
+  }
+  await updateDoc(doc(db, "modelos", currentModel.id), { paints: currentModel.paints || [] });
+  closePaintsModal();
+  cargarModelos();
+};
+
+function normalizeCode(c) {
+  if (!c) return '';
+  c = c.trim().toUpperCase().replace(/ /g, '').replace(/^H/i, '');
+  if (/^\d+$/.test(c)) {
+    const tamiya = gunzeToTamiya[c];
+    if (tamiya) return tamiya;
+  }
+  if (!c.includes('-')) {
+    const match = c.match(/^([A-Z]+)([\d]+)/);
+    if (match) c = match[1] + '-' + match[2];
+  }
+  return c;
+}
+
+/* DATA */
+async function cargarModelos() {
+  modelos = [];
+  const snap = await getDocs(collection(db, "modelos"));
+  snap.forEach(d => modelos.push({ id: d.id, ...d.data() }));
+  pintar();
+}
+
+function pintar() {
+  const q = search.value.toLowerCase();
+  grid.innerHTML = "";
+  const filtered = modelos.filter(m =>
+    (m.codigo || "").toLowerCase().includes(q) ||
+    (m.fabricante || "").toLowerCase().includes(q) ||
+    (m.modelo || "").toLowerCase().includes(q)
+  );
+  filtered.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div style="position:relative">
+        <img src="${m.foto || ''}" style="width:100%; height:200px; object-fit:cover; border-radius:8px;">
+        ${m.duplicados > 1 ? `<div class="badge">${m.duplicados}</div>` : ''}
+      </div>
+      <b>${m.modelo || "Sin nombre"}</b><br>
+      <small>${m.fabricante || "—"} · ${m.codigo || "—"}</small><br><br>
+    `;
+    const btnEdit = document.createElement('button');
+    btnEdit.textContent = '✏️';
+    btnEdit.onclick = () => openModal(m);
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = '🗑️';
+    btnDelete.onclick = () => borrar(m.id);
+    const btnPaint = document.createElement('button');
+    btnPaint.textContent = '🎨';
+    btnPaint.onclick = () => openPaintsModal(m);
+    card.append(btnEdit, btnDelete, btnPaint);
+    grid.appendChild(card);
+  });
+}
+
+/* SAVE MODELO */
+window.guardarModelo = async () => {
+  const existente = modelos.find(m =>
+    (m.codigo && m.codigo === document.getElementById('codigo').value) ||
+    (
+      m.fabricante?.toLowerCase() === document.getElementById('fabricante').value.toLowerCase() &&
+      m.modelo?.toLowerCase() === document.getElementById('modelo').value.toLowerCase()
+    )
+  );
+  if (existente && !editId) {
+    if (!confirm("Este modelo ya existe.\n¿Quieres añadir un duplicado?")) return;
+    await updateDoc(doc(db, "modelos", existente.id), { duplicados: (existente.duplicados || 1) + 1 });
+    closeModal();
+    cargarModelos();
+    return;
+  }
+  let fotoFinal = "";
+  if (document.getElementById('fotoURL').value) fotoFinal = document.getElementById('fotoURL').value;
+  else if (document.getElementById('fotoFile').files[0]) {
+    const r = ref(storage, "modelos/" + Date.now());
+    await uploadBytes(r, document.getElementById('fotoFile').files[0]);
+    fotoFinal = await getDownloadURL(r);
+  }
+  const data = {
+    codigo: document.getElementById('codigo').value,
+    fabricante: document.getElementById('fabricante').value,
+    modelo: document.getElementById('modelo').value,
+    foto: fotoFinal,
+    duplicados: 1
+  };
+  if (editId) await updateDoc(doc(db, "modelos", editId), data);
+  else await addDoc(collection(db, "modelos"), data);
+  closeModal();
+  cargarModelos();
+};
+
+window.borrar = async id => {
+  if (confirm("¿Borrar modelo?")) {
+    await deleteDoc(doc(db, "modelos", id));
+    cargarModelos();
+  }
+};
+
+search.addEventListener("input", pintar);
 
 /* EXPORT / IMPORT */
 window.exportarModelos = () => {
@@ -711,7 +850,7 @@ window.importarModelos = () => {
   reader.onload = async e => {
     const wb = XLSX.read(e.target.result, { type: 'binary' });
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { header: ['Código', 'Fabricante', 'Modelo', 'Imagen', 'Pinturas'] }).slice(1); // Skip header
+    const data = XLSX.utils.sheet_to_json(ws, { header: ['Código', 'Fabricante', 'Modelo', 'Imagen', 'Pinturas'] }).slice(1);
     for (const row of data) {
       const paints = row.Pinturas ? row.Pinturas.split(',').map(normalizeCode).filter(code => code && paintsDict[code]) : [];
       const existing = modelos.find(m => m.codigo === row.Código && m.fabricante.toLowerCase() === (row.Fabricante || '').toLowerCase() && m.modelo.toLowerCase() === (row.Modelo || '').toLowerCase());
