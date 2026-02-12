@@ -23,19 +23,19 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--min-card-width),1fr)); gap:16px; padding:20px; }
 .card { background:var(--card); border-radius:12px; padding:12px; position:relative; }
 .card img { width:100%; height:200px; object-fit:cover; border-radius:8px; }
-.card .buttons { display:flex; gap:12px; margin-top:10px; } /* ← botones más separados */
+.card .buttons { display:flex; gap:14px; margin-top:12px; flex-wrap:wrap; }
 .badge { position:absolute; bottom:8px; right:8px; background:#dc2626; color:white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:bold; }
 .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:1000; }
-.modal-content { background:var(--card); padding:20px; width:340px; border-radius:12px; display:flex; flex-direction:column; gap:10px; }
-#paintsModal .modal-content { width:90%; max-width:1400px; max-height:92vh; overflow-y:auto; padding:24px; }
+.modal-content { background:var(--card); padding:24px; width:90%; max-width:400px; border-radius:12px; display:flex; flex-direction:column; gap:12px; max-height:90vh; overflow-y:auto; }
+#paintsModal .modal-content { max-width:1400px; }
 #paintsList { display:flex; flex-wrap:wrap; gap:32px; margin:20px 0; }
 .paints-column { flex:1; min-width:240px; display:flex; flex-direction:column; gap:10px; }
-.paints-item { display:flex; align-items:center; gap:12px; padding:6px 10px; border-radius:6px; background:rgba(255,255,255,0.06); font-size:14px; }
+.paints-item { display:flex; align-items:center; gap:12px; padding:8px; border-radius:6px; background:rgba(255,255,255,0.06); font-size:14px; }
 .paints-item button { background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:18px; padding:0 8px; }
 .paints-color { width:28px; height:28px; border:1px solid #4b5563; border-radius:6px; flex-shrink:0; }
-#infoModal .modal-content { width:90%; max-width:600px; padding:24px; }
-#infoGallery { display:flex; flex-wrap:wrap; gap:16px; margin-top:10px; }
-#infoGallery img { width:150px; height:150px; object-fit:cover; border-radius:8px; border:1px solid #444; }
+#infoModal .modal-content { max-width:700px; }
+#infoGallery { display:flex; flex-wrap:wrap; gap:16px; margin-top:16px; }
+#infoGallery img { width:180px; height:180px; object-fit:cover; border-radius:8px; border:1px solid #444; cursor:pointer; }
 #configModal .modal-content { width:420px; }
 #configModal h4 { margin:20px 0 10px; font-size:18px; }
 #configModal label { display:block; margin-bottom:12px; }
@@ -104,7 +104,7 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 <div id="infoModal" class="modal">
 <div class="modal-content">
 <h3>Información de <span id="infoModelName"></span></h3>
-<p><strong>Precio:</strong> <span id="infoPrecio"></span> €</p>
+<p><strong>Precio:</strong> <span id="infoPrecio"></span></p>
 <h4>Galería de imágenes</h4>
 <div id="infoGallery"></div>
 <button onclick="closeInfoModal()">Cerrar</button>
@@ -145,12 +145,12 @@ import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
-  authDomain: "maikmanmodelsstock.firebaseapp.com",
-  projectId: "maikmanmodelsstock",
-  storageBucket: "maikmanmodelsstock.appspot.com",
-  messagingSenderId: "871520809912",
-  appId: "1:871520809912:web:4042f15ef200832a95d54d"
+  apiKey:"AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+  authDomain:"maikmanmodelsstock.firebaseapp.com",
+  projectId:"maikmanmodelsstock",
+  storageBucket:"maikmanmodelsstock.appspot.com",
+  messagingSenderId:"871520809912",
+  appId:"1:871520809912:web:4042f15ef200832a95d54d"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -174,7 +174,6 @@ let currentModel = null;
 let itemsPerColumn = parseInt(localStorage.getItem('itemsPerColumn')) || 10;
 let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
 
-// applyConfig
 function applyConfig() {
   document.documentElement.style.setProperty('--min-card-width', `calc((100% - 40px) / ${cardsPerRow} - 16px)`);
   const theme = localStorage.getItem('theme') || 'dark';
@@ -182,11 +181,10 @@ function applyConfig() {
   const currentThemeEl = document.getElementById('currentTheme');
   if (currentThemeEl) currentThemeEl.innerText = theme === 'light' ? 'Claro' : 'Oscuro';
 }
-document.addEventListener('DOMContentLoaded', () => applyConfig());
+document.addEventListener('DOMContentLoaded', applyConfig);
 
-// Gunze y pinturas
 const gunzeToTamiya = { 
-  '1': 'X-2', 
+    '1': 'X-2', 
   '2': 'X-1', 
   '3': 'X-7', 
   '4': 'X-8', 
@@ -230,10 +228,8 @@ const gunzeToTamiya = {
   '94': 'X-25', 
   '95': 'XF-19'
 };
-const tamiyaToGunze = {};
-for (const [g, t] of Object.entries(gunzeToTamiya)) tamiyaToGunze[t] = g;
-
-const paintsDict = {
+const tamiyaToGunze = {
+  const paintsDict = {
            'X-1': { name: 'Negro', color: '#000000' },
             'X-2': { name: 'Blanco', color: '#FFFFFF' },
             'X-3': { name: 'Azul Real', color: '#003087' },
@@ -507,7 +503,11 @@ const paintsDict = {
             'TS-98': { name: 'Amarillo Puro Brillante', color: '#FFFF00' },
             'TS-99': { name: 'Marrón IJN Mate', color: '#5C4033' },
             'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
-}
+};
+for (const [g, t] of Object.entries(gunzeToTamiya)) tamiyaToGunze[t] = g;
+
+const paintsDict = { /* tu diccionario completo */ };
+
 /* LOGIN */
 window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
   .catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
@@ -572,7 +572,7 @@ window.closeModal = () => modal.style.display = "none";
 window.openInfoModal = m => {
   infoModal.style.display = "flex";
   document.getElementById("infoModelName").innerText = m.modelo || "Sin nombre";
-  document.getElementById("infoPrecio").innerText = m.precio ? m.precio + " €" : "No especificado";
+  document.getElementById("infoPrecio").innerText = m.precio != null ? m.precio + " €" : "No especificado";
   const gallery = document.getElementById("infoGallery");
   gallery.innerHTML = "";
   (m.galeria || []).forEach(url => {
@@ -729,7 +729,7 @@ function pintar() {
   });
 }
 
-/* SAVE MODELO */
+/* SAVE MODELO - CORREGIDO */
 window.guardarModelo = async () => {
   const codigo = String(document.getElementById('codigo').value || "").trim();
   const fabricante = String(document.getElementById('fabricante').value || "").trim();
@@ -749,17 +749,22 @@ window.guardarModelo = async () => {
     return;
   }
 
+  // Conservar foto existente si no se sube nueva
   let fotoFinal = document.getElementById('fotoURL').value || '';
   if (!fotoFinal && document.getElementById('fotoFile').files[0]) {
     const r = ref(storage, "modelos/" + Date.now());
     await uploadBytes(r, document.getElementById('fotoFile').files[0]);
     fotoFinal = await getDownloadURL(r);
+  } else if (editId && !fotoFinal && !document.getElementById('fotoFile').files[0]) {
+    const existing = modelos.find(m => m.id === editId);
+    fotoFinal = existing?.foto || '';
   }
 
+  // Galería
   let galeriaFinal = [];
   if (editId) {
-    const existingModel = modelos.find(m => m.id === editId);
-    galeriaFinal = existingModel?.galeria || [];
+    const existing = modelos.find(m => m.id === editId);
+    galeriaFinal = existing?.galeria || [];
   }
   const urls = document.getElementById('galeriaURLs').value.split(',').map(u => u.trim()).filter(u => u);
   urls.forEach(u => {
