@@ -23,6 +23,7 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--min-card-width),1fr)); gap:16px; padding:20px; }
 .card { background:var(--card); border-radius:12px; padding:12px; position:relative; }
 .card img { width:100%; height:200px; object-fit:cover; border-radius:8px; }
+.card .buttons { display:flex; gap:12px; margin-top:10px; } /* ← botones más separados */
 .badge { position:absolute; bottom:8px; right:8px; background:#dc2626; color:white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:bold; }
 .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:1000; }
 .modal-content { background:var(--card); padding:20px; width:340px; border-radius:12px; display:flex; flex-direction:column; gap:10px; }
@@ -32,6 +33,9 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 .paints-item { display:flex; align-items:center; gap:12px; padding:6px 10px; border-radius:6px; background:rgba(255,255,255,0.06); font-size:14px; }
 .paints-item button { background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:18px; padding:0 8px; }
 .paints-color { width:28px; height:28px; border:1px solid #4b5563; border-radius:6px; flex-shrink:0; }
+#infoModal .modal-content { width:90%; max-width:600px; padding:24px; }
+#infoGallery { display:flex; flex-wrap:wrap; gap:16px; margin-top:10px; }
+#infoGallery img { width:150px; height:150px; object-fit:cover; border-radius:8px; border:1px solid #444; }
 #configModal .modal-content { width:420px; }
 #configModal h4 { margin:20px 0 10px; font-size:18px; }
 #configModal label { display:block; margin-bottom:12px; }
@@ -71,9 +75,13 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
 <input id="codigo" placeholder="Código">
 <input id="fabricante" placeholder="Fabricante">
 <input id="modelo" placeholder="Modelo">
-<b>Imagen</b>
+<input id="precio" type="number" step="0.01" placeholder="Precio (€) - opcional">
+<b>Imagen principal</b>
 <input id="fotoURL" placeholder="URL de la imagen (opcional)">
 <input type="file" id="fotoFile" accept="image/*">
+<b>Galería adicional (opcional)</b>
+<input id="galeriaURLs" placeholder="URLs separadas por coma">
+<input type="file" id="galeriaFiles" accept="image/*" multiple>
 <button onclick="guardarModelo()">Guardar</button>
 <button onclick="closeModal()">Cancelar</button>
 </div>
@@ -89,6 +97,17 @@ input { padding:8px; border-radius:6px; border:none; width:100%; }
   <button onclick="savePaints()" style="flex:1; padding:12px;">Guardar cambios</button>
   <button onclick="closePaintsModal()" style="flex:1; padding:12px;">Cerrar</button>
 </div>
+</div>
+</div>
+
+<!-- MODAL INFORMACIÓN -->
+<div id="infoModal" class="modal">
+<div class="modal-content">
+<h3>Información de <span id="infoModelName"></span></h3>
+<p><strong>Precio:</strong> <span id="infoPrecio"></span> €</p>
+<h4>Galería de imágenes</h4>
+<div id="infoGallery"></div>
+<button onclick="closeInfoModal()">Cerrar</button>
 </div>
 </div>
 
@@ -143,6 +162,7 @@ const loginBox = document.getElementById("login");
 const appBox = document.getElementById("app");
 const modal = document.getElementById("modal");
 const paintsModal = document.getElementById("paintsModal");
+const infoModal = document.getElementById("infoModal");
 const configModal = document.getElementById("configModal");
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
@@ -154,26 +174,18 @@ let currentModel = null;
 let itemsPerColumn = parseInt(localStorage.getItem('itemsPerColumn')) || 10;
 let cardsPerRow = parseInt(localStorage.getItem('cardsPerRow')) || 4;
 
-// ────────────────────────────────────────────────
-// applyConfig - se llama después del DOM ready
+// applyConfig
 function applyConfig() {
   document.documentElement.style.setProperty('--min-card-width', `calc((100% - 40px) / ${cardsPerRow} - 16px)`);
   const theme = localStorage.getItem('theme') || 'dark';
   document.body.classList.toggle('light', theme === 'light');
   const currentThemeEl = document.getElementById('currentTheme');
-  if (currentThemeEl) {
-    currentThemeEl.innerText = theme === 'light' ? 'Claro' : 'Oscuro';
-  }
+  if (currentThemeEl) currentThemeEl.innerText = theme === 'light' ? 'Claro' : 'Oscuro';
 }
+document.addEventListener('DOMContentLoaded', () => applyConfig());
 
-// Esperamos a que el DOM esté listo antes de aplicar config y cargar datos
-document.addEventListener('DOMContentLoaded', () => {
-  applyConfig();
-});
-
-// ────────────────────────────────────────────────
 // Gunze y pinturas
-const gunzeToTamiya = {
+const gunzeToTamiya = { 
   '1': 'X-2', 
   '2': 'X-1', 
   '3': 'X-7', 
@@ -218,7 +230,6 @@ const gunzeToTamiya = {
   '94': 'X-25', 
   '95': 'XF-19'
 };
-
 const tamiyaToGunze = {};
 for (const [g, t] of Object.entries(gunzeToTamiya)) tamiyaToGunze[t] = g;
 
@@ -496,13 +507,10 @@ const paintsDict = {
             'TS-98': { name: 'Amarillo Puro Brillante', color: '#FFFF00' },
             'TS-99': { name: 'Marrón IJN Mate', color: '#5C4033' },
             'TS-100': { name: 'Verde Mate IJN', color: '#2E4A2E' }
-  // Añade aquí más si necesitas
-};
-
+}
 /* LOGIN */
-window.login = () => 
-  signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
-    .catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
+window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+  .catch(() => document.getElementById('error').innerText = "Credenciales incorrectas");
 
 window.logout = () => signOut(auth);
 
@@ -550,12 +558,31 @@ window.openModal = m => {
   document.getElementById('codigo').value = m?.codigo || "";
   document.getElementById('fabricante').value = m?.fabricante || "";
   document.getElementById('modelo').value = m?.modelo || "";
+  document.getElementById('precio').value = m?.precio || "";
   document.getElementById('fotoURL').value = "";
   document.getElementById('fotoFile').value = "";
+  document.getElementById('galeriaURLs').value = m?.galeria ? m.galeria.join(', ') : "";
+  document.getElementById('galeriaFiles').value = "";
   editId = m?.id || null;
 };
 
 window.closeModal = () => modal.style.display = "none";
+
+/* MODAL INFORMACIÓN */
+window.openInfoModal = m => {
+  infoModal.style.display = "flex";
+  document.getElementById("infoModelName").innerText = m.modelo || "Sin nombre";
+  document.getElementById("infoPrecio").innerText = m.precio ? m.precio + " €" : "No especificado";
+  const gallery = document.getElementById("infoGallery");
+  gallery.innerHTML = "";
+  (m.galeria || []).forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    gallery.appendChild(img);
+  });
+};
+
+window.closeInfoModal = () => infoModal.style.display = "none";
 
 /* MODAL PINTURAS */
 window.openPaintsModal = m => {
@@ -694,7 +721,10 @@ function pintar() {
     const btnPaint = document.createElement('button');
     btnPaint.textContent = '🎨';
     btnPaint.onclick = () => openPaintsModal(m);
-    card.append(btnEdit, btnDelete, btnPaint);
+    const btnInfo = document.createElement('button');
+    btnInfo.textContent = 'i';
+    btnInfo.onclick = () => openInfoModal(m);
+    card.append(btnEdit, btnDelete, btnPaint, btnInfo);
     grid.appendChild(card);
   });
 }
@@ -704,6 +734,7 @@ window.guardarModelo = async () => {
   const codigo = String(document.getElementById('codigo').value || "").trim();
   const fabricante = String(document.getElementById('fabricante').value || "").trim();
   const modelo = String(document.getElementById('modelo').value || "").trim();
+  const precio = document.getElementById('precio').value ? parseFloat(document.getElementById('precio').value) : null;
 
   const existente = modelos.find(m =>
     String(m.codigo) === codigo ||
@@ -725,7 +756,30 @@ window.guardarModelo = async () => {
     fotoFinal = await getDownloadURL(r);
   }
 
-  const data = { codigo, fabricante, modelo, foto: fotoFinal, duplicados: 1 };
+  let galeriaFinal = [];
+  if (editId) {
+    const existingModel = modelos.find(m => m.id === editId);
+    galeriaFinal = existingModel?.galeria || [];
+  }
+  const urls = document.getElementById('galeriaURLs').value.split(',').map(u => u.trim()).filter(u => u);
+  urls.forEach(u => {
+    if (!galeriaFinal.includes(u)) galeriaFinal.push(u);
+  });
+  for (const file of document.getElementById('galeriaFiles').files) {
+    const r = ref(storage, "galeria/" + Date.now());
+    await uploadBytes(r, file);
+    galeriaFinal.push(await getDownloadURL(r));
+  }
+
+  const data = {
+    codigo,
+    fabricante,
+    modelo,
+    precio,
+    foto: fotoFinal,
+    galeria: galeriaFinal,
+    duplicados: 1
+  };
 
   if (editId) await updateDoc(doc(db, "modelos", editId), data);
   else await addDoc(collection(db, "modelos"), data);
@@ -749,7 +803,9 @@ window.exportarModelos = () => {
     Código: m.codigo || '',
     Fabricante: m.fabricante || '',
     Modelo: m.modelo || '',
+    Precio: m.precio || '',
     Imagen: m.foto || '',
+    Galería: (m.galeria || []).join(', '),
     Pinturas: (m.paints || []).join(',')
   }));
   const ws = XLSX.utils.json_to_sheet(data);
@@ -761,38 +817,31 @@ window.exportarModelos = () => {
 window.importarModelos = async () => {
   const file = document.getElementById('importFile').files[0];
   if (!file) return alert('Selecciona un archivo Excel.');
-
   const reader = new FileReader();
   reader.onload = async e => {
     try {
       const wb = XLSX.read(e.target.result, { type: 'binary' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, { header: ['Código', 'Fabricante', 'Modelo', 'Imagen', 'Pinturas'] }).slice(1);
-
+      const data = XLSX.utils.sheet_to_json(ws, { header: ['Código', 'Fabricante', 'Modelo', 'Precio', 'Imagen', 'Galería', 'Pinturas'] }).slice(1);
       if (data.length === 0) return alert('El archivo está vacío o no tiene datos.');
-
       let imported = 0;
       let updated = 0;
-
       for (const row of data) {
         const codigo = String(row['Código'] || "").trim();
         const fabricante = String(row['Fabricante'] || "").trim();
         const modelo = String(row['Modelo'] || "").trim();
+        const precio = row['Precio'] ? parseFloat(row['Precio']) : null;
         const foto = String(row['Imagen'] || "").trim();
+        const galeriaStr = String(row['Galería'] || "").trim();
+        const galeria = galeriaStr ? galeriaStr.split(',').map(u => u.trim()).filter(u => u) : [];
         const pinturasStr = String(row['Pinturas'] || "").trim();
-
-        const paints = pinturasStr 
-          ? pinturasStr.split(',').map(c => normalizeCode(c.trim())).filter(code => code && paintsDict[code]) 
-          : [];
-
+        const paints = pinturasStr ? pinturasStr.split(',').map(c => normalizeCode(c.trim())).filter(code => code && paintsDict[code]) : [];
         const existing = modelos.find(m => 
           String(m.codigo) === codigo &&
           String(m.fabricante).toLowerCase() === fabricante.toLowerCase() &&
           String(m.modelo).toLowerCase() === modelo.toLowerCase()
         );
-
-        const modelData = { codigo, fabricante, modelo, foto, paints, duplicados: 1 };
-
+        const modelData = { codigo, fabricante, modelo, precio, foto, galeria, paints, duplicados: 1 };
         if (existing) {
           await updateDoc(doc(db, "modelos", existing.id), modelData);
           updated++;
@@ -801,14 +850,12 @@ window.importarModelos = async () => {
           imported++;
         }
       }
-
       alert(`Importación completada:\n- ${imported} nuevos\n- ${updated} actualizados`);
       await cargarModelos();
       pintar();
-
     } catch (err) {
       console.error('Error al importar:', err);
-      alert('Error al procesar el Excel. Revisa la consola para detalles.');
+      alert('Error al procesar el Excel. Revisa la consola.');
     }
   };
   reader.readAsBinaryString(file);
