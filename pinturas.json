@@ -1,0 +1,24 @@
+{
+  "Tamiya XF (Acrílicos)": [
+    {"id": "XF-1", "nombre": "Flat Black", "hex": "#000000"},
+    {"id": "XF-2", "nombre": "Flat White", "hex": "#FFFFFF"},
+    {"id": "XF-3", "nombre": "Flat Yellow", "hex": "#F9D71C"},
+    {"id": "XF-7", "nombre": "Flat Red", "hex": "#ED1C24"},
+    {"id": "XF-10", "nombre": "Flat Brown", "hex": "#4B3621"},
+    {"id": "XF-16", "nombre": "Flat Aluminum", "hex": "#C0C0C0"},
+    {"id": "XF-56", "nombre": "Metallic Grey", "hex": "#708090"},
+    {"id": "XF-61", "nombre": "Dark Green", "hex": "#2E3B23"},
+    {"id": "XF-64", "nombre": "Red Brown", "hex": "#5D3A3A"}
+  ],
+  "Vallejo Model Color": [
+    {"id": "70.950", "nombre": "Negro", "hex": "#000000"},
+    {"id": "70.951", "nombre": "Blanco", "hex": "#FFFFFF"},
+    {"id": "70.957", "nombre": "Rojo Mate", "hex": "#9B1B1E"},
+    {"id": "70.818", "nombre": "Cuero Rojo", "hex": "#6B3E2E"},
+    {"id": "70.997", "nombre": "Plata", "hex": "#C0C0C0"}
+  ],
+  "Ammo MIG": [
+    {"id": "MIG-001", "nombre": "RAL 6003 Olivgrün", "hex": "#4B5320"},
+    {"id": "MIG-046", "nombre": "Matt Black", "hex": "#1A1A1B"}
+  ]
+}
