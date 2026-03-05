@@ -2,18 +2,18 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Maikman Models Stock & Colors</title>
+<title>Maikman Models - Stock & Colors Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
---bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8; --success:#00b894; --danger:#d63031;
---min-card-width: 260px;
+    --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8; --success:#00b894; --danger:#d63031;
+    --min-card-width: 260px;
 }
 body.light { --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb; }
 * { box-sizing:border-box; transition:.3s; }
-body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); padding-bottom: 50px; }
+body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); padding-bottom: 80px; }
 
-/* Navegación y Estilos Generales */
+/* Navegación */
 .nav-tabs { display: flex; background: var(--card); padding: 10px; gap: 10px; position: sticky; top: 0; z-index: 900; border-bottom: 1px solid #334155; }
 .tab-btn { flex: 1; padding: 12px; border: none; background: rgba(255,255,255,0.05); color: var(--text); cursor: pointer; border-radius: 8px; font-weight: bold; }
 .tab-btn.active { background: var(--accent); color: white; }
@@ -22,37 +22,39 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .content-section { display: none; padding: 20px; }
 .content-section.active { display: block; }
 
-/* Grid Maquetas y Tarjetas con 4 botones */
+/* Grid Maquetas */
 #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--min-card-width),1fr)); gap:16px; }
-.card { background:var(--card); border-radius:12px; padding:12px; position:relative; border: 1px solid #334155; overflow: hidden; }
+.card { background:var(--card); border-radius:12px; padding:12px; border: 1px solid #334155; display: flex; flex-direction: column; }
 .card img { width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom: 10px; }
-.card-info { margin-bottom: 15px; }
-.card-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.btn-action { padding: 6px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 4px; }
-.btn-edit { background: #f39c12; }
-.btn-delete { background: var(--danger); }
-.btn-paints { background: #9b59b6; }
-.btn-info { background: #3498db; }
+.card-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: auto; }
+.btn-action { padding: 8px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; color: white; }
+.btn-edit { background: #f39c12; } .btn-delete { background: var(--danger); }
+.btn-paints { background: #9b59b6; } .btn-info { background: #3498db; }
 
-/* Estilos Catálogo Pinturas */
+/* Estilos Pinturas */
 .paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
-.paint-item { background: var(--card); padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid #334155; }
-.color-swatch { width: 30px; height: 30px; border-radius: 6px; border: 1px solid #444; }
+.paint-item, .paint-row-mini { background: var(--card); padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid #334155; }
+.color-swatch { width: 25px; height: 25px; border-radius: 5px; border: 1px solid #444; flex-shrink: 0; }
+.btn-mini { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: white; background: #334155; }
+.btn-mini.active-have { background: var(--success) !important; }
+.btn-mini.active-buy { background: var(--danger) !important; }
 
 /* Modales */
-.modal { position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:1000; padding: 20px; }
+.modal { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
 .modal-content { background:var(--card); padding:24px; width:100%; max-width:500px; border-radius:12px; display:flex; flex-direction:column; gap:12px; max-height:90vh; overflow-y:auto; }
-input, select { padding:10px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; }
+input, select { padding:10px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; }
+
+.shopping-cart { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; padding: 15px 25px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; z-index: 1001; }
 </style>
 </head>
 <body class="dark">
 
-<div id="login" style="max-width:320px; margin:80px auto; background:var(--card); padding:20px; border-radius:12px; text-align: center;">
+<div id="login" style="max-width:320px; margin:80px auto; padding:20px; text-align:center;">
     <h2>Maikman Stock</h2>
     <input id="email" type="email" placeholder="Email" style="margin-bottom:10px">
     <input id="password" type="password" placeholder="Contraseña" style="margin-bottom:20px">
-    <button onclick="login()" style="width:100%; padding:12px; background:var(--accent); border:none; border-radius:6px; color:white;">Entrar</button>
-    <p id="error" style="color:red; margin-top:10px;"></p>
+    <button onclick="login()" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Entrar</button>
+    <p id="error" style="color:red"></p>
 </div>
 
 <div id="app">
@@ -63,7 +65,7 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     </nav>
 
     <section id="tab-maquetas" class="content-section active">
-        <div id="controls" style="display:flex; gap:10px; margin-bottom:20px;">
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
             <input id="search" placeholder="Buscar maqueta..." oninput="renderMaquetas()">
             <button onclick="openModal()">➕ Añadir</button>
         </div>
@@ -73,54 +75,69 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     <section id="tab-pinturas" class="content-section">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
             <select id="brandFilter" onchange="renderPaintCatalog()"></select>
-            <input id="paintSearch" placeholder="Buscar color..." onkeyup="renderPaintCatalog()">
+            <input id="paintSearch" placeholder="Filtrar catálogo..." onkeyup="renderPaintCatalog()">
         </div>
         <div id="paintCatalog" class="paint-grid"></div>
     </section>
+
+    <div class="shopping-cart" onclick="exportShoppingList()">
+        🛒 Lista de Compra (<span id="cartCount">0</span>)
+    </div>
 </div>
 
 <div id="modal" class="modal">
     <div class="modal-content">
         <h3 id="modalTitle">Nuevo modelo</h3>
         <input id="form_id" type="hidden">
-        <input id="codigo" placeholder="Código">
-        <input id="fabricante" placeholder="Fabricante">
-        <input id="modelo" placeholder="Modelo">
+        <input id="codigo" placeholder="Código (Ej: 35210)">
+        <input id="fabricante" placeholder="Fabricante (Ej: Tamiya)">
+        <input id="modelo" placeholder="Nombre del Modelo">
         <input id="precio" type="number" step="0.01" placeholder="Precio (€)">
-        <b>Imagen Principal</b>
+        <b>Imagen de portada</b>
         <input type="file" id="fotoFile" accept="image/*">
         <button onclick="guardarModelo()">Guardar</button>
         <button onclick="closeModal()">Cancelar</button>
     </div>
 </div>
 
+<div id="paintsModal" class="modal">
+    <div class="modal-content">
+        <h3 id="paintsModalTitle">Pinturas Necesarias</h3>
+        <div style="display:flex; gap:5px;">
+            <select id="addPaintSelect" style="flex-grow:1"></select>
+            <button onclick="vincularPinturaAModelo()">Añadir</button>
+        </div>
+        <div id="modelPaintsList" style="margin-top:15px; display:flex; flex-direction:column; gap:8px;"></div>
+        <button onclick="document.getElementById('paintsModal').style.display='none'">Cerrar</button>
+    </div>
+</div>
+
 <div id="infoModal" class="modal">
     <div class="modal-content">
-        <h3 id="infoTitle">Detalles del Modelo</h3>
-        <div id="infoDetails" style="font-size: 14px; opacity: 0.9;"></div>
+        <h3 id="infoTitle">Info</h3>
+        <div id="infoDetails"></div>
         <hr>
-        <b>Galería de Imágenes</b>
-        <div id="galleryGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;"></div>
+        <b>Galería</b>
+        <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;"></div>
         <input type="file" id="galleryFile" accept="image/*" onchange="subirAFotoGaleria()">
         <button onclick="document.getElementById('infoModal').style.display='none'">Cerrar</button>
     </div>
 </div>
 
-<div id="paintsModal" class="modal">
+<div id="configModal" class="modal">
     <div class="modal-content">
-        <h3>Pinturas para este modelo</h3>
-        <div id="modelPaintsList"></div>
-        <hr>
-        <select id="addPaintSelect"></select>
-        <button onclick="vincularPinturaAModelo()">Añadir Pintura</button>
-        <button onclick="document.getElementById('paintsModal').style.display='none'">Cerrar</button>
+        <h3>Configuración</h3>
+        <button onclick="document.body.classList.toggle('light')">🌓 Cambiar Tema</button>
+        <button onclick="exportarExcel()">📊 Exportar Excel</button>
+        <button onclick="signOutUser()" style="background:var(--danger)">Cerrar Sesión</button>
+        <button onclick="document.getElementById('configModal').style.display='none'">Cerrar</button>
     </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
@@ -138,24 +155,25 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 let modelos = [];
-let currentModelId = null; 
 let paintCatalogData = {};
+let currentModelId = null;
 let myPaints = JSON.parse(localStorage.getItem('maikman_paints')) || { have: [], buy: [] };
 
-// --- LOGIN Y ESTADO ---
+// --- LOGIN ---
+window.login = () => {
+    const e = document.getElementById('email').value;
+    const p = document.getElementById('password').value;
+    signInWithEmailAndPassword(auth, e, p).catch(err => document.getElementById('error').innerText = "Acceso denegado");
+};
+window.signOutUser = () => signOut(auth);
+
 onAuthStateChanged(auth, user => {
     document.getElementById("login").style.display = user ? "none" : "block";
     document.getElementById("app").style.display = user ? "block" : "none";
     if (user) { cargarModelos(); cargarCatalogoPinturas(); }
 });
 
-window.login = () => {
-    const e = document.getElementById('email').value;
-    const p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(err => document.getElementById('error').innerText = "Error de acceso");
-};
-
-// --- NAVEGACIÓN ---
+// --- PESTAÑAS ---
 window.switchTab = (tabId) => {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -163,11 +181,10 @@ window.switchTab = (tabId) => {
     event.currentTarget.classList.add('active');
 };
 
-// --- GESTIÓN DE MODELOS (LOS 4 BOTONES) ---
+// --- GESTIÓN DE MODELOS ---
 async function cargarModelos() {
     const snap = await getDocs(collection(db, "modelos"));
-    modelos = [];
-    snap.forEach(d => modelos.push({ id: d.id, ...d.data() }));
+    modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderMaquetas();
 }
 
@@ -175,30 +192,50 @@ window.renderMaquetas = () => {
     const grid = document.getElementById("grid");
     const q = document.getElementById("search").value.toLowerCase();
     grid.innerHTML = "";
-
     modelos.filter(m => (m.modelo||"").toLowerCase().includes(q) || (m.fabricante||"").toLowerCase().includes(q))
     .forEach(m => {
         grid.innerHTML += `
             <div class="card">
                 <img src="${m.foto || 'https://via.placeholder.com/200?text=Sin+Foto'}">
-                <div class="card-info">
-                    <strong>${m.modelo}</strong><br>
-                    <small>${m.fabricante} [${m.codigo}]</small>
-                </div>
+                <div style="margin-bottom:10px"><b>${m.modelo}</b><br><small>${m.fabricante}</small></div>
                 <div class="card-btns">
-                    <button class="btn-action btn-edit" onclick="editarModelo('${m.id}')">✏️ Editar</button>
-                    <button class="btn-action btn-delete" onclick="borrarModelo('${m.id}')">🗑️ Borrar</button>
-                    <button class="btn-action btn-paints" onclick="abrirPinturasModelo('${m.id}')">🎨 Pinturas</button>
-                    <button class="btn-action btn-info" onclick="abrirInfoModelo('${m.id}')">ℹ️ Info</button>
+                    <button class="btn-action btn-edit" onclick="editarModelo('${m.id}')">✏️</button>
+                    <button class="btn-action btn-delete" onclick="borrarModelo('${m.id}')">🗑️</button>
+                    <button class="btn-action btn-paints" onclick="abrirPinturasModelo('${m.id}')">🎨</button>
+                    <button class="btn-action btn-info" onclick="abrirInfoModelo('${m.id}')">ℹ️</button>
                 </div>
             </div>`;
     });
 };
 
-// 1. EDITAR
+window.guardarModelo = async () => {
+    const id = document.getElementById("form_id").value;
+    const file = document.getElementById('fotoFile').files[0];
+    let fotoURL = "";
+    if(file) {
+        const r = ref(storage, `modelos/${Date.now()}_${file.name}`);
+        await uploadBytes(r, file);
+        fotoURL = await getDownloadURL(r);
+    }
+    const data = {
+        codigo: document.getElementById('codigo').value,
+        fabricante: document.getElementById('fabricante').value,
+        modelo: document.getElementById('modelo').value,
+        precio: document.getElementById('precio').value
+    };
+    if(fotoURL) data.foto = fotoURL;
+
+    if(id) await updateDoc(doc(db, "modelos", id), data);
+    else await addDoc(collection(db, "modelos"), { ...data, paints: [], galeria: [] });
+
+    closeModal(); cargarModelos();
+};
+
+window.borrarModelo = async (id) => { if(confirm("¿Borrar?")) { await deleteDoc(doc(db, "modelos", id)); cargarModelos(); } };
+window.openModal = () => { document.getElementById("form_id").value = ""; document.getElementById("modal").style.display = "flex"; };
+window.closeModal = () => document.getElementById("modal").style.display = "none";
 window.editarModelo = (id) => {
     const m = modelos.find(x => x.id === id);
-    document.getElementById("modalTitle").innerText = "Editar Modelo";
     document.getElementById("form_id").value = m.id;
     document.getElementById("codigo").value = m.codigo;
     document.getElementById("fabricante").value = m.fabricante;
@@ -207,125 +244,131 @@ window.editarModelo = (id) => {
     document.getElementById("modal").style.display = "flex";
 };
 
-// 2. BORRAR
-window.borrarModelo = async (id) => {
-    if(confirm("¿Eliminar definitivamente esta maqueta?")) {
-        await deleteDoc(doc(db, "modelos", id));
-        cargarModelos();
-    }
-};
-
-// 3. PINTURAS DEL MODELO
-window.abrirPinturasModelo = (id) => {
-    currentModelId = id;
-    const m = modelos.find(x => x.id === id);
-    const list = document.getElementById("modelPaintsList");
-    list.innerHTML = (m.paints || []).length > 0 ? m.paints.join(", ") : "No hay pinturas asignadas.";
-    document.getElementById("paintsModal").style.display = "flex";
-};
-
-// 4. INFO / GALERÍA
-window.abrirInfoModelo = (id) => {
-    currentModelId = id;
-    const m = modelos.find(x => x.id === id);
-    document.getElementById("infoTitle").innerText = m.modelo;
-    document.getElementById("infoDetails").innerHTML = `
-        <b>Fabricante:</b> ${m.fabricante}<br>
-        <b>Código:</b> ${m.codigo}<br>
-        <b>Precio:</b> ${m.precio ? m.precio + '€' : 'No indicado'}
-    `;
-    
-    // Render galería
-    const gal = document.getElementById("galleryGrid");
-    gal.innerHTML = "";
-    (m.galeria || []).forEach(img => {
-        gal.innerHTML += `<img src="${img}" style="width:100%; border-radius:4px">`;
-    });
-    
-    document.getElementById("infoModal").style.display = "flex";
-};
-
-// --- GUARDAR (NUEVO O EDITAR) ---
-window.guardarModelo = async () => {
-    const id = document.getElementById("form_id").value;
-    const file = document.getElementById('fotoFile').files[0];
-    let fotoURL = "";
-
-    if(file) {
-        const r = ref(storage, "modelos/" + Date.now());
-        await uploadBytes(r, file);
-        fotoURL = await getDownloadURL(r);
-    }
-
-    const data = {
-        codigo: document.getElementById('codigo').value,
-        fabricante: document.getElementById('fabricante').value,
-        modelo: document.getElementById('modelo').value,
-        precio: document.getElementById('precio').value,
-    };
-    if(fotoURL) data.foto = fotoURL;
-
-    if(id) {
-        await updateDoc(doc(db, "modelos", id), data);
-    } else {
-        data.paints = [];
-        data.galeria = [];
-        await addDoc(collection(db, "modelos"), data);
-    }
-
-    closeModal();
-    cargarModelos();
-};
-
-window.openModal = () => {
-    document.getElementById("modalTitle").innerText = "Nuevo Modelo";
-    document.getElementById("form_id").value = "";
-    document.getElementById("modal").style.display = "flex";
-};
-
-window.closeModal = () => document.getElementById("modal").style.display = "none";
-
-// --- CATÁLOGO DE PINTURAS ---
+// --- SINCRONIZACIÓN PINTURAS ---
 async function cargarCatalogoPinturas() {
     try {
         const res = await fetch('pinturas.json');
         paintCatalogData = await res.json();
-        const selector = document.getElementById("brandFilter");
-        const addSelector = document.getElementById("addPaintSelect");
-        
+        const bFilter = document.getElementById("brandFilter");
+        const aSelect = document.getElementById("addPaintSelect");
+        bFilter.innerHTML = ""; aSelect.innerHTML = "";
         Object.keys(paintCatalogData).forEach(brand => {
-            selector.innerHTML += `<option value="${brand}">${brand}</option>`;
+            bFilter.innerHTML += `<option value="${brand}">${brand}</option>`;
+            paintCatalogData[brand].forEach(p => {
+                aSelect.innerHTML += `<option value="${p.id}">${brand} - ${p.id}</option>`;
+            });
         });
         renderPaintCatalog();
-    } catch (e) { console.error("Falta pinturas.json"); }
+    } catch(e) { console.error("Error cargando pinturas.json"); }
 }
 
 window.renderPaintCatalog = () => {
     const brand = document.getElementById("brandFilter").value;
+    const search = document.getElementById("paintSearch").value.toLowerCase();
     const container = document.getElementById("paintCatalog");
     container.innerHTML = "";
-    
-    paintCatalogData[brand].forEach(p => {
-        const hasIt = myPaints.have.includes(p.id);
-        const buyIt = myPaints.buy.includes(p.id);
+    paintCatalogData[brand].filter(p => p.id.toLowerCase().includes(search) || p.nombre.toLowerCase().includes(search))
+    .forEach(p => {
+        const has = myPaints.have.includes(p.id);
+        const buy = myPaints.buy.includes(p.id);
         container.innerHTML += `
             <div class="paint-item">
                 <div class="color-swatch" style="background:${p.hex}"></div>
                 <div style="flex-grow:1"><b>${p.id}</b><br><small>${p.nombre}</small></div>
-                <button onclick="togglePaint('${p.id}', 'have')" style="background:${hasIt?'var(--success)':'#334155'}">✅</button>
-                <button onclick="togglePaint('${p.id}', 'buy')" style="background:${buyIt?'var(--danger)':'#334155'}">🛒</button>
+                <button class="btn-mini ${has?'active-have':''}" onclick="togglePaintSync('${p.id}', 'have')">✅</button>
+                <button class="btn-mini ${buy?'active-buy':''}" onclick="togglePaintSync('${p.id}', 'buy')">🛒</button>
             </div>`;
     });
+    document.getElementById("cartCount").innerText = myPaints.buy.length;
 };
 
-window.togglePaint = (id, type) => {
+window.abrirPinturasModelo = (id) => {
+    currentModelId = id;
+    const m = modelos.find(x => x.id === id);
+    const container = document.getElementById("modelPaintsList");
+    container.innerHTML = "";
+    (m.paints || []).forEach(pId => {
+        const info = buscarPintura(pId);
+        const has = myPaints.have.includes(pId);
+        const buy = myPaints.buy.includes(pId);
+        container.innerHTML += `
+            <div class="paint-row-mini">
+                <div class="color-swatch" style="background:${info.hex}"></div>
+                <div style="flex-grow:1"><b>${pId}</b></div>
+                <button class="btn-mini ${has?'active-have':''}" onclick="togglePaintSync('${pId}', 'have')">✅</button>
+                <button class="btn-mini ${buy?'active-buy':''}" onclick="togglePaintSync('${pId}', 'buy')">🛒</button>
+                <button onclick="desvincularPintura('${pId}')" style="background:none; border:none; color:red; cursor:pointer">✖</button>
+            </div>`;
+    });
+    document.getElementById("paintsModal").style.display = "flex";
+};
+
+window.togglePaintSync = (id, type) => {
     const idx = myPaints[type].indexOf(id);
     if(idx > -1) myPaints[type].splice(idx, 1);
     else myPaints[type].push(id);
     localStorage.setItem('maikman_paints', JSON.stringify(myPaints));
     renderPaintCatalog();
+    if(currentModelId) abrirPinturasModelo(currentModelId);
 };
 
+window.vincularPinturaAModelo = async () => {
+    const pId = document.getElementById("addPaintSelect").value;
+    const m = modelos.find(x => x.id === currentModelId);
+    if(!m.paints) m.paints = [];
+    if(!m.paints.includes(pId)) {
+        m.paints.push(pId);
+        await updateDoc(doc(db, "modelos", currentModelId), { paints: m.paints });
+        abrirPinturasModelo(currentModelId);
+    }
+};
+
+window.desvincularPintura = async (pId) => {
+    const m = modelos.find(x => x.id === currentModelId);
+    m.paints = m.paints.filter(id => id !== pId);
+    await updateDoc(doc(db, "modelos", currentModelId), { paints: m.paints });
+    abrirPinturasModelo(currentModelId);
+};
+
+function buscarPintura(id) {
+    for(let b in paintCatalogData) {
+        let p = paintCatalogData[b].find(x => x.id === id);
+        if(p) return p;
+    }
+    return { nombre: "---", hex: "#333" };
+}
+
+// --- INFO Y GALERÍA ---
+window.abrirInfoModelo = (id) => {
+    currentModelId = id;
+    const m = modelos.find(x => x.id === id);
+    document.getElementById("infoTitle").innerText = m.modelo;
+    document.getElementById("infoDetails").innerHTML = `<b>Marca:</b> ${m.fabricante}<br><b>Precio:</b> ${m.precio||'--'}€`;
+    const gal = document.getElementById("galleryGrid");
+    gal.innerHTML = "";
+    (m.galeria || []).forEach(img => gal.innerHTML += `<img src="${img}" style="width:100%; border-radius:4px">`);
+    document.getElementById("infoModal").style.display = "flex";
+};
+
+window.subirAFotoGaleria = async () => {
+    const file = document.getElementById('galleryFile').files[0];
+    if(!file) return;
+    const r = ref(storage, `galeria/${Date.now()}_${file.name}`);
+    await uploadBytes(r, file);
+    const url = await getDownloadURL(r);
+    const m = modelos.find(x => x.id === currentModelId);
+    if(!m.galeria) m.galeria = [];
+    m.galeria.push(url);
+    await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
+    abrirInfoModelo(currentModelId);
+};
+
+window.openConfigModal = () => document.getElementById("configModal").style.display = "flex";
+window.exportShoppingList = () => {
+    if(myPaints.buy.length === 0) return alert("Lista vacía");
+    navigator.clipboard.writeText("Lista Maikman: " + myPaints.buy.join(", "));
+    alert("Copiado al portapapeles");
+};
 </script>
 </body>
 </html>
