@@ -428,4 +428,52 @@
     {"id": "Cool Gray 11 C", "nombre": "Pantone Cool Gray 11 C", "hex": "#63666A"},
     {"id": "877 C", "nombre": "Pantone 877 C (Metallic Silver)", "hex": "#8A8D91"}
   ]
+  
+  "AMMO by Mig Jimenez - Alclad II (Lacquer Metallics)": [
+    // Regular Finishes (base metálicos)
+    {"id": "ALC-101", "nombre": "Aluminium", "acabado": "Regular Metallic", "hex_approx": "#C0C0C0"},
+    {"id": "ALC-102", "nombre": "Duraluminium", "acabado": "Regular Metallic", "hex_approx": "#A9A9A9"},
+    {"id": "ALC-103", "nombre": "Dark Aluminium", "acabado": "Regular Metallic", "hex_approx": "#808080"},
+    {"id": "ALC-104", "nombre": "Pale Burnt Metal", "acabado": "Regular Metallic", "hex_approx": "#B8860B"},
+    {"id": "ALC-105", "nombre": "Polished Aluminium (High Shine)", "acabado": "High Shine Metallic", "hex_approx": "#D3D3D3"},
+    {"id": "ALC-106", "nombre": "White Aluminium", "acabado": "Regular Metallic", "hex_approx": "#E0E0E0"},
+    {"id": "ALC-108", "nombre": "Pale Gold", "acabado": "Regular Metallic", "hex_approx": "#D4AF37"},
+    {"id": "ALC-109", "nombre": "Polished Brass", "acabado": "High Shine Metallic", "hex_approx": "#B8860B"},
+    {"id": "ALC-110", "nombre": "Copper", "acabado": "Regular Metallic", "hex_approx": "#B87333"},
+    {"id": "ALC-111", "nombre": "Magnesium", "acabado": "Regular Metallic", "hex_approx": "#B0C4DE"},
+    {"id": "ALC-112", "nombre": "Steel", "acabado": "Regular Metallic", "hex_approx": "#A9A9A9"},
+    {"id": "ALC-113", "nombre": "Jet Exhaust", "acabado": "Special Effects", "hex_approx": "#4D4D4D"},
+    {"id": "ALC-114", "nombre": "Titanium", "acabado": "Regular Metallic", "hex_approx": "#D3D3D3"},
+    {"id": "ALC-115", "nombre": "Stainless Steel", "acabado": "Regular Metallic", "hex_approx": "#C0C0C0"},
+    {"id": "ALC-117", "nombre": "Dull Aluminium", "acabado": "Matte Metallic", "hex_approx": "#A9A9A9"},
+    {"id": "ALC-118", "nombre": "Gold Titanium", "acabado": "Regular Metallic", "hex_approx": "#DAA520"},
+    {"id": "ALC-119", "nombre": "Airframe Aluminium", "acabado": "Regular Metallic", "hex_approx": "#B0C4DE"},
+
+    // Transparent Finishes (tinte sobre metal)
+    {"id": "ALC-201", "nombre": "Aluminium", "acabado": "Transparent Base"},
+    {"id": "ALC-203", "nombre": "Steel", "acabado": "Transparent"},
+    {"id": "ALC-204", "nombre": "Burnt Iron", "acabado": "Transparent"},
+    {"id": "ALC-305", "nombre": "Black Primer & Microfiller", "acabado": "Primer"},
+    {"id": "ALC-306", "nombre": "White Primer & Microfiller", "acabado": "Primer"},
+    {"id": "ALC-307", "nombre": "Lacquer Thinner & Cleaner", "acabado": "Thinner (no color)"},
+
+    // Hot Metal / Exhaust Finishes
+    {"id": "ALC-401", "nombre": "Die Burnt Metal", "acabado": "Hot Metal"},
+    {"id": "ALC-402", "nombre": "Burnt Metal", "acabado": "Hot Metal"},
+    {"id": "ALC-403", "nombre": "Burnt Iron", "acabado": "Hot Metal"},
+    {"id": "ALC-404", "nombre": "Burnt Iron 2", "acabado": "Hot Metal"},
+    {"id": "ALC-405", "nombre": "Exhaust Manifold", "acabado": "Hot Metal"},
+    {"id": "ALC-406", "nombre": "Jet Exhaust", "acabado": "Hot Metal"},
+    {"id": "ALC-407", "nombre": "Opaque Black Primer", "acabado": "Primer"},
+
+    // Special Effects / Others
+    {"id": "ALC-301", "nombre": "Gloss Black Base", "acabado": "Base Coat"},
+    {"id": "ALC-302", "nombre": "Matte Black Base", "acabado": "Base Coat"},
+    {"id": "ALC-308", "nombre": "Transparent Smoke", "acabado": "Transparent"},
+    {"id": "ALC-309", "nombre": "Transparent Blue", "acabado": "Transparent"},
+    {"id": "ALC-310", "nombre": "Klear Kote Gloss", "acabado": "Clear Gloss"},
+    {"id": "ALC-311", "nombre": "Klear Kote Semi-Matte", "acabado": "Semi-Matte Clear"},
+    {"id": "ALC-312", "nombre": "Klear Kote Flat", "acabado": "Flat Clear"}
+  ]
 }
+
