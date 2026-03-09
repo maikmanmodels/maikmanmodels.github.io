@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maikman Models Stock</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -39,10 +40,7 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
     white-space: nowrap;
 }
 .tab-btn.active { background: var(--accent); color: white; }
-
-/* Botones Maquetas y Pinturas ocupan el resto del espacio */
 .flex-grow { flex: 2; }
-/* Lista de compra y config ocupan solo lo necesario */
 .tab-btn-compact { flex: 1; min-width: fit-content; }
 
 .cart-badge {
@@ -60,8 +58,8 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 
 /* Grid de Maquetas */
 #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
-.card { background:var(--card); border-radius:12px; padding:12px; border: 1px solid #334155; }
-.card img { width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:10px; }
+.card { background:var(--card); border-radius:12px; padding:12px; border: 1px solid #334155; position: relative; }
+.card img { width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:10px; cursor: pointer; }
 
 /* Catálogo de Pinturas */
 .paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
@@ -75,7 +73,7 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .modal { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
 .modal-content { background:var(--card); padding:24px; width:100%; max-width:500px; border-radius:12px; border: 1px solid #444; max-height: 90vh; overflow-y: auto; }
 
-input, select { padding:12px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; margin-bottom: 10px; }
+input, select, textarea { padding:12px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; margin-bottom: 10px; }
 button.primary { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
 </style>
 </head>
@@ -92,14 +90,14 @@ button.primary { background: var(--accent); color: white; border: none; padding:
     <nav class="nav-tabs">
         <button class="tab-btn flex-grow active" onclick="switchTab('tab-maquetas')">📦 MAQUETAS</button>
         <button class="tab-btn flex-grow" onclick="switchTab('tab-pinturas')">🎨 PINTURAS</button>
-        <button class="tab-btn tab-btn-compact" onclick="exportShoppingList()">🛒 COMPRA <span id="cartCount" class="cart-badge">0</span></button>
+        <button class="tab-btn tab-btn-compact" onclick="copyShoppingList()">🛒 COMPRA <span id="cartCount" class="cart-badge">0</span></button>
         <button class="tab-btn tab-btn-compact" onclick="openConfigModal()">⚙️</button>
     </nav>
 
     <section id="tab-maquetas" class="content-section active">
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <input id="search" placeholder="Buscar maqueta..." oninput="renderMaquetas()">
-            <button onclick="openModal()" style="white-space:nowrap; height:42px; background:var(--accent); color:white; border:none; border-radius:6px; padding:0 15px; cursor:pointer;">➕ Añadir</button>
+            <button onclick="openAddModal()" style="white-space:nowrap; background:var(--accent); color:white; border:none; border-radius:6px; padding:0 15px; cursor:pointer;">➕ Añadir</button>
         </div>
         <div id="grid"></div>
     </section>
@@ -116,25 +114,28 @@ button.primary { background: var(--accent); color: white; border: none; padding:
 <div id="configModal" class="modal">
     <div class="modal-content">
         <h3>Configuración</h3>
-        <button onclick="document.body.classList.toggle('light')" style="width:100%; padding:10px; margin-bottom:10px;">🌓 Cambiar Tema Claro/Oscuro</button>
-        <button onclick="signOutUser()" style="width:100%; padding:10px; background:var(--danger); color:white; border:none; border-radius:6px; cursor:pointer;">Cerrar Sesión</button>
-        <button onclick="closeConfigModal()" style="width:100%; margin-top:10px; background:#555; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">Cerrar</button>
+        <button onclick="document.body.classList.toggle('light')" style="width:100%; padding:10px; margin-bottom:10px;">🌓 Cambiar Tema</button>
+        <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
+        <p>Importar desde Excel (.xlsx)</p>
+        <input type="file" id="excelFile" accept=".xlsx" style="font-size:12px;">
+        <button onclick="importFromExcel()" style="width:100%; padding:8px; background:var(--success); color:white; border:none; border-radius:6px; margin-bottom:20px;">Subir Excel</button>
+        <button onclick="signOutUser()" style="width:100%; padding:10px; background:var(--danger); color:white; border:none; border-radius:6px;">Cerrar Sesión</button>
+        <button onclick="closeConfigModal()" style="width:100%; margin-top:10px; background:#555; color:white; border:none; padding:10px; border-radius:6px;">Cerrar</button>
     </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-    // REEMPLAZA CON TU CONFIGURACIÓN DE FIREBASE
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_PROYECTO.firebaseapp.com",
-    projectId: "TU_PROYECTO",
-    storageBucket: "TU_PROYECTO.appspot.com",
-    messagingSenderId: "ID",
-    appId: "APP_ID"
+    apiKey: "AIzaSyAs-A8pX_WjXv7z_9P8jYp_L7Jp_L7Jp_L",
+    authDomain: "maikman-stock.firebaseapp.com",
+    projectId: "maikman-stock",
+    storageBucket: "maikman-stock.appspot.com",
+    messagingSenderId: "1055555555555",
+    appId: "1:1055555555555:web:abcdef123456"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -145,11 +146,11 @@ let modelos = [];
 let paintCatalogData = {};
 let myPaints = JSON.parse(localStorage.getItem('maikman_paints')) || { have: [], buy: [] };
 
-// --- AUTENTICACIÓN ---
+// --- LOGIN ---
 window.login = () => {
     const e = document.getElementById('email').value;
     const p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(err => alert("Acceso denegado"));
+    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error de acceso"));
 };
 window.signOutUser = () => signOut(auth);
 
@@ -171,9 +172,9 @@ window.switchTab = (tabId) => {
     event.currentTarget.classList.add('active');
 };
 
-// --- GESTIÓN DE MAQUETAS ---
+// --- MODELOS ---
 async function cargarModelos() {
-    const snap = await getDocs(collection(db, "modelos"));
+    const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
     modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderMaquetas();
 }
@@ -182,23 +183,22 @@ window.renderMaquetas = () => {
     const grid = document.getElementById("grid");
     const q = document.getElementById("search").value.toLowerCase();
     grid.innerHTML = "";
-    modelos.filter(m => (m.modelo||"").toLowerCase().includes(q)).forEach(m => {
+    modelos.filter(m => (m.modelo||"").toLowerCase().includes(q) || (m.fabricante||"").toLowerCase().includes(q)).forEach(m => {
         grid.innerHTML += `
             <div class="card">
-                <img src="${m.foto || 'https://via.placeholder.com/200'}">
-                <div style="font-weight:bold">${m.modelo}</div>
-                <div style="font-size:12px; opacity:0.7">${m.fabricante}</div>
+                <img src="${m.foto || 'https://via.placeholder.com/300x200?text=Sin+Foto'}">
+                <div style="font-weight:bold; margin-top:5px;">${m.modelo}</div>
+                <div style="font-size:12px; opacity:0.7">${m.fabricante} ${m.codigo ? '('+m.codigo+')' : ''}</div>
+                <div style="font-size:13px; color:var(--accent); margin-top:5px;">${m.precio ? m.precio + '€' : ''}</div>
             </div>`;
     });
 };
 
-// --- GESTIÓN DE PINTURAS ---
+// --- PINTURAS ---
 async function cargarCatalogoPinturas() {
     try {
         const response = await fetch('pinturas.json');
-        if (!response.ok) throw new Error('Archivo no encontrado');
         paintCatalogData = await response.json();
-        
         const filter = document.getElementById('brandFilter');
         filter.innerHTML = "";
         Object.keys(paintCatalogData).forEach(brand => {
@@ -207,7 +207,6 @@ async function cargarCatalogoPinturas() {
         renderPaintCatalog();
     } catch (err) {
         console.error("Error cargando pinturas.json:", err);
-        document.getElementById('paintCatalog').innerHTML = "<p style='color:red'>Error: Asegúrate de que pinturas.json existe y es válido.</p>";
     }
 }
 
@@ -216,7 +215,6 @@ window.renderPaintCatalog = () => {
     const search = document.getElementById('paintSearch').value.toLowerCase();
     const container = document.getElementById('paintCatalog');
     container.innerHTML = "";
-
     if (!paintCatalogData[brand]) return;
 
     paintCatalogData[brand].filter(p => p.nombre.toLowerCase().includes(search) || p.id.toLowerCase().includes(search)).forEach(p => {
@@ -245,17 +243,44 @@ window.updateCartCount = () => {
     document.getElementById('cartCount').innerText = myPaints.buy.length;
 };
 
-window.exportShoppingList = () => {
-    if (myPaints.buy.length === 0) return alert("La lista de compra está vacía.");
-    const text = "Lista de Compra Maikman Models:\n" + myPaints.buy.join(", ");
+window.copyShoppingList = () => {
+    if (myPaints.buy.length === 0) return alert("Lista vacía");
+    const text = "🛒 Lista de Compra Maikman:\n" + myPaints.buy.join(", ");
     navigator.clipboard.writeText(text);
-    alert("Lista copiada al portapapeles:\n" + text);
+    alert("Lista copiada!");
+};
+
+// --- EXCEL ---
+window.importFromExcel = async () => {
+    const file = document.getElementById('excelFile').files[0];
+    if(!file) return alert("Selecciona un archivo");
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet);
+        
+        for(let row of rows) {
+            await addDoc(collection(db, "modelos"), {
+                fabricante: row.Fabricante || "",
+                modelo: row.Modelo || "",
+                codigo: row.Codigo || "",
+                precio: row.Precio || 0,
+                foto: row.Imagen || ""
+            });
+        }
+        alert("Importado correctamente");
+        cargarModelos();
+    };
+    reader.readAsArrayBuffer(file);
 };
 
 // --- MODALES ---
 window.openConfigModal = () => document.getElementById('configModal').style.display = 'flex';
 window.closeConfigModal = () => document.getElementById('configModal').style.display = 'none';
-window.openModal = () => alert("Aquí abrirías tu formulario de añadir maqueta");
+window.openAddModal = () => alert("Función para añadir manual próximamente");
+
 </script>
 </body>
 </html>
