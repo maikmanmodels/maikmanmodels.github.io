@@ -72,8 +72,8 @@
   {"id": "XF-91", "nombre": "IJN Grey (Yokosuka Arsenal)", "hex": "#a0a8b0"},
   {"id": "XF-92", "nombre": "Yellow-Brown (DAK 1941)", "hex": "#c8a04c"},
   {"id": "XF-93", "nombre": "Light Brown (DAK 1942)", "hex": "#b8860b"}
-]
-  ],
+],
+  
   "Tamiya X (Acrílicos Brillantes)": [
   {"id": "X-1", "nombre": "Black", "hex": "#000000"},
   {"id": "X-2", "nombre": "White", "hex": "#ffffff"},
@@ -108,6 +108,7 @@
   {"id": "X-33", "nombre": "Bronze", "hex": "#cd7f32"},
   {"id": "X-34", "nombre": "Metallic Brown", "hex": "#a52a2a"}
   ],
+  
   "Tamiya LP (Lacquer Paint)": [
   {"id": "LP-1", "nombre": "Black", "hex": "#000000"},
   {"id": "LP-2", "nombre": "White", "hex": "#ffffff"},
@@ -300,6 +301,7 @@
   {"id": "TS-101", "nombre": "Base White", "hex": "#ffffff"},
   {"id": "TS-102", "nombre": "Cobalt Green", "hex": "#008b8b"}
 ],
+  
 "Mr.Color (Gunze Sangyo)": [
   {"id": "C1", "nombre": "Gloss White", "hex": "#ffffff"},
   {"id": "C2", "nombre": "Gloss Black", "hex": "#000000"},
@@ -382,6 +384,7 @@
   {"id": "C359", "nombre": "FS Grey FS36495", "hex": "#d3d3d3"},
   {"id": "C360", "nombre": "Dark Ghost Grey FS36320", "hex": "#778899"}
 ],
+  
   "Humbrol Enamel": [
   {"id": "1", "nombre": "Grey Primer", "hex": "#808080"},
   {"id": "2", "nombre": "Emerald", "hex": "#50c878"},
@@ -507,6 +510,7 @@
   {"id": "226", "nombre": "PRU Blue", "hex": "#4169e1"},
   {"id": "230", "nombre": "Desert Sand", "hex": "#edc9af"}
 ],
+  
   "RAL Colours": [
   {"id": "RAL 1000", "nombre": "Green beige", "hex": "#cdba88"},
   {"id": "RAL 1001", "nombre": "Beige", "hex": "#d0b084"},
@@ -717,6 +721,7 @@
   {"id": "RAL 9022", "nombre": "Pearl light grey", "hex": "#9e9e9e"},
   {"id": "RAL 9023", "nombre": "Pearl dark grey", "hex": "#7d7d7d"}
 ],
+  
   "AMMO Alclad II": [
   {"id": "ALC-101", "nombre": "Aluminium", "hex": "#c0c0c0"},
   {"id": "ALC-102", "nombre": "Duraluminium", "hex": "#a9a9a9"},
