@@ -264,7 +264,7 @@
   {"id": "TS-64", "nombre": "Dark Mica Blue", "hex": "#00008b"},
   {"id": "TS-65", "nombre": "Pearl Clear", "hex": "#ffffff"},
   {"id": "TS-66", "nombre": "IJN Gray Sasebo", "hex": "#b0b8c0"},
-  {"id": "TS-67", "nombre": "IJN Gray Sasebo", "hex": "#b0b8c0"},  // Similar a TS-66
+  {"id": "TS-67", "nombre": "IJN Gray Sasebo", "hex": "#b0b8c0"},
   {"id": "TS-68", "nombre": "Wooden Deck Tan", "hex": "#d0c0a0"},
   {"id": "TS-69", "nombre": "Linoleum Deck Brown", "hex": "#6c4c3c"},
   {"id": "TS-70", "nombre": "Olive Drab JGSDF", "hex": "#6b8e23"},
