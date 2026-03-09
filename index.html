@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Maikman Models - Stock & Colors Pro</title>
+<title>Maikman Models - Stock & Colors Pro v4.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
@@ -82,9 +82,7 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .modal-content { background:var(--card); padding:24px; width:100%; max-width:500px; border-radius:12px; display:flex; flex-direction:column; gap:12px; max-height:90vh; overflow-y:auto; }
 input, select { padding:10px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; }
 
-/* Estilo específico para la lista de compra */
 .cart-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #334155; }
-.cart-item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
 </style>
 </head>
 <body class="dark">
@@ -100,7 +98,7 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     <nav class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('tab-maquetas')">📦 MAQUETAS</button>
         <button class="tab-btn" onclick="switchTab('tab-pinturas')">🎨 PINTURAS</button>
-        <button class="tab-btn tab-btn-compact" onclick="abrirModalCompra()">🛒 COMPRA <span id="cartCount" class="cart-badge">0</span></button>
+        <button class="tab-btn tab-btn-compact" onclick="abrirModalCompra()">🛒 <span id="cartCount" class="cart-badge">0</span></button>
         <button class="tab-btn tab-btn-compact" onclick="openConfigModal()">⚙️</button>
     </nav>
 
@@ -124,23 +122,60 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
 <div id="cartModal" class="modal">
     <div class="modal-content">
         <h3>Lista de Compra</h3>
-        <div id="cartListContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
-            </div>
+        <div id="cartListContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;"></div>
         <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-            <button onclick="exportarListaExcel(true)" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">📥 EXPORTAR MARCADOS</button>
-            <button onclick="exportarListaExcel(false)" style="background:var(--accent); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">💾 GUARDAR PARA DESPUÉS (NO MARCADOS)</button>
-            <button onclick="cerrarModalCompra()" style="background:#555; color:white; padding:10px; border:none; border-radius:6px; cursor:pointer;">Cerrar</button>
+            <button onclick="exportarListaExcel(true)" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">📥 EXPORTAR MARCADOS</button>
+            <button onclick="exportarListaExcel(false)" style="background:var(--accent); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">💾 GUARDAR NO MARCADOS</button>
+            <button onclick="cerrarModalCompra()" style="background:#555; color:white; padding:10px; border:none; border-radius:6px;">Cerrar</button>
         </div>
     </div>
 </div>
 
-<div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle"></h3><input type="hidden" id="form_id"><input id="form_codigo" placeholder="Código"><input id="form_fabricante" placeholder="Fabricante"><input id="form_modelo" placeholder="Modelo"><input id="form_precio" type="number" step="0.01" placeholder="Precio"><input type="file" id="form_fotoFile" accept="image/*"><button onclick="guardarModelo()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px;">Guardar</button><button onclick="closeFormModal()" style="background:#555; color:white; padding:10px; border:none; border-radius:6px;">Cancelar</button></div></div>
+<div id="formModal" class="modal">
+    <div class="modal-content">
+        <h3 id="formTitle"></h3>
+        <input type="hidden" id="form_id">
+        <input id="form_codigo" placeholder="Código">
+        <input id="form_fabricante" placeholder="Fabricante">
+        <input id="form_modelo" placeholder="Modelo">
+        <input id="form_precio" type="number" step="0.01" placeholder="Precio (€)">
+        <p style="font-size:12px; margin:0">Imagen principal:</p>
+        <input type="file" id="form_fotoFile" accept="image/*">
+        <button onclick="guardarModelo()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px;">Guardar</button>
+        <button onclick="closeFormModal()" style="background:#555; color:white; padding:10px; border:none; border-radius:6px;">Cancelar</button>
+    </div>
+</div>
 
-<div id="infoModal" class="modal"><div class="modal-content"><h3 id="infoTitle"></h3><div id="infoDetails"></div><hr style="border:0; border-top:1px solid #444;"><b>Galería</b><div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;"></div><input type="file" id="galleryFile" accept="image/*" onchange="subirAFotoGaleria()"><button onclick="document.getElementById('infoModal').style.display='none'" style="padding:10px;">Cerrar</button></div></div>
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h3 id="infoTitle"></h3>
+        <div id="infoDetails"></div>
+        <hr style="border:0; border-top:1px solid #444;">
+        <b>Galería</b>
+        <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;"></div>
+        <input type="file" id="galleryFile" accept="image/*" onchange="subirAFotoGaleria()">
+        <button onclick="document.getElementById('infoModal').style.display='none'" style="padding:10px; border-radius:6px; border:none;">Cerrar</button>
+    </div>
+</div>
 
-<div id="modelPaintsModal" class="modal"><div class="modal-content"><h3 id="modelPaintsTitle"></h3><div id="modelPaintsList" class="paint-grid" style="grid-template-columns: 1fr;"></div><button onclick="document.getElementById('modelPaintsModal').style.display='none'" style="padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Cerrar</button></div></div>
+<div id="modelPaintsModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modelPaintsTitle"></h3>
+        <div id="modelPaintsList" class="paint-grid" style="grid-template-columns: 1fr;"></div>
+        <button onclick="document.getElementById('modelPaintsModal').style.display='none'" style="padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Cerrar</button>
+    </div>
+</div>
 
-<div id="configModal" class="modal"><div class="modal-content"><h3>Configuración</h3><button onclick="document.body.classList.toggle('light')" style="padding:10px; margin-bottom:5px;">🌓 Cambiar Tema</button><button onclick="exportarExcelPrincipal()" style="padding:10px; margin-bottom:5px;">📊 Exportar Stock Completo</button><hr style="border:0; border-top:1px solid #444;"><button onclick="signOutUser()" style="background:var(--danger); color:white; padding:12px; border:none; border-radius:6px;">Cerrar Sesión</button><button onclick="closeConfigModal()" style="margin-top:10px; padding:10px;">Volver</button></div></div>
+<div id="configModal" class="modal">
+    <div class="modal-content">
+        <h3>Configuración</h3>
+        <button onclick="document.body.classList.toggle('light')" style="padding:10px; margin-bottom:5px;">🌓 Cambiar Tema</button>
+        <button onclick="exportarExcelPrincipal()" style="padding:10px; margin-bottom:5px;">📊 Exportar Stock Completo</button>
+        <hr style="border:0; border-top:1px solid #444;">
+        <button onclick="signOutUser()" style="background:var(--danger); color:white; padding:12px; border:none; border-radius:6px;">Cerrar Sesión</button>
+        <button onclick="closeConfigModal()" style="margin-top:10px; padding:10px;">Volver</button>
+    </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -171,7 +206,7 @@ let myPaints = JSON.parse(localStorage.getItem('maikman_paints')) || { have: [],
 window.login = () => {
     const e = document.getElementById('email').value;
     const p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error"));
+    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error de acceso"));
 };
 window.signOutUser = () => signOut(auth);
 
@@ -188,7 +223,7 @@ window.switchTab = (tabId) => {
     event.currentTarget.classList.add('active');
 };
 
-// --- GESTIÓN MAQUETAS (RESTAURADA) ---
+// --- MODELOS ---
 async function cargarModelos() {
     const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
     modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -261,7 +296,7 @@ window.guardarModelo = async () => {
 
 window.borrarModelo = async (id) => { if(confirm("¿Borrar?")) { await deleteDoc(doc(db, "modelos", id)); cargarModelos(); } };
 
-// --- GESTIÓN PINTURAS Y COMPRA (MEJORADO) ---
+// --- PINTURAS ---
 async function cargarCatalogoPinturas() {
     try {
         const response = await fetch('pinturas.json');
@@ -305,12 +340,12 @@ window.togglePaint = (id, type) => {
 
 window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
 
-// NUEVA GESTIÓN DE MODAL DE COMPRA
+// --- COMPRA ---
 window.abrirModalCompra = () => {
     const container = document.getElementById('cartListContainer');
     container.innerHTML = "";
     if(myPaints.buy.length === 0) {
-        container.innerHTML = "<p style='text-align:center; opacity:0.5;'>Tu lista está vacía.</p>";
+        container.innerHTML = "<p style='text-align:center; opacity:0.5;'>Lista vacía.</p>";
     } else {
         myPaints.buy.forEach(id => {
             let info = encontrarPintura(id);
@@ -330,26 +365,18 @@ window.cerrarModalCompra = () => document.getElementById('cartModal').style.disp
 window.exportarListaExcel = (soloMarcados) => {
     const checks = document.querySelectorAll('.cart-check');
     let listaExportar = [];
-    
     checks.forEach(check => {
         const id = check.value;
-        const estaMarcado = check.checked;
         const info = encontrarPintura(id);
-
-        if(soloMarcados && estaMarcado) {
-            listaExportar.push({ CODIGO: id, PINTURA: info.nombre });
-        } else if (!soloMarcados && !estaMarcado) {
+        if((soloMarcados && check.checked) || (!soloMarcados && !check.checked)) {
             listaExportar.push({ CODIGO: id, PINTURA: info.nombre });
         }
     });
-
-    if(listaExportar.length === 0) return alert("No hay pinturas para exportar en esta categoría.");
-
+    if(listaExportar.length === 0) return alert("Nada que exportar.");
     const ws = XLSX.utils.json_to_sheet(listaExportar);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Lista");
-    const nombreArchivo = soloMarcados ? "Lista_Compra_Maikman.xlsx" : "Pinturas_Pendientes_Maikman.xlsx";
-    XLSX.writeFile(wb, nombreArchivo);
+    XLSX.writeFile(wb, soloMarcados ? "Compra_Maikman.xlsx" : "Pendientes_Maikman.xlsx");
 };
 
 function encontrarPintura(codigo) {
@@ -357,10 +384,26 @@ function encontrarPintura(codigo) {
         let p = paintCatalogData[b].find(x => x.id === codigo);
         if(p) return p;
     }
-    return { nombre: "Desconocida", hex: "#333" };
+    return { nombre: "S/D", hex: "#333" };
 }
 
-// --- INFO Y CONFIG ---
+// --- EXPORTAR STOCK COMPLETO (PINTURAS ARREGLADAS) ---
+window.exportarExcelPrincipal = () => {
+    const datosExcel = modelos.map(m => ({
+        FABRICANTE: m.fabricante || "",
+        MODELO: m.modelo || "",
+        CODIGO: m.codigo || "",
+        PRECIO: m.precio ? `${m.precio}€` : "",
+        PINTURAS: m.paints ? m.paints.join(", ") : "No asignadas"
+    }));
+    const ws = XLSX.utils.json_to_sheet(datosExcel);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Stock");
+    const fecha = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `Stock_Maikman_${fecha}.xlsx`);
+};
+
+// --- INFO Y GALERÍA ---
 window.abrirInfoModelo = (id) => {
     currentModelId = id;
     const m = modelos.find(x => x.id === id);
@@ -389,18 +432,13 @@ window.abrirPinturasModelo = (modelId) => {
     const list = document.getElementById('modelPaintsList');
     document.getElementById('modelPaintsTitle').innerText = "Colores: " + m.modelo;
     list.innerHTML = "";
-    if(m.paints) m.paints.forEach(pCode => { let info = encontrarPintura(pCode); list.innerHTML += crearHTMLPintura(info); });
+    if(m.paints) m.paints.forEach(pCode => { let info = encontrarPintura(pCode); if(info.nombre==="S/D") info.id=pCode; list.innerHTML += crearHTMLPintura(info); });
     document.getElementById('modelPaintsModal').style.display = 'flex';
 };
 
 window.openConfigModal = () => document.getElementById('configModal').style.display = 'flex';
 window.closeConfigModal = () => document.getElementById('configModal').style.display = 'none';
-window.exportarExcelPrincipal = () => {
-    const ws = XLSX.utils.json_to_sheet(modelos);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Stock");
-    XLSX.writeFile(wb, "Stock_Maikman_Completo.xlsx");
-};
+
 </script>
 </body>
 </html>
