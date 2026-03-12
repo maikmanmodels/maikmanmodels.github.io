@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v5.2.1</title>
+<title>Maikman Models - Pro Stock v5.2.2</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -47,6 +47,7 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .modal { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
 .modal-content { background:var(--card); padding:24px; width:100%; max-width:500px; border-radius:12px; display:flex; flex-direction:column; gap:12px; max-height:90vh; overflow-y:auto; }
 input, select { padding:10px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; }
+#reader { width: 100%; background: #000; border-radius: 8px; }
 </style>
 </head>
 <body class="dark">
@@ -96,17 +97,17 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     </section>
 </div>
 
-<div id="scannerModal" class="modal"><div class="modal-content"><h3>Lector de Pinturas</h3><div id="reader"></div><button onclick="cerrarScanner()" style="padding:10px; margin-top:10px;">Cerrar Cámara</button></div></div>
+<div id="scannerModal" class="modal"><div class="modal-content"><h3>Lector de Pinturas</h3><div id="reader"></div><p id="scannerStatus" style="text-align:center; font-size:12px; color:var(--accent);">Apunta al código de barras</p><button onclick="cerrarScanner()" style="padding:10px; margin-top:10px; background:#555; color:white; border:none; border-radius:6px;">Cerrar Cámara</button></div></div>
 
 <div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle">Modelo</h3><input type="hidden" id="form_id"><input id="form_codigo" placeholder="Código"><input id="form_fabricante" placeholder="Fabricante"><input id="form_modelo" placeholder="Modelo"><input id="form_precio" type="number" step="0.01" placeholder="Precio (€)"><input type="file" id="form_fotoFile" accept="image/*"><button onclick="guardarModelo()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px;">Guardar</button><button onclick="closeFormModal()" style="background:#555; color:white; padding:10px; border:none; border-radius:6px;">Cancelar</button></div></div>
 
-<div id="infoModal" class="modal"><div class="modal-content"><h3 id="infoTitle"></h3><div id="infoDetails"></div><hr style="border:0; border-top:1px solid #444;"><b>Galería</b><div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;"></div><input type="file" id="galleryFile" accept="image/*" onchange="subirAFotoGaleria()"><button onclick="document.getElementById('infoModal').style.display='none'" style="padding:10px;">Cerrar</button></div></div>
+<div id="infoModal" class="modal"><div class="modal-content"><h3 id="infoTitle"></h3><div id="infoDetails"></div><hr style="border:0; border-top:1px solid #444;"><b>Galería de Fotos</b><div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;"></div><input type="file" id="galleryFile" accept="image/*" onchange="subirAFotoGaleria()"><button onclick="document.getElementById('infoModal').style.display='none'" style="padding:10px; margin-top:10px;">Cerrar</button></div></div>
 
 <div id="modelPaintsModal" class="modal"><div class="modal-content"><h3 id="modelPaintsTitle">Colores necesarios</h3><div id="modelPaintsList" class="paint-grid" style="grid-template-columns: 1fr;"></div><button onclick="document.getElementById('modelPaintsModal').style.display='none'" style="padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Cerrar</button></div></div>
 
 <div id="cartModal" class="modal"><div class="modal-content"><h3>Lista de Compra</h3><div id="cartListContainer" style="max-height: 300px; overflow-y: auto;"></div><button onclick="exportarListaExcel()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">📥 Exportar Excel</button><button onclick="cerrarModalCompra()" style="padding:10px; margin-top:5px;">Cerrar</button></div></div>
 
-<div id="configModal" class="modal"><div class="modal-content"><h3>Configuración</h3><button onclick="document.body.classList.toggle('light')">🌓 Cambiar Tema</button><button onclick="exportarExcelPrincipal()">📊 Exportar Stock Total</button><button onclick="signOutUser()" style="background:var(--danger); color:white; padding:10px; border:none; border-radius:6px; margin-top:10px;">Cerrar Sesión</button><button onclick="closeConfigModal()" style="margin-top:10px;">Volver</button></div></div>
+<div id="configModal" class="modal"><div class="modal-content"><h3>Opciones</h3><button onclick="document.body.classList.toggle('light')">🌓 Cambiar Tema</button><button onclick="exportarExcelPrincipal()">📊 Exportar Todo el Stock</button><button onclick="signOutUser()" style="background:var(--danger); color:white; padding:10px; border:none; border-radius:6px; margin-top:10px;">Cerrar Sesión</button><button onclick="closeConfigModal()" style="margin-top:10px;">Volver</button></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -135,11 +136,11 @@ let myPaints = JSON.parse(localStorage.getItem('maikman_paints')) || { have: [],
 let mixerChart = null;
 let html5QrCode = null;
 
-// --- EXPORTAR FUNCIONES ---
+// --- EXPORTAR A WINDOW ---
 window.login = () => {
     const e = document.getElementById('email').value;
     const p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error"));
+    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error de login"));
 };
 window.signOutUser = () => signOut(auth);
 window.switchTab = (id) => {
@@ -147,11 +148,14 @@ window.switchTab = (id) => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     event.currentTarget.classList.add('active');
+    if(id !== 'tab-pinturas') cerrarScanner();
 };
 window.openConfigModal = () => document.getElementById('configModal').style.display='flex';
 window.closeConfigModal = () => document.getElementById('configModal').style.display='none';
+window.openFormModal = () => { document.getElementById('form_id').value = ""; document.getElementById('formModal').style.display = 'flex'; };
+window.closeFormModal = () => document.getElementById('formModal').style.display = 'none';
 
-// --- MODELOS ---
+// --- GESTIÓN MAQUETAS ---
 async function cargarModelos() {
     const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
     modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -198,9 +202,7 @@ window.abrirPinturasModelo = (id) => {
             let info = encontrarPintura(pCode);
             list.innerHTML += crearHTMLPintura(info);
         });
-    } else {
-        list.innerHTML = "<p style='text-align:center; opacity:0.5'>No hay pinturas asignadas.</p>";
-    }
+    } else { list.innerHTML = "<p style='text-align:center; opacity:0.5'>Sin pinturas asignadas.</p>"; }
     document.getElementById('modelPaintsModal').style.display = 'flex';
 };
 
@@ -214,7 +216,7 @@ window.editarModelo = (id) => {
     document.getElementById('formModal').style.display = 'flex';
 };
 
-window.borrarModelo = async (id) => { if(confirm("¿Borrar?")) { await deleteDoc(doc(db, "modelos", id)); cargarModelos(); } };
+window.borrarModelo = async (id) => { if(confirm("¿Seguro?")) { await deleteDoc(doc(db, "modelos", id)); cargarModelos(); } };
 
 window.guardarModelo = async () => {
     const id = document.getElementById('form_id').value;
@@ -287,31 +289,60 @@ window.togglePaint = (id, type) => {
 
 window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
 
-// --- SCANNER ---
+// --- SCANNER CORREGIDO ---
 window.abrirScanner = () => {
     document.getElementById('scannerModal').style.display = 'flex';
     html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-        let encontrada = null;
-        for(let m in paintCatalogData) {
-            encontrada = paintCatalogData[m].find(p => text.includes(p.id.replace("-","")));
-            if(encontrada) break;
-        }
-        if(encontrada) {
-            if(confirm(`Detectada: ${encontrada.nombre}. ¿Añadir al Stock?`)) {
-                if(!myPaints.have.includes(encontrada.id)) { myPaints.have.push(encontrada.id); localStorage.setItem('maikman_paints', JSON.stringify(myPaints)); renderPaintCatalog(); }
-                cerrarScanner();
-            }
-        }
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 150} }, (text) => {
+        buscarPinturaEscaneada(text);
     });
 };
-window.cerrarScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => document.getElementById('scannerModal').style.display='none'); };
+
+function buscarPinturaEscaneada(codigoEan) {
+    let encontrada = null;
+    const eanLimpio = codigoEan.trim();
+
+    for(let marca in paintCatalogData) {
+        encontrada = paintCatalogData[marca].find(p => {
+            const idLimpio = p.id.replace("-", "").toLowerCase();
+            // Lógica Estricta: El código de barras debe terminar en el ID de la pintura
+            // Y el ID debe tener al menos 2 caracteres para evitar falsos positivos
+            return idLimpio.length > 1 && eanLimpio.endsWith(idLimpio);
+        });
+        if(encontrada) break;
+    }
+
+    if(encontrada) {
+        navigator.vibrate(200);
+        if(confirm(`Detectada: ${encontrada.id} - ${encontrada.nombre}\n¿Añadir al Stock?`)) {
+            if(!myPaints.have.includes(encontrada.id)) {
+                myPaints.have.push(encontrada.id);
+                localStorage.setItem('maikman_paints', JSON.stringify(myPaints));
+                renderPaintCatalog();
+            }
+            cerrarScanner();
+        }
+    } else {
+        document.getElementById('scannerStatus').innerText = "No reconocido: " + eanLimpio;
+    }
+}
+
+window.cerrarScanner = () => { 
+    if(html5QrCode) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('scannerModal').style.display='none';
+            html5QrCode = null;
+        }).catch(() => {
+            document.getElementById('scannerModal').style.display='none';
+        });
+    } else { document.getElementById('scannerModal').style.display='none'; }
+};
 
 // --- MIXER ---
 function initMixerUI() {
     const container = document.getElementById('mixerCardsContainer');
     container.innerHTML = "";
-    let options = '<option value="">-</option>';
+    let options = '<option value="">- Vacío -</option>';
     Object.keys(paintCatalogData).forEach(b => {
         options += `<optgroup label="${b}">`;
         paintCatalogData[b].forEach(p => options += `<option value="${p.hex}">${p.id} - ${p.nombre}</option>`);
@@ -356,7 +387,7 @@ window.cerrarModalCompra = () => document.getElementById('cartModal').style.disp
 window.exportarListaExcel = () => {
     const data = myPaints.buy.map(id => ({ CODIGO: id, NOMBRE: encontrarPintura(id).nombre }));
     const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Compra");
-    XLSX.writeFile(wb, "Lista_Compra_Maikman.xlsx");
+    XLSX.writeFile(wb, "Compra_Maikman.xlsx");
 };
 window.exportarExcelPrincipal = () => {
     const data = modelos.map(m => ({ MARCA: m.fabricante, MODELO: m.modelo, CODIGO: m.codigo, PRECIO: m.precio }));
@@ -365,7 +396,7 @@ window.exportarExcelPrincipal = () => {
 };
 
 // --- UTILS ---
-function encontrarPintura(id) { for(let b in paintCatalogData) { let p = paintCatalogData[b].find(x => x.id === id); if(p) return p; } return { nombre: "---", hex: "#333", id: id }; }
+function encontrarPintura(id) { for(let b in paintCatalogData) { let p = paintCatalogData[b].find(x => x.id === id); if(p) return p; } return { nombre: id, hex: "#333", id: id }; }
 function hexToRgb(h) { return { r: parseInt(h.slice(1,3),16), g: parseInt(h.slice(3,5),16), b: parseInt(h.slice(5,7),16) }; }
 function rgbToHex(r, g, b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase(); }
 
