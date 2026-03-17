@@ -266,9 +266,9 @@
   { "id": "TS-89", "nombre": "Pearl Blue", "hex": "#00008b", "ean": "4950344850891" },
   { "id": "TS-92", "nombre": "Metallic Orange", "hex": "#ff8c00", "ean": "4950344850921" },
   { "id": "TS-95", "nombre": "Pure Metallic Red", "hex": "#ff0000", "ean": "4950344850952" },
-  { "id": "TS-100", "nombre": "Semi-Gloss Bright Gun Metal", "hex": "#3d3d3d", "ean": "4950344851003" }
-  {"id": "TS-101", "nombre": "Base White", "hex": "#ffffff"},
-  {"id": "TS-102", "nombre": "Cobalt Green", "hex": "#008b8b"}
+  { "id": "TS-100", "nombre": "Semi-Gloss Bright Gun Metal", "hex": "#3d3d3d", "ean": "4950344851003" },
+  { "id": "TS-101", "nombre": "Base White", "hex": "#ffffff"},
+  { "id": "TS-102", "nombre": "Cobalt Green", "hex": "#008b8b"}
 ],
   
 "Mr.Color (Gunze Sangyo)": [
