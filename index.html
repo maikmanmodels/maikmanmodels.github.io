@@ -1,78 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v5.3.0</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maikman Models - Pro Stock v5.3.0</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
-<style>
-:root {
-    --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8; --success:#00b894; --danger:#d63031;
-    --min-card-width: 260px;
-}
-body.light { --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb; }
-* { box-sizing:border-box; transition:.3s; }
-body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); padding-bottom: 20px; }
+    <style>
+        :root {
+            --bg: #0f172a; --card: #020617; --text: #e5e7eb; 
+            --accent: #38bdf8; --success: #00b894; --danger: #d63031;
+            --min-card-width: 260px;
+        }
+        body.light { --bg: #f1f5f9; --card: #fff; --text: #020617; --accent: #2563eb; }
+        
+        * { box-sizing: border-box; transition: 0.3s; }
+        body { 
+            margin: 0; font-family: system-ui, -apple-system, sans-serif; 
+            background: var(--bg); color: var(--text); padding-bottom: 40px; 
+        }
 
-/* Navegación - ORDEN: Maquetas, Pinturas, Stats, Scan, Compra */
-.nav-tabs {
-    display: flex; align-items: center; background: var(--card); padding: 8px; gap: 4px;
-    position: sticky; top: 0; z-index: 900; border-bottom: 1px solid #334155; overflow-x: auto;
-}
-.tab-btn {
-    background:none; border:none; color:var(--text); padding: 10px 16px;
-    cursor:pointer; font-weight:600; white-space:nowrap; border-radius: 6px;
-}
-.tab-btn.active { background:var(--accent); color:#000; }
+        /* Navegación - Orden: Maquetas, Pinturas, Stats, Scan, Compra */
+        .nav-tabs {
+            display: flex; align-items: center; background: var(--card);
+            padding: 8px; gap: 4px; position: sticky; top: 0; z-index: 999;
+            border-bottom: 1px solid #334155; overflow-x: auto;
+        }
+        .tab-btn {
+            background: none; border: none; color: var(--text);
+            padding: 10px 16px; cursor: pointer; font-weight: 600;
+            white-space: nowrap; border-radius: 6px; font-size: 0.9em;
+        }
+        .tab-btn.active { background: var(--accent); color: #000; }
 
-.container { padding: 16px; max-width: 1200px; margin: auto; }
-.view { display:none; }
-.view.active { display:block; }
+        .container { padding: 16px; max-width: 1200px; margin: auto; }
+        .view { display: none; }
+        .view.active { display: block; }
 
-.paint-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr)); gap: 12px; margin-top:10px; }
-.model-card, .paint-card { background:var(--card); padding: 15px; border-radius: 12px; border: 1px solid #334155; }
-.color-swatch { width: 45px; height: 45px; border-radius: 8px; border: 1px solid #444; }
+        /* Formularios y Buscadores */
+        .form-group {
+            display: grid; gap: 10px; background: var(--card);
+            padding: 20px; border-radius: 12px; margin-bottom: 25px;
+            border: 1px solid var(--accent);
+        }
+        .form-group input {
+            padding: 12px; border-radius: 6px; border: 1px solid #334155;
+            background: #0f172a; color: white; width: 100%;
+        }
 
-.form-group { display:grid; gap:10px; background:var(--card); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--accent); }
-.form-group input { padding:12px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:white; }
+        .controls { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .search-bar {
+            flex-grow: 1; padding: 12px; border-radius: 8px;
+            border: 1px solid #334155; background: var(--card); color: var(--text);
+        }
 
-#scannerModal, #cartModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; flex-direction:column; align-items:center; justify-content:center; }
-.modal-content { background:var(--bg); padding:20px; border-radius:12px; width:90%; max-width:500px; border:1px solid var(--accent); }
-#reader { width: 90%; max-width: 400px; border-radius: 12px; overflow: hidden; background: white; }
-</style>
+        /* Grids y Tarjetas */
+        .grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr));
+            gap: 15px;
+        }
+        .card {
+            background: var(--card); padding: 15px; border-radius: 12px;
+            border: 1px solid #334155; position: relative;
+        }
+        .paint-card { display: flex; align-items: center; gap: 12px; }
+        .color-swatch { 
+            width: 50px; height: 50px; border-radius: 8px; 
+            border: 1px solid #ffffff22; flex-shrink: 0; 
+        }
+
+        /* Modales */
+        .modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85); z-index: 2000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-content {
+            background: var(--bg); padding: 25px; border-radius: 15px;
+            width: 100%; max-width: 500px; border: 1px solid var(--accent);
+            max-height: 80vh; overflow-y: auto;
+        }
+
+        /* Botones específicos */
+        .btn-qty {
+            width: 30px; height: 30px; border-radius: 50%; border: none;
+            background: #334155; color: white; cursor: pointer;
+        }
+        .btn-action {
+            padding: 8px 12px; border-radius: 6px; border: none; 
+            cursor: pointer; font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-<div class="nav-tabs">
+<nav class="nav-tabs">
     <button class="tab-btn active" onclick="showTab('models', event)">📦 Maquetas</button>
     <button class="tab-btn" onclick="showTab('paints', event)">🎨 Pinturas</button>
     <button class="tab-btn" onclick="showTab('stats', event)">📊 Stats</button>
     <button class="tab-btn" onclick="abrirScanner()">📷 Scan</button>
-    <button class="tab-btn" onclick="abrirCompra()" id="buyTab">🛒 Compra (0)</button>
+    <button class="tab-btn" onclick="abrirCompra()" id="buyBtnNav">🛒 Compra (0)</button>
     <div style="flex-grow:1"></div>
     <button class="tab-btn" onclick="document.body.classList.toggle('light')">🌓</button>
-</div>
+</nav>
 
 <div class="container">
+    
     <div id="modelsView" class="view active">
         <div class="form-group">
-            <input type="text" id="mFab" placeholder="Fabricante">
-            <input type="text" id="mMod" placeholder="Modelo">
-            <input type="text" id="mCod" placeholder="Referencia">
+            <h3 style="margin-top:0">Nueva Maqueta</h3>
+            <input type="text" id="mFab" placeholder="Fabricante (Tamiya, Revell...)">
+            <input type="text" id="mMod" placeholder="Nombre del Modelo">
+            <input type="text" id="mCod" placeholder="Código / Referencia">
             <input type="number" id="mPre" placeholder="Precio (€)">
-            <button class="tab-btn" style="background:var(--success); color:black" onclick="addModelo()">Añadir Maqueta</button>
+            <button class="btn-action" style="background:var(--success); color:black" onclick="addModelo()">Guardar en Stock</button>
         </div>
-        <div class="paint-grid" id="modelsGrid"></div>
+        <div class="grid" id="modelsGrid"></div>
     </div>
 
     <div id="paintsView" class="view">
-        <div style="display:flex; gap:10px; margin-bottom:15px">
-            <input type="text" id="paintSearch" class="tab-btn" style="flex-grow:1; text-align:left; background:var(--card); border:1px solid #334155" placeholder="Buscar pintura..." oninput="renderPaints()">
-            <select id="filterStock" class="tab-btn" style="background:var(--card); border:1px solid #334155" onchange="renderPaints()">
+        <div class="controls">
+            <input type="text" class="search-bar" id="paintSearch" placeholder="Buscar por código o nombre..." oninput="renderPaints()">
+            <select class="search-bar" style="max-width:150px" id="filterStock" onchange="renderPaints()">
                 <option value="all">Todas</option>
                 <option value="owned">En Stock</option>
                 <option value="missing">Sin Stock</option>
@@ -82,192 +135,298 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
     </div>
 
     <div id="statsView" class="view">
-        <canvas id="stockChart" style="max-height:400px"></canvas>
+        <div class="card">
+            <canvas id="stockChart"></canvas>
+        </div>
     </div>
+
 </div>
 
-<div id="scannerModal">
+<div id="scannerModal" class="modal">
     <div id="reader"></div>
-    <button class="tab-btn" style="margin-top:20px; background:var(--danger)" onclick="cerrarScanner()">Cancelar</button>
+    <button class="tab-btn" style="background:var(--danger); margin-top:20px" onclick="cerrarScanner()">Cancelar</button>
 </div>
 
-<div id="cartModal">
+<div id="cartModal" class="modal">
     <div class="modal-content">
-        <h3>🛒 Lista de Compra</h3>
-        <div id="cartList" style="margin-bottom:20px; max-height:300px; overflow-y:auto"></div>
-        <button class="tab-btn" style="background:var(--success); color:black; width:100%" onclick="exportarListaExcel()">Exportar Excel</button>
-        <button class="tab-btn" style="width:100%; margin-top:10px" onclick="cerrarModalCompra()">Cerrar</button>
+        <h2 style="margin-top:0">🛒 Lista de Compra</h2>
+        <div id="cartList" style="margin-bottom:20px"></div>
+        <button class="btn-action" style="background:var(--success); color:black; width:100%" onclick="exportarListaExcel()">Descargar Excel (.xlsx)</button>
+        <button class="btn-action" style="background:#334155; color:white; width:100%; margin-top:10px" onclick="cerrarModalCompra()">Cerrar</button>
     </div>
 </div>
 
 <script>
+// --- VARIABLES GLOBALES ---
 let paintCatalogData = {};
 let myPaints = { stock: {}, buy: [] };
 let modelos = [];
 let html5QrCode = null;
 let stockChart = null;
 
-// --- FUNCIONES GLOBALMENTE DISPONIBLES ---
+// --- FUNCIONES CORE ---
 
-window.showTab = (tab, event) => {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(tab + 'View').classList.add('active');
-    if(event) event.currentTarget.classList.add('active');
-};
+async function init() {
+    console.log("Iniciando Maikman Models...");
+    
+    // 1. CARGAR MAQUETAS (Prioridad 1)
+    try {
+        const localModels = localStorage.getItem('maikman_models_v5');
+        if (localModels) {
+            modelos = JSON.parse(localModels);
+            renderModelos();
+        }
+    } catch(e) { console.error("Error cargando modelos:", e); }
+
+    // 2. CARGAR STOCK PINTURAS
+    try {
+        const localPaints = localStorage.getItem('maikman_paints_v5');
+        if (localPaints) {
+            myPaints = JSON.parse(localPaints);
+            actualizarContadorCompra();
+        }
+    } catch(e) { console.error("Error cargando stock:", e); }
+
+    // 3. CARGAR CATÁLOGO JSON
+    try {
+        const response = await fetch('pinturas.json');
+        if (response.ok) {
+            paintCatalogData = await response.json();
+            renderPaints();
+            actualizarGrafico();
+        }
+    } catch(e) { 
+        console.warn("No se pudo cargar pinturas.json. Trabajando solo con local.");
+    }
+}
+
+// --- MAQUETAS ---
+function renderModelos() {
+    const grid = document.getElementById('modelsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    modelos.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div style="color:var(--accent); font-size:0.8em; font-weight:800">${m.fabricante || 'S/F'}</div>
+            <div style="font-size:1.1em; margin:5px 0; font-weight:bold">${m.modelo}</div>
+            <div style="color:#888; font-size:0.85em">${m.codigo || ''}</div>
+            <div style="display:flex; justify-content:space-between; margin-top:15px; align-items:center">
+                <span style="color:var(--success); font-weight:bold">${m.precio || 0}€</span>
+                <button onclick="deleteModel(${m.id})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold">Eliminar</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
 
 window.addModelo = () => {
-    const m = { id: Date.now(), fabricante: document.getElementById('mFab').value, modelo: document.getElementById('mMod').value, codigo: document.getElementById('mCod').value, precio: document.getElementById('mPre').value };
-    if(!m.modelo) return;
-    modelos.push(m);
-    saveModels();
+    const fab = document.getElementById('mFab').value;
+    const mod = document.getElementById('mMod').value;
+    const cod = document.getElementById('mCod').value;
+    const pre = document.getElementById('mPre').value;
+
+    if (!mod) { alert("El nombre del modelo es obligatorio"); return; }
+
+    const nuevo = { id: Date.now(), fabricante: fab, modelo: mod, codigo: cod, precio: pre };
+    modelos.push(nuevo);
+    localStorage.setItem('maikman_models_v5', JSON.stringify(modelos));
     renderModelos();
-    document.querySelectorAll('#modelsView input').forEach(i => i.value = '');
+    
+    // Limpiar inputs
+    document.getElementById('mFab').value = '';
+    document.getElementById('mMod').value = '';
+    document.getElementById('mCod').value = '';
+    document.getElementById('mPre').value = '';
 };
 
 window.deleteModel = (id) => {
-    modelos = modelos.filter(m => m.id !== id);
-    saveModels();
-    renderModelos();
+    if (confirm("¿Estás seguro de eliminar esta maqueta?")) {
+        modelos = modelos.filter(m => m.id !== id);
+        localStorage.setItem('maikman_models_v5', JSON.stringify(modelos));
+        renderModelos();
+    }
 };
 
+// --- PINTURAS ---
+function renderPaints() {
+    const container = document.getElementById('paintsContainer');
+    const query = document.getElementById('paintSearch').value.toLowerCase();
+    const filter = document.getElementById('filterStock').value;
+    
+    container.innerHTML = '';
+
+    for (const marca in paintCatalogData) {
+        const filtradas = paintCatalogData[marca].filter(p => {
+            const matchesSearch = p.id.toLowerCase().includes(query) || p.nombre.toLowerCase().includes(query);
+            const stock = myPaints.stock[p.id] || 0;
+            if (filter === 'owned') return matchesSearch && stock > 0;
+            if (filter === 'missing') return matchesSearch && stock === 0;
+            return matchesSearch;
+        });
+
+        if (filtradas.length > 0) {
+            const section = document.createElement('div');
+            section.innerHTML = `<h3 style="color:var(--accent); border-bottom:1px solid #334155; padding-bottom:5px; margin-top:25px">${marca}</h3>`;
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+
+            filtradas.forEach(p => {
+                const qty = myPaints.stock[p.id] || 0;
+                const inBuy = myPaints.buy.includes(p.id);
+                grid.innerHTML += `
+                    <div class="card paint-card">
+                        <div class="color-swatch" style="background:${p.hex}"></div>
+                        <div style="flex-grow:1">
+                            <div style="font-weight:bold; font-size:0.9em">${p.id}</div>
+                            <div style="font-size:0.75em; color:#aaa; margin-bottom:8px">${p.nombre}</div>
+                            <div style="display:flex; align-items:center; gap:10px">
+                                <button class="btn-qty" onclick="changeQty('${p.id}', -1)">-</button>
+                                <span style="font-weight:bold; min-width:15px; text-align:center">${qty}</span>
+                                <button class="btn-qty" onclick="changeQty('${p.id}', 1)">+</button>
+                                <button onclick="toggleBuy('${p.id}')" style="background:none; border:1px solid #444; color:${inBuy ? '#f39c12' : 'white'}; border-radius:4px; margin-left:5px; cursor:pointer">🛒</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            section.appendChild(grid);
+            container.appendChild(section);
+        }
+    }
+}
+
+window.changeQty = (id, delta) => {
+    myPaints.stock[id] = Math.max(0, (myPaints.stock[id] || 0) + delta);
+    savePaints();
+    renderPaints();
+    actualizarGrafico();
+};
+
+window.toggleBuy = (id) => {
+    const index = myPaints.buy.indexOf(id);
+    if (index > -1) myPaints.buy.splice(index, 1);
+    else myPaints.buy.push(id);
+    savePaints();
+    renderPaints();
+    actualizarContadorCompra();
+};
+
+// --- COMPRA ---
 window.abrirCompra = () => {
     const list = document.getElementById('cartList');
     list.innerHTML = '';
+    
+    if (myPaints.buy.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:gray">La lista está vacía</p>';
+    }
+
     myPaints.buy.forEach(id => {
-        const p = encontrarPintura(id);
-        list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #334155">
-            <span><b>${p.id}</b> ${p.nombre}</span>
-            <button onclick="toggleBuy('${p.id}'); abrirCompra()" style="color:red; background:none; border:none">✖</button>
-        </div>`;
+        let pInfo = null;
+        for (const m in paintCatalogData) {
+            const found = paintCatalogData[m].find(x => x.id === id);
+            if (found) { pInfo = found; break; }
+        }
+        
+        list.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #334155">
+                <span><b style="color:var(--accent)">${id}</b> ${pInfo ? pInfo.nombre : ''}</span>
+                <button onclick="toggleBuy('${id}'); abrirCompra()" style="background:none; border:none; color:var(--danger); cursor:pointer">✖</button>
+            </div>`;
     });
     document.getElementById('cartModal').style.display = 'flex';
 };
 
 window.cerrarModalCompra = () => { document.getElementById('cartModal').style.display = 'none'; };
 
-window.toggleBuy = (id) => {
-    const i = myPaints.buy.indexOf(id);
-    if(i > -1) myPaints.buy.splice(i, 1);
-    else myPaints.buy.push(id);
-    savePaints(); renderPaints(); actualizarContador();
+window.exportarListaExcel = () => {
+    const data = myPaints.buy.map(id => {
+        let pInfo = null;
+        for (const m in paintCatalogData) {
+            const found = paintCatalogData[m].find(x => x.id === id);
+            if (found) { pInfo = found; break; }
+        }
+        return { CODIGO: id, NOMBRE: pInfo ? pInfo.nombre : '', MARCA: pInfo ? pInfo.marca : '' };
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Compra");
+    XLSX.writeFile(wb, "Lista_Compra_Maikman.xlsx");
 };
 
-window.changeQty = (id, delta) => {
-    myPaints.stock[id] = Math.max(0, (myPaints.stock[id] || 0) + delta);
-    savePaints(); renderPaints(); actualizarGrafico();
-};
-
+// --- SCANNER ---
 window.abrirScanner = () => {
     document.getElementById('scannerModal').style.display = 'flex';
     html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-        alert("Detectado: " + text);
+    html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+            alert("Código detectado: " + decodedText);
+            // Aquí podrías añadir lógica para buscar la pintura automáticamente
+            cerrarScanner();
+        }
+    ).catch(err => {
+        alert("Error de cámara: " + err);
         cerrarScanner();
-    }).catch(err => { alert("Error cámara: " + err); cerrarScanner(); });
+    });
 };
 
 window.cerrarScanner = () => {
-    if(html5QrCode) html5QrCode.stop().finally(() => { document.getElementById('scannerModal').style.display='none'; });
-    else document.getElementById('scannerModal').style.display='none';
+    if (html5QrCode) {
+        html5QrCode.stop().finally(() => {
+            document.getElementById('scannerModal').style.display = 'none';
+        });
+    } else {
+        document.getElementById('scannerModal').style.display = 'none';
+    }
 };
 
-// --- LOGICA DE RENDERIZADO ---
-
-function renderModelos() {
-    const grid = document.getElementById('modelsGrid');
-    grid.innerHTML = '';
-    modelos.forEach(m => {
-        grid.innerHTML += `<div class="model-card">
-            <div style="color:var(--accent); font-size:0.8em; font-weight:bold">${m.fabricante}</div>
-            <div style="font-size:1.1em; margin:5px 0">${m.modelo}</div>
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="color:var(--success)">${m.precio}€</span>
-                <button onclick="deleteModel(${m.id})" style="color:var(--danger); background:none; border:none; cursor:pointer">Eliminar</button>
-            </div>
-        </div>`;
-    });
-}
-
-function renderPaints() {
-    const query = document.getElementById('paintSearch').value.toLowerCase();
-    const filter = document.getElementById('filterStock').value;
-    const container = document.getElementById('paintsContainer');
-    container.innerHTML = '';
-    for (let marca in paintCatalogData) {
-        let filtradas = paintCatalogData[marca].filter(p => {
-            const m = p.id.toLowerCase().includes(query) || p.nombre.toLowerCase().includes(query);
-            const s = myPaints.stock[p.id] || 0;
-            if (filter === 'owned') return m && s > 0;
-            if (filter === 'missing') return m && s === 0;
-            return m;
-        });
-        if (filtradas.length > 0) {
-            const div = document.createElement('div');
-            div.innerHTML = `<h3 style="border-bottom:1px solid #334155; margin-top:20px">${marca}</h3>`;
-            const grid = document.createElement('div'); grid.className = 'paint-grid';
-            filtradas.forEach(p => {
-                const qty = myPaints.stock[p.id] || 0;
-                const inBuy = myPaints.buy.includes(p.id);
-                grid.innerHTML += `<div class="paint-card" style="display:flex; align-items:center; gap:10px">
-                    <div class="color-swatch" style="background:${p.hex}"></div>
-                    <div style="flex-grow:1">
-                        <div style="font-weight:bold; color:var(--accent)">${p.id}</div>
-                        <div style="font-size:0.8em">${p.nombre}</div>
-                        <div style="display:flex; align-items:center; gap:10px; margin-top:5px">
-                            <button class="btn-qty" onclick="changeQty('${p.id}', -1)">-</button>
-                            <span>${qty}</span>
-                            <button class="btn-qty" onclick="changeQty('${p.id}', 1)">+</button>
-                            <button onclick="toggleBuy('${p.id}')" style="background:none; border:1px solid #444; color:${inBuy?'#f39c12':'white'}; border-radius:4px; font-size:10px">🛒</button>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            div.appendChild(grid); container.appendChild(div);
-        }
-    }
-}
-
-function encontrarPintura(id) {
-    for(let m in paintCatalogData) { 
-        let p = paintCatalogData[m].find(x => x.id === id); 
-        if(p) return p; 
-    }
-    return { id, nombre: "Pintura" };
-}
-
-function saveModels() { localStorage.setItem('maikman_models_v5', JSON.stringify(modelos)); }
+// --- UTILIDADES ---
 function savePaints() { localStorage.setItem('maikman_paints_v5', JSON.stringify(myPaints)); }
-function actualizarContador() { document.getElementById('buyTab').innerText = `🛒 Compra (${myPaints.buy.length})`; }
+
+function actualizarContadorCompra() {
+    document.getElementById('buyBtnNav').innerText = `🛒 Compra (${myPaints.buy.length})`;
+}
+
+window.showTab = (tabId, event) => {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId + 'View').classList.add('active');
+    if (event) event.currentTarget.classList.add('active');
+};
 
 function actualizarGrafico() {
     const ctx = document.getElementById('stockChart').getContext('2d');
     const labels = Object.keys(paintCatalogData);
     const data = labels.map(m => paintCatalogData[m].filter(p => (myPaints.stock[p.id] || 0) > 0).length);
-    if(stockChart) stockChart.destroy();
-    stockChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Stock', data, backgroundColor: '#38bdf8' }] } });
-}
-
-async function init() {
-    // 1. CARGA INMEDIATA DE MAQUETAS
-    const m = localStorage.getItem('maikman_models_v5');
-    if(m) { modelos = JSON.parse(m); renderModelos(); }
     
-    const p = localStorage.getItem('maikman_paints_v5');
-    if(p) { myPaints = JSON.parse(p); actualizarContador(); }
-
-    // 2. INTENTO DE CARGA DE PINTURAS
-    try {
-        const res = await fetch('pinturas.json');
-        if(res.ok) {
-            paintCatalogData = await res.json();
-            renderPaints();
-            actualizarGrafico();
+    if (stockChart) stockChart.destroy();
+    
+    stockChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Pinturas en Stock',
+                data: data,
+                backgroundColor: '#38bdf8'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#e5e7eb' } } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#334155' }, ticks: { color: '#e5e7eb' } },
+                x: { grid: { display: false }, ticks: { color: '#e5e7eb' } }
+            }
         }
-    } catch(e) { console.error("Error en pinturas.json"); }
+    });
 }
 
+// Iniciar aplicación
 init();
 </script>
+
 </body>
 </html>
