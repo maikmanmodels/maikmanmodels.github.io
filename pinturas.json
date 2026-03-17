@@ -29,7 +29,7 @@
   { "id": "XF-27", "nombre": "Black Green", "hex": "#242e26", "ean": ["4950344061273", "4950344813278"] },
   { "id": "XF-28", "nombre": "Dark Copper", "hex": "#6b5443", "ean": ["4950344061280", "4950344813285"] },
   { "id": "XF-49", "nombre": "Khaki", "hex": "#8b8164", "ean": ["4950344061495", "4950344813490"] },
-  { "id": "XF-50", "nombre": "Field Blue", "hex": "#43505e", "ean": ["4950344061501", "4950344813506"] }
+  { "id": "XF-50", "nombre": "Field Blue", "hex": "#43505e", "ean": ["4950344061501", "4950344813506"] },
   { "id": "XF-51", "nombre": "Khaki Drab", "hex": "#4b4b3a", "ean": ["4950344061518", "4950344813513"] },
   { "id": "XF-52", "nombre": "Flat Earth", "hex": "#7d634a", "ean": ["4950344061525", "4950344813520"] },
   { "id": "XF-53", "nombre": "Neutral Grey", "hex": "#828282", "ean": ["4950344061532", "4950344813537"] },
@@ -141,7 +141,7 @@
   { "id": "LP-47", "nombre": "Pure Metallic Blue", "hex": "#0000ff", "ean": "4950344821471" },
   { "id": "LP-48", "nombre": "Sparkling Silver", "hex": "#e5e5e5", "ean": "4950344821488" },
   { "id": "LP-49", "nombre": "Sparkling Gold", "hex": "#ffd700", "ean": "4950344821495" },
-  { "id": "LP-50", "nombre": "Bright Iron", "hex": "#4a4a4a", "ean": "4950344821501" }
+  { "id": "LP-50", "nombre": "Bright Iron", "hex": "#4a4a4a", "ean": "4950344821501" },
   { "id": "LP-51", "nombre": "Pure Orange", "hex": "#ff8c00", "ean": "4950344821518" },
   { "id": "LP-52", "nombre": "Clear Red (Laca)", "hex": "#ff000080", "ean": "4950344821525" },
   { "id": "LP-53", "nombre": "Clear Orange (Laca)", "hex": "#ff8c0080", "ean": "4950344821532" },
