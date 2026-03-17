@@ -1,6 +1,6 @@
 {
   "Tamiya XF (Acrílicos Mate)": [
-  {"id": "XF-1", "nombre": "Flat Black", "hex": "#2e2e2e"},
+  {"id": "XF-1", "nombre": "Flat Black", "hex": "#2e2e2e", "ean": ["4950344069507", "4950344068401"] },
   {"id": "XF-2", "nombre": "Flat White", "hex": "#f0f0f0"},
   {"id": "XF-3", "nombre": "Flat Yellow", "hex": "#f7d94a"},
   {"id": "XF-4", "nombre": "Yellow Green", "hex": "#7ba05b"},
