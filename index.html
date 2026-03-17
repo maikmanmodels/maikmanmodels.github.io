@@ -18,28 +18,14 @@ body.light { --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb; }
 * { box-sizing:border-box; transition:.3s; }
 body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); padding-bottom: 20px; }
 
-/* Navegación - ORDEN SOLICITADO */
+/* Navegación - ORDEN: Maquetas, Pinturas, Stats, Scan, Compra */
 .nav-tabs {
-    display: flex;
-    align-items: center;
-    background: var(--card);
-    padding: 8px;
-    gap: 4px;
-    position: sticky;
-    top: 0;
-    z-index: 900;
-    border-bottom: 1px solid #334155;
-    overflow-x: auto;
+    display: flex; align-items: center; background: var(--card); padding: 8px; gap: 4px;
+    position: sticky; top: 0; z-index: 900; border-bottom: 1px solid #334155; overflow-x: auto;
 }
 .tab-btn {
-    background:none;
-    border:none;
-    color:var(--text);
-    padding: 10px 16px;
-    cursor:pointer;
-    font-weight:600;
-    white-space:nowrap;
-    border-radius: 6px;
+    background:none; border:none; color:var(--text); padding: 10px 16px;
+    cursor:pointer; font-weight:600; white-space:nowrap; border-radius: 6px;
 }
 .tab-btn.active { background:var(--accent); color:#000; }
 
@@ -47,51 +33,15 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .view { display:none; }
 .view.active { display:block; }
 
-/* Estilos de Tarjetas */
-.paint-grid {
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr));
-    gap: 12px;
-    margin-top:10px;
-}
-.model-card, .paint-card {
-    background:var(--card);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    position: relative;
-}
-.color-swatch { width: 45px; height: 45px; border-radius: 8px; flex-shrink: 0; border: 1px solid #444; }
+.paint-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr)); gap: 12px; margin-top:10px; }
+.model-card, .paint-card { background:var(--card); padding: 15px; border-radius: 12px; border: 1px solid #334155; }
+.color-swatch { width: 45px; height: 45px; border-radius: 8px; border: 1px solid #444; }
 
-/* Formularios */
-.form-group {
-    display:grid;
-    gap:10px;
-    background:var(--card);
-    padding:15px;
-    border-radius:12px;
-    margin-bottom:20px;
-    border:1px solid var(--accent);
-}
-.form-group input {
-    padding:12px;
-    border-radius:6px;
-    border:1px solid #334155;
-    background:#0f172a;
-    color:white;
-}
+.form-group { display:grid; gap:10px; background:var(--card); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--accent); }
+.form-group input { padding:12px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:white; }
 
-/* Scanner */
-#scannerModal {
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.9);
-    z-index:2000;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-}
+#scannerModal, #cartModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; flex-direction:column; align-items:center; justify-content:center; }
+.modal-content { background:var(--bg); padding:20px; border-radius:12px; width:90%; max-width:500px; border:1px solid var(--accent); }
 #reader { width: 90%; max-width: 400px; border-radius: 12px; overflow: hidden; background: white; }
 </style>
 </head>
@@ -108,12 +58,11 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 </div>
 
 <div class="container">
-    
     <div id="modelsView" class="view active">
         <div class="form-group">
-            <input type="text" id="mFab" placeholder="Fabricante (Tamiya, Revell...)">
-            <input type="text" id="mMod" placeholder="Nombre del Modelo">
-            <input type="text" id="mCod" placeholder="Código de Referencia">
+            <input type="text" id="mFab" placeholder="Fabricante">
+            <input type="text" id="mMod" placeholder="Modelo">
+            <input type="text" id="mCod" placeholder="Referencia">
             <input type="number" id="mPre" placeholder="Precio (€)">
             <button class="tab-btn" style="background:var(--success); color:black" onclick="addModelo()">Añadir Maqueta</button>
         </div>
@@ -135,12 +84,20 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
     <div id="statsView" class="view">
         <canvas id="stockChart" style="max-height:400px"></canvas>
     </div>
-
 </div>
 
 <div id="scannerModal">
     <div id="reader"></div>
     <button class="tab-btn" style="margin-top:20px; background:var(--danger)" onclick="cerrarScanner()">Cancelar</button>
+</div>
+
+<div id="cartModal">
+    <div class="modal-content">
+        <h3>🛒 Lista de Compra</h3>
+        <div id="cartList" style="margin-bottom:20px; max-height:300px; overflow-y:auto"></div>
+        <button class="tab-btn" style="background:var(--success); color:black; width:100%" onclick="exportarListaExcel()">Exportar Excel</button>
+        <button class="tab-btn" style="width:100%; margin-top:10px" onclick="cerrarModalCompra()">Cerrar</button>
+    </div>
 </div>
 
 <script>
@@ -150,112 +107,165 @@ let modelos = [];
 let html5QrCode = null;
 let stockChart = null;
 
-// INICIO CARGA
-async function init() {
-    // A. CARGAR MODELOS DESDE LOCALSTORAGE (Prioridad absoluta)
-    try {
-        const storedModels = localStorage.getItem('maikman_models_v5');
-        if (storedModels) {
-            modelos = JSON.parse(storedModels);
-            renderModelos();
-        }
-        
-        const storedPaints = localStorage.getItem('maikman_paints_v5');
-        if (storedPaints) myPaints = JSON.parse(storedPaints);
-    } catch(e) { console.error("Error cargando locales:", e); }
+// --- FUNCIONES GLOBALMENTE DISPONIBLES ---
 
-    // B. CARGAR CATÁLOGO EXTERNO (Si falla, no bloquea lo anterior)
-    try {
-        const response = await fetch('pinturas.json');
-        if (response.ok) {
-            paintCatalogData = await response.json();
-            renderPaints();
-            actualizarGrafico();
-        } else {
-            console.warn("No se pudo cargar pinturas.json");
-        }
-    } catch(e) { console.error("Error en archivo de pinturas:", e); }
-}
-
-// LÓGICA DE MAQUETAS
-function renderModelos() {
-    const grid = document.getElementById('modelsGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    modelos.forEach(m => {
-        grid.innerHTML += `
-            <div class="model-card">
-                <div style="color:var(--accent); font-size:0.8em; font-weight:bold">${m.fabricante}</div>
-                <div style="font-size:1.1em; margin:5px 0">${m.modelo}</div>
-                <div style="color:gray; font-size:0.8em">${m.codigo || '-'}</div>
-                <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:center">
-                    <span style="color:var(--success); font-weight:bold">${m.precio}€</span>
-                    <button onclick="deleteModel(${m.id})" style="color:var(--danger); background:none; border:none; cursor:pointer">Eliminar</button>
-                </div>
-            </div>`;
-    });
-}
-
-window.addModelo = () => {
-    const m = { 
-        id: Date.now(), 
-        fabricante: document.getElementById('mFab').value, 
-        modelo: document.getElementById('mMod').value, 
-        codigo: document.getElementById('mCod').value, 
-        precio: document.getElementById('mPre').value 
-    };
-    if(!m.modelo) return alert("El nombre del modelo es obligatorio");
-    modelos.push(m);
-    localStorage.setItem('maikman_models_v5', JSON.stringify(modelos));
-    renderModelos();
-    document.querySelectorAll('.form-group input').forEach(i => i.value = '');
-};
-
-window.deleteModel = (id) => {
-    if(!confirm("¿Eliminar maqueta?")) return;
-    modelos = modelos.filter(m => m.id !== id);
-    localStorage.setItem('maikman_models_v5', JSON.stringify(modelos));
-    renderModelos();
-};
-
-// NAVEGACIÓN
-function showTab(tab, event) {
+window.showTab = (tab, event) => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(tab + 'View').classList.add('active');
     if(event) event.currentTarget.classList.add('active');
-}
+};
 
-// SCANNER (Optimizado para móvil)
+window.addModelo = () => {
+    const m = { id: Date.now(), fabricante: document.getElementById('mFab').value, modelo: document.getElementById('mMod').value, codigo: document.getElementById('mCod').value, precio: document.getElementById('mPre').value };
+    if(!m.modelo) return;
+    modelos.push(m);
+    saveModels();
+    renderModelos();
+    document.querySelectorAll('#modelsView input').forEach(i => i.value = '');
+};
+
+window.deleteModel = (id) => {
+    modelos = modelos.filter(m => m.id !== id);
+    saveModels();
+    renderModelos();
+};
+
+window.abrirCompra = () => {
+    const list = document.getElementById('cartList');
+    list.innerHTML = '';
+    myPaints.buy.forEach(id => {
+        const p = encontrarPintura(id);
+        list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #334155">
+            <span><b>${p.id}</b> ${p.nombre}</span>
+            <button onclick="toggleBuy('${p.id}'); abrirCompra()" style="color:red; background:none; border:none">✖</button>
+        </div>`;
+    });
+    document.getElementById('cartModal').style.display = 'flex';
+};
+
+window.cerrarModalCompra = () => { document.getElementById('cartModal').style.display = 'none'; };
+
+window.toggleBuy = (id) => {
+    const i = myPaints.buy.indexOf(id);
+    if(i > -1) myPaints.buy.splice(i, 1);
+    else myPaints.buy.push(id);
+    savePaints(); renderPaints(); actualizarContador();
+};
+
+window.changeQty = (id, delta) => {
+    myPaints.stock[id] = Math.max(0, (myPaints.stock[id] || 0) + delta);
+    savePaints(); renderPaints(); actualizarGrafico();
+};
+
 window.abrirScanner = () => {
     document.getElementById('scannerModal').style.display = 'flex';
     html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-        { facingMode: "environment" }, 
-        { fps: 10, qrbox: 250 },
-        (text) => {
-            alert("Código detectado: " + text);
-            cerrarScanner();
-        }
-    ).catch(err => {
-        alert("Error de cámara: " + err);
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+        alert("Detectado: " + text);
         cerrarScanner();
-    });
+    }).catch(err => { alert("Error cámara: " + err); cerrarScanner(); });
 };
 
 window.cerrarScanner = () => {
-    if (html5QrCode) {
-        html5QrCode.stop().finally(() => {
-            document.getElementById('scannerModal').style.display = 'none';
-        });
-    } else {
-        document.getElementById('scannerModal').style.display = 'none';
-    }
+    if(html5QrCode) html5QrCode.stop().finally(() => { document.getElementById('scannerModal').style.display='none'; });
+    else document.getElementById('scannerModal').style.display='none';
 };
 
-// (Las funciones de renderPaints y actualizarGrafico van aquí abajo, igual que en tu index 7 original)
-function renderPaints() { /* ... tu lógica original ... */ }
-function actualizarGrafico() { /* ... tu lógica original ... */ }
+// --- LOGICA DE RENDERIZADO ---
+
+function renderModelos() {
+    const grid = document.getElementById('modelsGrid');
+    grid.innerHTML = '';
+    modelos.forEach(m => {
+        grid.innerHTML += `<div class="model-card">
+            <div style="color:var(--accent); font-size:0.8em; font-weight:bold">${m.fabricante}</div>
+            <div style="font-size:1.1em; margin:5px 0">${m.modelo}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="color:var(--success)">${m.precio}€</span>
+                <button onclick="deleteModel(${m.id})" style="color:var(--danger); background:none; border:none; cursor:pointer">Eliminar</button>
+            </div>
+        </div>`;
+    });
+}
+
+function renderPaints() {
+    const query = document.getElementById('paintSearch').value.toLowerCase();
+    const filter = document.getElementById('filterStock').value;
+    const container = document.getElementById('paintsContainer');
+    container.innerHTML = '';
+    for (let marca in paintCatalogData) {
+        let filtradas = paintCatalogData[marca].filter(p => {
+            const m = p.id.toLowerCase().includes(query) || p.nombre.toLowerCase().includes(query);
+            const s = myPaints.stock[p.id] || 0;
+            if (filter === 'owned') return m && s > 0;
+            if (filter === 'missing') return m && s === 0;
+            return m;
+        });
+        if (filtradas.length > 0) {
+            const div = document.createElement('div');
+            div.innerHTML = `<h3 style="border-bottom:1px solid #334155; margin-top:20px">${marca}</h3>`;
+            const grid = document.createElement('div'); grid.className = 'paint-grid';
+            filtradas.forEach(p => {
+                const qty = myPaints.stock[p.id] || 0;
+                const inBuy = myPaints.buy.includes(p.id);
+                grid.innerHTML += `<div class="paint-card" style="display:flex; align-items:center; gap:10px">
+                    <div class="color-swatch" style="background:${p.hex}"></div>
+                    <div style="flex-grow:1">
+                        <div style="font-weight:bold; color:var(--accent)">${p.id}</div>
+                        <div style="font-size:0.8em">${p.nombre}</div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:5px">
+                            <button class="btn-qty" onclick="changeQty('${p.id}', -1)">-</button>
+                            <span>${qty}</span>
+                            <button class="btn-qty" onclick="changeQty('${p.id}', 1)">+</button>
+                            <button onclick="toggleBuy('${p.id}')" style="background:none; border:1px solid #444; color:${inBuy?'#f39c12':'white'}; border-radius:4px; font-size:10px">🛒</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            div.appendChild(grid); container.appendChild(div);
+        }
+    }
+}
+
+function encontrarPintura(id) {
+    for(let m in paintCatalogData) { 
+        let p = paintCatalogData[m].find(x => x.id === id); 
+        if(p) return p; 
+    }
+    return { id, nombre: "Pintura" };
+}
+
+function saveModels() { localStorage.setItem('maikman_models_v5', JSON.stringify(modelos)); }
+function savePaints() { localStorage.setItem('maikman_paints_v5', JSON.stringify(myPaints)); }
+function actualizarContador() { document.getElementById('buyTab').innerText = `🛒 Compra (${myPaints.buy.length})`; }
+
+function actualizarGrafico() {
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    const labels = Object.keys(paintCatalogData);
+    const data = labels.map(m => paintCatalogData[m].filter(p => (myPaints.stock[p.id] || 0) > 0).length);
+    if(stockChart) stockChart.destroy();
+    stockChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Stock', data, backgroundColor: '#38bdf8' }] } });
+}
+
+async function init() {
+    // 1. CARGA INMEDIATA DE MAQUETAS
+    const m = localStorage.getItem('maikman_models_v5');
+    if(m) { modelos = JSON.parse(m); renderModelos(); }
+    
+    const p = localStorage.getItem('maikman_paints_v5');
+    if(p) { myPaints = JSON.parse(p); actualizarContador(); }
+
+    // 2. INTENTO DE CARGA DE PINTURAS
+    try {
+        const res = await fetch('pinturas.json');
+        if(res.ok) {
+            paintCatalogData = await res.json();
+            renderPaints();
+            actualizarGrafico();
+        }
+    } catch(e) { console.error("Error en pinturas.json"); }
+}
 
 init();
 </script>
