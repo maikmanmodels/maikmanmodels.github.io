@@ -130,7 +130,7 @@ let stockChart = null;
 // CARGAR DATOS
 async function init() {
     try {
-        const response = await fetch('pinturas (1).json');
+        const response = await fetch('pinturas.json');
         paintCatalogData = await response.json();
         
         const sPaints = localStorage.getItem('maikman_paints_v5');
