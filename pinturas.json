@@ -74,9 +74,9 @@
   {"id": "XF-93", "nombre": "Light Brown (DAK 1942)", "hex": "#b8860b"}
 ],
   
-  "Tamiya X (Acrílicos Brillantes)": [
-  {"id": "X-1", "nombre": "Black", "hex": "#000000", "ean": "4950344068913"},
-  {"id": "X-2", "nombre": "White", "hex": "#ffffff", "ean": "4950344068920"},
+  "Tamiya X (Acrílicos Brillantes 10ml)": [
+  {"id": "X-1", "nombre": "Black", "hex": "#000000", "ean": "4950344068913", "4950344810017"},
+  {"id": "X-2", "nombre": "White", "hex": "#ffffff", "ean": "4950344068920", "4950344810024"},
   {"id": "X-3", "nombre": "Royal Blue", "hex": "#4169e1", "ean": "4950344068937"},
   {"id": "X-4", "nombre": "Blue", "hex": "#0000ff", "ean": "4950344068944"},
   {"id": "X-5", "nombre": "Green", "hex": "#008000", "ean": "4950344068951"},
