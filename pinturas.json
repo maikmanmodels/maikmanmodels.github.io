@@ -1,6 +1,6 @@
 {
   "Tamiya XF (Acrílicos Mate)": [
-{ "id": "XF-1", "nombre": "Flat Black", "hex": "#1a1a1a", "ean": ["4950344061013", "4950344813018"] },
+  { "id": "XF-1", "nombre": "Flat Black", "hex": "#1a1a1a", "ean": ["4950344061013", "4950344813018"] },
   { "id": "XF-2", "nombre": "Flat White", "hex": "#f5f5f5", "ean": ["4950344061020", "4950344813025"] },
   { "id": "XF-3", "nombre": "Flat Yellow", "hex": "#f2c600", "ean": ["4950344061037", "4950344813032"] },
   { "id": "XF-4", "nombre": "Yellow Green", "hex": "#9ab03d", "ean": ["4950344061044", "4950344813049"] },
@@ -321,7 +321,7 @@
   { "id": "C47", "nombre": "Clear Red", "hex": "#ff000080", "ean": "4973028535471" },
   { "id": "C48", "nombre": "Clear Yellow", "hex": "#ffff0080", "ean": "4973028535488" },
   { "id": "C49", "nombre": "Clear Orange", "hex": "#ff8c0080", "ean": "497302853495" },
-  { "id": "C50", "nombre": "Clear Blue", "hex": "#0000ff80", "ean": "4973028535501" }
+  { "id": "C50", "nombre": "Clear Blue", "hex": "#0000ff80", "ean": "4973028535501" },
   { "id": "C51", "nombre": "Flesh (Carne)", "hex": "#f5d0b9", "ean": "4973028535518" },
   { "id": "C52", "nombre": "Field Grey (1)", "hex": "#5f9ea0", "ean": "4973028535525" },
   { "id": "C54", "nombre": "Khaki Green", "hex": "#4b5320", "ean": "4973028535549" },
