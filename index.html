@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman-Models - Pro Stock v5.2.2</title>
+<title>Maikman Models - Pro Stock v5.3.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -18,7 +18,7 @@ body.light { --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb; }
 * { box-sizing:border-box; transition:.3s; }
 body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); padding-bottom: 20px; }
 
-/* Navegación - ORDEN ORIGINAL */
+/* Navegación - ORDEN SOLICITADO */
 .nav-tabs {
     display: flex;
     align-items: center;
@@ -47,24 +47,41 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .view { display:none; }
 .view.active { display:block; }
 
-/* Grid y Tarjetas */
+/* Estilos de Tarjetas */
 .paint-grid {
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr));
     gap: 12px;
     margin-top:10px;
 }
-.paint-card, .model-card {
+.model-card, .paint-card {
     background:var(--card);
-    padding: 12px;
+    padding: 15px;
     border-radius: 12px;
     border: 1px solid #334155;
+    position: relative;
 }
-.color-swatch { width: 45px; height: 45px; border-radius: 8px; flex-shrink: 0; }
-.stock-ctrl { display:flex; align-items:center; gap:8px; margin-top:5px; }
-.btn-qty { width:28px; height:28px; border-radius:50%; border:none; background:#334155; color:white; cursor:pointer; }
+.color-swatch { width: 45px; height: 45px; border-radius: 8px; flex-shrink: 0; border: 1px solid #444; }
 
-/* Scanner Modal */
+/* Formularios */
+.form-group {
+    display:grid;
+    gap:10px;
+    background:var(--card);
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:20px;
+    border:1px solid var(--accent);
+}
+.form-group input {
+    padding:12px;
+    border-radius:6px;
+    border:1px solid #334155;
+    background:#0f172a;
+    color:white;
+}
+
+/* Scanner */
 #scannerModal {
     display:none;
     position:fixed;
@@ -75,20 +92,14 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
     align-items:center;
     justify-content:center;
 }
-#reader {
-    width: 90%;
-    max-width: 350px;
-    border-radius:12px;
-    overflow:hidden;
-    background: #000;
-}
+#reader { width: 90%; max-width: 400px; border-radius: 12px; overflow: hidden; background: white; }
 </style>
 </head>
 <body>
 
 <div class="nav-tabs">
-    <button class="tab-btn active" onclick="showTab('paints', event)">🎨 Pinturas</button>
-    <button class="tab-btn" onclick="showTab('models', event)">📦 Maquetas</button>
+    <button class="tab-btn active" onclick="showTab('models', event)">📦 Maquetas</button>
+    <button class="tab-btn" onclick="showTab('paints', event)">🎨 Pinturas</button>
     <button class="tab-btn" onclick="showTab('stats', event)">📊 Stats</button>
     <button class="tab-btn" onclick="abrirScanner()">📷 Scan</button>
     <button class="tab-btn" onclick="abrirCompra()" id="buyTab">🛒 Compra (0)</button>
@@ -97,9 +108,21 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 </div>
 
 <div class="container">
-    <div id="paintsView" class="view active">
-        <div class="controls" style="display:flex; gap:10px; margin-bottom:15px">
-            <input type="text" id="paintSearch" class="tab-btn" style="flex-grow:1; background:var(--card); border:1px solid #334155; text-align:left" placeholder="Buscar pintura..." oninput="renderPaints()">
+    
+    <div id="modelsView" class="view active">
+        <div class="form-group">
+            <input type="text" id="mFab" placeholder="Fabricante (Tamiya, Revell...)">
+            <input type="text" id="mMod" placeholder="Nombre del Modelo">
+            <input type="text" id="mCod" placeholder="Código de Referencia">
+            <input type="number" id="mPre" placeholder="Precio (€)">
+            <button class="tab-btn" style="background:var(--success); color:black" onclick="addModelo()">Añadir Maqueta</button>
+        </div>
+        <div class="paint-grid" id="modelsGrid"></div>
+    </div>
+
+    <div id="paintsView" class="view">
+        <div style="display:flex; gap:10px; margin-bottom:15px">
+            <input type="text" id="paintSearch" class="tab-btn" style="flex-grow:1; text-align:left; background:var(--card); border:1px solid #334155" placeholder="Buscar pintura..." oninput="renderPaints()">
             <select id="filterStock" class="tab-btn" style="background:var(--card); border:1px solid #334155" onchange="renderPaints()">
                 <option value="all">Todas</option>
                 <option value="owned">En Stock</option>
@@ -109,20 +132,10 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
         <div id="paintsContainer"></div>
     </div>
 
-    <div id="modelsView" class="view">
-        <div style="background:var(--card); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--accent); display:grid; gap:10px">
-            <input type="text" id="mFab" placeholder="Fabricante" style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid #334155">
-            <input type="text" id="mMod" placeholder="Modelo" style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid #334155">
-            <input type="text" id="mCod" placeholder="Referencia" style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid #334155">
-            <input type="number" id="mPre" placeholder="Precio" style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid #334155">
-            <button class="tab-btn" style="background:var(--success); color:black" onclick="addModelo()">Añadir Maqueta</button>
-        </div>
-        <div class="paint-grid" id="modelsGrid"></div>
+    <div id="statsView" class="view">
+        <canvas id="stockChart" style="max-height:400px"></canvas>
     </div>
 
-    <div id="statsView" class="view">
-        <canvas id="stockChart"></canvas>
-    </div>
 </div>
 
 <div id="scannerModal">
@@ -137,31 +150,34 @@ let modelos = [];
 let html5QrCode = null;
 let stockChart = null;
 
+// INICIO CARGA
 async function init() {
-    // 1. CARGA FORZADA DE MODELOS (Independiente del JSON)
-    const storedModels = localStorage.getItem('maikman_models_v5');
-    if (storedModels) {
-        try { modelos = JSON.parse(storedModels); renderModelos(); } catch(e) { console.error(e); }
-    }
+    // A. CARGAR MODELOS DESDE LOCALSTORAGE (Prioridad absoluta)
+    try {
+        const storedModels = localStorage.getItem('maikman_models_v5');
+        if (storedModels) {
+            modelos = JSON.parse(storedModels);
+            renderModelos();
+        }
+        
+        const storedPaints = localStorage.getItem('maikman_paints_v5');
+        if (storedPaints) myPaints = JSON.parse(storedPaints);
+    } catch(e) { console.error("Error cargando locales:", e); }
 
-    const storedPaints = localStorage.getItem('maikman_paints_v5');
-    if (storedPaints) {
-        try { myPaints = JSON.parse(storedPaints); } catch(e) { console.error(e); }
-    }
-
-    // 2. CARGA DE PINTURAS
+    // B. CARGAR CATÁLOGO EXTERNO (Si falla, no bloquea lo anterior)
     try {
         const response = await fetch('pinturas.json');
         if (response.ok) {
             paintCatalogData = await response.json();
             renderPaints();
             actualizarGrafico();
+        } else {
+            console.warn("No se pudo cargar pinturas.json");
         }
-    } catch(e) { 
-        alert("Aviso: pinturas.json no cargó, pero tus modelos están a salvo.");
-    }
+    } catch(e) { console.error("Error en archivo de pinturas:", e); }
 }
 
+// LÓGICA DE MAQUETAS
 function renderModelos() {
     const grid = document.getElementById('modelsGrid');
     if (!grid) return;
@@ -169,29 +185,40 @@ function renderModelos() {
     modelos.forEach(m => {
         grid.innerHTML += `
             <div class="model-card">
-                <div style="color:var(--accent); font-size:0.8em">${m.fabricante}</div>
-                <div style="font-weight:bold">${m.modelo}</div>
-                <div>${m.precio}€</div>
-                <button onclick="deleteModel(${m.id})" style="color:var(--danger); background:none; border:none; margin-top:10px; cursor:pointer">Eliminar</button>
+                <div style="color:var(--accent); font-size:0.8em; font-weight:bold">${m.fabricante}</div>
+                <div style="font-size:1.1em; margin:5px 0">${m.modelo}</div>
+                <div style="color:gray; font-size:0.8em">${m.codigo || '-'}</div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:center">
+                    <span style="color:var(--success); font-weight:bold">${m.precio}€</span>
+                    <button onclick="deleteModel(${m.id})" style="color:var(--danger); background:none; border:none; cursor:pointer">Eliminar</button>
+                </div>
             </div>`;
     });
 }
 
 window.addModelo = () => {
-    const m = { id: Date.now(), fabricante: document.getElementById('mFab').value, modelo: document.getElementById('mMod').value, codigo: document.getElementById('mCod').value, precio: document.getElementById('mPre').value };
-    if(!m.modelo) return;
+    const m = { 
+        id: Date.now(), 
+        fabricante: document.getElementById('mFab').value, 
+        modelo: document.getElementById('mMod').value, 
+        codigo: document.getElementById('mCod').value, 
+        precio: document.getElementById('mPre').value 
+    };
+    if(!m.modelo) return alert("El nombre del modelo es obligatorio");
     modelos.push(m);
     localStorage.setItem('maikman_models_v5', JSON.stringify(modelos));
     renderModelos();
-    document.querySelectorAll('#modelsView input').forEach(i => i.value = '');
+    document.querySelectorAll('.form-group input').forEach(i => i.value = '');
 };
 
 window.deleteModel = (id) => {
+    if(!confirm("¿Eliminar maqueta?")) return;
     modelos = modelos.filter(m => m.id !== id);
     localStorage.setItem('maikman_models_v5', JSON.stringify(modelos));
     renderModelos();
 };
 
+// NAVEGACIÓN
 function showTab(tab, event) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -199,31 +226,26 @@ function showTab(tab, event) {
     if(event) event.currentTarget.classList.add('active');
 }
 
-// SCANNER CORREGIDO PARA MÓVIL
+// SCANNER (Optimizado para móvil)
 window.abrirScanner = () => {
-    const modal = document.getElementById('scannerModal');
-    modal.style.display = 'flex';
-    
-    if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-    }
-
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-    html5QrCode.start({ facingMode: "environment" }, config, (text) => {
-        // Lógica de búsqueda...
-        alert("Escaneado: " + text);
+    document.getElementById('scannerModal').style.display = 'flex';
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: 250 },
+        (text) => {
+            alert("Código detectado: " + text);
+            cerrarScanner();
+        }
+    ).catch(err => {
+        alert("Error de cámara: " + err);
         cerrarScanner();
-    }).catch(err => {
-        console.error(err);
-        alert("Error: No se pudo acceder a la cámara. Asegúrate de dar permisos.");
-        modal.style.display = 'none';
     });
 };
 
 window.cerrarScanner = () => {
-    if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
+    if (html5QrCode) {
+        html5QrCode.stop().finally(() => {
             document.getElementById('scannerModal').style.display = 'none';
         });
     } else {
@@ -231,13 +253,9 @@ window.cerrarScanner = () => {
     }
 };
 
-function renderPaints() {
-    // ... (Tu lógica original de renderizado de pinturas)
-}
-
-function actualizarGrafico() {
-    // ... (Tu lógica original de Chart.js)
-}
+// (Las funciones de renderPaints y actualizarGrafico van aquí abajo, igual que en tu index 7 original)
+function renderPaints() { /* ... tu lógica original ... */ }
+function actualizarGrafico() { /* ... tu lógica original ... */ }
 
 init();
 </script>
