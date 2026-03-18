@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v6.1.5</title>
+<title>Maikman Models - Pro Stock v6.2.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -33,17 +33,18 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .card { background:var(--card); border-radius:12px; padding:12px; border: 1px solid #334155; display: flex; flex-direction: column; }
 .card img { width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom: 10px; cursor: pointer; }
 
-/* Pinturas (Cuadrícula Compacta) */
+/* Grid Pinturas Compacto */
 .paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
 .paint-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #334155; display: flex; flex-direction: column; }
 .color-swatch { width: 100%; height: 35px; border-radius: 4px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
 .paint-info { font-size: 11px; font-weight: bold; margin-bottom: 8px; height: 30px; overflow: hidden; }
 
-/* Galería y Modales */
+/* Galería y Zoom */
 .gallery-item { position: relative; width: 100%; height: 110px; }
 .gallery-img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid #444; }
 .btn-del-photo { position: absolute; top: 4px; right: 4px; background: var(--danger); color: white; border: none; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; }
 
+/* Modales */
 .modal { position:fixed; inset:0; background:rgba(0,0,0,.9); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
 .modal-content { background:var(--card); padding:20px; width:100%; max-width:500px; border-radius:12px; display:flex; flex-direction:column; gap:12px; max-height:90vh; overflow-y:auto; }
 input, select { padding:10px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; }
@@ -91,8 +92,8 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     <section id="tab-mixer" class="content-section">
         <div id="mixerCardsContainer" class="paint-grid" style="margin-bottom:20px;"></div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px;">
-            <div id="mixerResultPreview" style="height:100px; border-radius:12px; border:1px solid #444; display:flex; align-items:center; justify-content:center;">
-                <span id="hexResult">#---</span>
+            <div id="mixerResultPreview" style="height:100px; border-radius:12px; border:1px solid #444; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                <span id="hexResult" style="font-weight:bold; text-shadow: 1px 1px 2px black;">#---</span>
             </div>
             <canvas id="mixerChart" style="max-height: 100px;"></canvas>
         </div>
@@ -119,7 +120,7 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     <input type="hidden" id="form_id">
     <input id="form_fabricante" placeholder="Fabricante">
     <input id="form_modelo" placeholder="Modelo">
-    <input id="form_codigo" placeholder="Referencia">
+    <input id="form_codigo" placeholder="Referencia (Ej: Tamiya)">
     <input id="form_precio" type="number" step="0.01" placeholder="Precio (€)">
     <input id="form_foto_url" placeholder="URL Foto Principal">
     <button onclick="guardarModelo()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px;">Guardar</button>
@@ -128,19 +129,19 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
 
 <div id="scannerModal" class="modal"><div class="modal-content"><h3>Escáner</h3><div id="reader"></div><button onclick="cerrarScanner()" style="padding:10px; margin-top:10px;">Cerrar</button></div></div>
 
+<div id="cartModal" class="modal"><div class="modal-content">
+    <h3>Lista de Compra</h3>
+    <div id="cartListContainer" style="max-height:300px; overflow-y:auto;"></div>
+    <button onclick="exportarListaExcel()" style="background:var(--success); color:white; border:none; padding:12px; border-radius:6px; margin-top:10px;">Exportar Excel</button>
+    <button onclick="document.getElementById('cartModal').style.display='none'" style="margin-top:10px; padding:10px;">Cerrar</button>
+</div></div>
+
 <div id="configModal" class="modal"><div class="modal-content">
     <h3>Configuración</h3>
     <button onclick="document.body.classList.toggle('light')">🌓 Cambiar Tema</button>
     <button onclick="exportarExcelPrincipal()" style="background:#2ecc71; color:white; border:none; padding:10px; border-radius:6px;">📊 Exportar Excel Stock</button>
     <button onclick="signOutUser()" style="background:var(--danger); color:white; border:none; padding:10px; border-radius:6px;">Cerrar Sesión</button>
     <button onclick="document.getElementById('configModal').style.display='none'" style="margin-top:10px;">Volver</button>
-</div></div>
-
-<div id="cartModal" class="modal"><div class="modal-content">
-    <h3>Lista de Compra</h3>
-    <div id="cartListContainer" style="max-height:300px; overflow-y:auto;"></div>
-    <button onclick="exportarListaExcel()" style="background:var(--success); color:white; border:none; padding:12px; border-radius:6px; margin-top:10px;">Exportar Excel</button>
-    <button onclick="document.getElementById('cartModal').style.display='none'" style="margin-top:10px; padding:10px;">Cerrar</button>
 </div></div>
 
 <script type="module">
@@ -169,11 +170,11 @@ let mixerSelection = [];
 let mixerChart = null;
 let html5QrCode = null;
 
-// --- LOGIN Y NAVEGACIÓN ---
+// --- AUTH & TABS ---
 window.login = () => {
     const e = document.getElementById('email').value;
     const p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error de acceso"));
+    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error"));
 };
 window.signOutUser = () => signOut(auth);
 window.switchTab = (id) => {
@@ -183,6 +184,9 @@ window.switchTab = (id) => {
     if(event) event.currentTarget.classList.add('active');
     if(id !== 'tab-pinturas') cerrarScanner();
 };
+window.openConfigModal = () => document.getElementById('configModal').style.display='flex';
+window.openFormModal = () => { document.getElementById('form_id').value = ""; document.getElementById('formModal').style.display = 'flex'; };
+window.closeFormModal = () => document.getElementById('formModal').style.display = 'none';
 
 // --- MODELOS ---
 async function cargarModelos() {
@@ -202,12 +206,28 @@ window.renderMaquetas = () => {
             <div style="font-size:12px; opacity:0.7">${m.fabricante}</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:10px;">
                 <button class="btn-mini" style="background:#3498db" onclick="abrirInfoModelo('${m.id}')">GALERÍA</button>
-                <button class="btn-mini" style="background:#9b59b6" onclick="switchTab('tab-pinturas')">COLOR</button>
+                <button class="btn-mini" style="background:#9b59b6" onclick="filtrarPinturasPorModelo('${m.id}')">COLOR</button>
                 <button class="btn-mini" style="background:#f39c12" onclick="editarModelo('${m.id}')">EDIT</button>
                 <button class="btn-mini" style="background:var(--danger)" onclick="borrarModelo('${m.id}')">DEL</button>
             </div>
         </div>`;
     });
+};
+
+window.filtrarPinturasPorModelo = (id) => {
+    const m = modelos.find(x => x.id === id);
+    if(!m) return;
+    // Buscamos si el fabricante del modelo coincide con alguna marca de pinturas
+    const marcasDisponibles = Object.keys(paintCatalogData);
+    const marcaCoincidente = marcasDisponibles.find(marca => m.fabricante.toLowerCase().includes(marca.toLowerCase()));
+    
+    if(marcaCoincidente) {
+        document.getElementById('brandFilter').value = marcaCoincidente;
+    }
+    // Además ponemos el nombre del modelo o código en el buscador para filtrar
+    document.getElementById('paintSearch').value = m.codigo || "";
+    switchTab('tab-pinturas');
+    renderPaintCatalog();
 };
 
 window.abrirInfoModelo = (id) => {
@@ -267,7 +287,7 @@ window.editarModelo = (id) => {
 
 window.borrarModelo = async (id) => { if(confirm("¿Borrar?")) { await deleteDoc(doc(db, "modelos", id)); cargarModelos(); } };
 
-// --- PINTURAS Y MIXER ---
+// --- PINTURAS ---
 async function cargarCatalogoPinturas() {
     const resp = await fetch('pinturas.json');
     paintCatalogData = await resp.json();
@@ -303,18 +323,18 @@ window.togglePaint = (id, type) => {
     localStorage.setItem('maikman_paints', JSON.stringify(myPaints));
     renderPaintCatalog(); updateCartCount();
 };
-
 window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
 
-// --- LÓGICA MIXER ---
+// --- MIXER CORREGIDO ---
 window.addToMixer = (id) => {
-    if(mixerSelection.length >= 4) return;
+    if(mixerSelection.length >= 6) return;
     let p = encontrarPintura(id);
     mixerSelection.push({ ...p, parts: 1 });
+    switchTab('tab-mixer');
     renderMixer();
 };
 
-function renderMixer() {
+window.renderMixer = () => {
     const cont = document.getElementById("mixerCardsContainer");
     cont.innerHTML = "";
     mixerSelection.forEach((p, idx) => {
@@ -322,16 +342,19 @@ function renderMixer() {
             <div class="paint-item">
                 <div class="color-swatch" style="background:${p.hex}"></div>
                 <div class="paint-info">${p.id}</div>
-                <input type="number" value="${p.parts}" min="1" onchange="updateMixParts(${idx}, this.value)" style="width:50px; margin:auto;">
-                <button onclick="mixerSelection.splice(${idx},1); renderMixer();" style="background:none; border:none; color:red; cursor:pointer; margin-top:5px;">Eliminar</button>
+                <input type="number" value="${p.parts}" min="1" onchange="updateMixParts(${idx}, this.value)" style="width:60px; margin:5px auto; padding:5px; text-align:center;">
+                <button onclick="mixerSelection.splice(${idx},1); renderMixer();" style="color:var(--danger); background:none; border:none; font-size:10px; cursor:pointer;">Eliminar</button>
             </div>`;
     });
     calculateMix();
-}
+};
 
-window.updateMixParts = (idx, val) => { mixerSelection[idx].parts = parseInt(val); calculateMix(); };
+window.updateMixParts = (idx, val) => { 
+    mixerSelection[idx].parts = parseInt(val) || 1; 
+    calculateMix(); 
+};
 
-function calculateMix() {
+window.calculateMix = () => {
     if(mixerSelection.length === 0) { resetMixer(); return; }
     let r=0, g=0, b=0, totalParts=0;
     mixerSelection.forEach(p => {
@@ -343,7 +366,7 @@ function calculateMix() {
     document.getElementById("mixerResultPreview").style.background = resHex;
     document.getElementById("hexResult").innerText = resHex;
     updateMixerChart();
-}
+};
 
 function updateMixerChart() {
     const ctx = document.getElementById('mixerChart').getContext('2d');
@@ -354,7 +377,7 @@ function updateMixerChart() {
             labels: mixerSelection.map(p => p.id),
             datasets: [{ data: mixerSelection.map(p => p.parts), backgroundColor: mixerSelection.map(p => p.hex) }]
         },
-        options: { plugins: { legend: { display: false } } }
+        options: { plugins: { legend: { display: false } }, animation: false }
     });
 }
 
@@ -366,7 +389,25 @@ window.resetMixer = () => {
     if(mixerChart) mixerChart.destroy();
 };
 
-// --- QR SCANNER ---
+// --- UTILS ---
+function encontrarPintura(id) { 
+    for(let b in paintCatalogData) { 
+        let p = paintCatalogData[b].find(x => x.id === id); 
+        if(p) return p; 
+    } 
+    return {id, hex:"#333", nombre:id}; 
+}
+function hexToRgb(h) {
+    let r = parseInt(h.slice(1,3), 16);
+    let g = parseInt(h.slice(3,5), 16);
+    let b = parseInt(h.slice(5,7), 16);
+    return {r, g, b};
+}
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+}
+
+// --- SCANNER ---
 window.abrirScanner = () => {
     document.getElementById('scannerModal').style.display = 'flex';
     html5QrCode = new Html5Qrcode("reader");
@@ -377,14 +418,10 @@ window.abrirScanner = () => {
 };
 window.cerrarScanner = () => { if(html5QrCode) html5QrCode.stop(); document.getElementById('scannerModal').style.display='none'; };
 
-// --- UTILS ---
-function encontrarPintura(id) { for(let b in paintCatalogData) { let p = paintCatalogData[b].find(x => x.id === id); if(p) return p; } return {id, hex:"#333", nombre:id}; }
-function hexToRgb(h) { return { r: parseInt(h.slice(1,3),16), g: parseInt(h.slice(3,5),16), b: parseInt(h.slice(5,7),16) }; }
-function rgbToHex(r, g, b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase(); }
-
+// --- EXPORTAR ---
 window.exportarExcelPrincipal = () => {
-    const ws = XLSX.utils.json_to_sheet(modelos);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock");
+    const data = modelos.map(m => ({ MARCA: m.fabricante, MODELO: m.modelo, CODIGO: m.codigo, PRECIO: m.precio }));
+    const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock");
     XLSX.writeFile(wb, "Stock_Maikman.xlsx");
 };
 
