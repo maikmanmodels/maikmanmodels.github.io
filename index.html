@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v6.5.1</title>
+<title>Maikman Models - Pro Stock v6.6.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -46,6 +46,10 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
 
 #finderCanvas { max-width: 100%; height: auto; border-radius: 8px; cursor: crosshair; border: 2px solid #334155; }
 .match-card { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 12px; margin-bottom: 5px; }
+
+/* Mixer Styles */
+.mixer-card { background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid #334155; }
+.drops-info { color: var(--accent); font-weight: bold; font-size: 13px; }
 </style>
 </head>
 <body class="dark">
@@ -62,8 +66,8 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
         <button class="tab-btn active" onclick="switchTab('tab-maquetas')">📦 MODELOS</button>
         <button class="tab-btn" onclick="switchTab('tab-pinturas')">🎨 PINTURAS</button>
         <button class="tab-btn" onclick="switchTab('tab-mixer')">🧪 MIXER / FINDER</button>
-        <button class="tab-btn" onclick="abrirModalCompra()">🛒 <span id="cartCount" class="cart-badge">0</span></button>
-        <button class="tab-btn" style="flex:0.3" onclick="openConfigModal()">⚙️</button>
+        <button class="tab-btn" onclick="window.abrirModalCompra(true)">🛒 <span id="cartCount" class="cart-badge">0</span></button>
+        <button class="tab-btn" style="flex:0.3" onclick="window.openConfigModal(true)">⚙️</button>
     </nav>
 
     <section id="tab-maquetas" class="content-section active">
@@ -102,11 +106,13 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
             </div>
         </div>
 
-        <h4 style="margin:0 0 10px 0; color:var(--accent)">🧪 Mezclador</h4>
+        <h4 style="margin:0 0 10px 0; color:var(--accent)">🧪 Mezclador Proporcional (Base 10)</h4>
         <div id="mixerCardsContainer" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:10px; margin-bottom:20px;"></div>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px;">
             <div id="mixerResultPreview" style="height:100px; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid #444;">
                 <span id="hexResult" style="font-weight:bold; text-shadow: 0 0 5px black;">#---</span>
+                <small id="totalDropsLabel" style="font-size:10px; margin-top:5px; text-shadow: 0 0 5px black;">Total: 10 gotas</small>
             </div>
             <canvas id="mixerChart" style="max-height: 100px;"></canvas>
         </div>
@@ -120,9 +126,9 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
 
 <div id="modelPaintsModal" class="modal"><div class="modal-content"><h3 id="modelPaintsTitle">Colores</h3><div id="modelPaintsList" class="paint-grid" style="grid-template-columns: 1fr;"></div><button onclick="document.getElementById('modelPaintsModal').style.display='none'" style="padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Cerrar</button></div></div>
 
-<div id="cartModal" class="modal"><div class="modal-content"><h3>Lista de Compra</h3><div id="cartListContainer" style="max-height: 300px; overflow-y: auto;"></div><button onclick="exportarListaExcel()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">📥 Exportar Excel</button><button onclick="abrirModalCompra(false)" style="padding:10px; margin-top:5px;">Cerrar</button></div></div>
+<div id="cartModal" class="modal"><div class="modal-content"><h3>Lista de Compra</h3><div id="cartListContainer" style="max-height: 300px; overflow-y: auto;"></div><button onclick="exportarListaExcel()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">📥 Exportar Excel</button><button onclick="window.abrirModalCompra(false)" style="padding:10px; margin-top:5px;">Cerrar</button></div></div>
 
-<div id="configModal" class="modal"><div class="modal-content"><h3>Opciones</h3><button onclick="document.body.classList.toggle('light')">🌓 Cambiar Tema</button><button onclick="exportarExcelPrincipal()">📊 Exportar Todo el Stock</button><button onclick="signOutUser()" style="background:var(--danger); color:white; padding:10px; border:none; border-radius:6px; margin-top:10px;">Cerrar Sesión</button><button onclick="openConfigModal(false)" style="margin-top:10px;">Volver</button></div></div>
+<div id="configModal" class="modal"><div class="modal-content"><h3>Opciones</h3><button onclick="document.body.classList.toggle('light')">🌓 Cambiar Tema</button><button onclick="exportarExcelPrincipal()">📊 Exportar Stock Completo</button><button onclick="signOutUser()" style="background:var(--danger); color:white; padding:10px; border:none; border-radius:6px; margin-top:10px;">Cerrar Sesión</button><button onclick="window.openConfigModal(false)" style="margin-top:10px;">Volver</button></div></div>
 
 <div id="scannerModal" class="modal"><div class="modal-content"><h3>Lector</h3><div id="reader"></div><button onclick="cerrarScanner()" style="padding:10px; margin-top:10px;">Cerrar</button></div></div>
 
@@ -164,7 +170,6 @@ window.switchTab = (id) => {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    if(event) event.currentTarget.classList.add('active');
 };
 window.openConfigModal = (show = true) => document.getElementById('configModal').style.display = show ? 'flex' : 'none';
 window.openFormModal = () => { document.getElementById('form_id').value = ""; document.getElementById('formModal').style.display = 'flex'; };
@@ -357,7 +362,7 @@ function findSimilarPaints(r1, g1, b1) {
     });
 }
 
-// --- MIXER ---
+// --- MIXER PROPORCIONAL (MEJORADO) ---
 function initMixerUI() {
     const container = document.getElementById('mixerCardsContainer');
     container.innerHTML = "";
@@ -368,19 +373,79 @@ function initMixerUI() {
         options += `</optgroup>`;
     });
     for(let i=1; i<=4; i++) {
-        container.innerHTML += `<div class="mixer-card" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:8px; border:1px solid #333;"><select id="mixColor${i}" onchange="calculateMix()">${options}</select><input type="range" id="mixSlider${i}" min="0" max="100" value="0" oninput="updateMixSlider(${i})"><div id="mixLabel${i}" style="text-align:center; font-size:10px;">0%</div></div>`;
+        container.innerHTML += `
+            <div class="mixer-card">
+                <select id="mixColor${i}" onchange="calculateMix()">${options}</select>
+                <input type="range" id="mixSlider${i}" min="0" max="100" value="0" oninput="handleMixSlider(${i})">
+                <div style="display:flex; justify-content:space-between;">
+                    <span id="mixLabel${i}" style="font-size:10px;">0%</span>
+                    <span id="dropsLabel${i}" class="drops-info">0.0 gotas</span>
+                </div>
+            </div>`;
     }
-    mixerChart = new Chart(document.getElementById('mixerChart').getContext('2d'), { type: 'pie', data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] }, options: { plugins: { legend: { display: false } }, animation: false } });
+    mixerChart = new Chart(document.getElementById('mixerChart').getContext('2d'), { 
+        type: 'pie', 
+        data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] }, 
+        options: { plugins: { legend: { display: false } }, animation: false } 
+    });
 }
-window.updateMixSlider = (i) => { document.getElementById(`mixLabel${i}`).innerText = document.getElementById(`mixSlider${i}`).value + "%"; calculateMix(); };
+
+window.handleMixSlider = (index) => {
+    let values = [];
+    let actives = [];
+    for(let i=1; i<=4; i++) {
+        let val = parseInt(document.getElementById(`mixSlider${i}`).value);
+        values.push(val);
+        if(document.getElementById(`mixColor${i}`).value !== "") actives.push(i-1);
+    }
+
+    if(actives.length <= 1) { 
+        // Si solo hay uno activo, forzar al 100% si se mueve algo
+        if(actives.length === 1) document.getElementById(`mixSlider${actives[0]+1}`).value = 100;
+        calculateMix(); return; 
+    }
+
+    let changedIdx = index - 1;
+    let newVal = values[changedIdx];
+    let otherActives = actives.filter(idx => idx !== changedIdx);
+    
+    let currentOthersSum = 0;
+    otherActives.forEach(idx => currentOthersSum += values[idx]);
+
+    let remaining = 100 - newVal;
+    
+    if(currentOthersSum === 0) {
+        // Si los otros estaban en 0, repartir equitativamente lo que sobra
+        otherActives.forEach(idx => {
+            document.getElementById(`mixSlider${idx+1}`).value = remaining / otherActives.length;
+        });
+    } else {
+        // Repartir proporcionalmente lo que sobra
+        otherActives.forEach(idx => {
+            let share = (values[idx] / currentOthersSum) * remaining;
+            document.getElementById(`mixSlider${idx+1}`).value = share;
+        });
+    }
+    calculateMix();
+};
+
 window.calculateMix = () => {
-    let r=0, g=0, b=0, total=0; const lbs=[], dts=[], cls=[];
+    let r=0, g=0, b=0, total=0; 
+    const lbs=[], dts=[], cls=[], drops=[];
+    
     for(let i=1; i<=4; i++) {
         const hex = document.getElementById(`mixColor${i}`).value;
-        const p = parseInt(document.getElementById(`mixSlider${i}`).value);
+        const p = parseFloat(document.getElementById(`mixSlider${i}`).value);
+        
+        // Actualizar etiquetas visuales
+        document.getElementById(`mixLabel${i}`).innerText = Math.round(p) + "%";
+        document.getElementById(`dropsLabel${i}`).innerText = (p/10).toFixed(1) + " gotas";
+
         if(hex && p > 0) {
             const rgb = hexToRgb(hex); r += rgb.r*p; g += rgb.g*p; b += rgb.b*p; total += p;
-            lbs.push(document.getElementById(`mixColor${i}`).selectedOptions[0].text); dts.push(p); cls.push(hex);
+            lbs.push(document.getElementById(`mixColor${i}`).selectedOptions[0].text + " (" + (p/10).toFixed(1) + " g.)"); 
+            dts.push(p); 
+            cls.push(hex);
         }
     }
     if(total > 0) {
@@ -389,9 +454,19 @@ window.calculateMix = () => {
         document.getElementById('hexResult').innerText = fHex;
         document.getElementById('hexResult').style.color = (r+g+b)/total > 380 ? 'black' : 'white';
     }
-    mixerChart.data.labels = lbs; mixerChart.data.datasets[0].data = dts; mixerChart.data.datasets[0].backgroundColor = cls; mixerChart.update();
+    mixerChart.data.labels = lbs; 
+    mixerChart.data.datasets[0].data = dts; 
+    mixerChart.data.datasets[0].backgroundColor = cls; 
+    mixerChart.update();
 };
-window.resetMixer = () => { for(let i=1; i<=4; i++) { document.getElementById(`mixColor${i}`).value=""; document.getElementById(`mixSlider${i}`).value=0; document.getElementById(`mixLabel${i}`).innerText="0%"; } calculateMix(); };
+
+window.resetMixer = () => { 
+    for(let i=1; i<=4; i++) { 
+        document.getElementById(`mixColor${i}`).value=""; 
+        document.getElementById(`mixSlider${i}`).value=0; 
+    } 
+    calculateMix(); 
+};
 
 // --- SCANNER ---
 window.abrirScanner = () => {
@@ -401,9 +476,15 @@ window.abrirScanner = () => {
         buscarPinturaEscaneada(text);
     }).catch(()=>{});
 };
-window.cerrarScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => { document.getElementById('scannerModal').style.display='none'; html5QrCode = null; }); else document.getElementById('scannerModal').style.display='none'; };
+window.cerrarScanner = () => { 
+    if(html5QrCode) html5QrCode.stop().then(() => { 
+        document.getElementById('scannerModal').style.display='none'; 
+        html5QrCode = null; 
+    }); 
+    else document.getElementById('scannerModal').style.display='none'; 
+};
 
-// --- COMPRA & EXPORT ---
+// --- COMPRA & EXPORT (MEJORADO CON COLORES Y URL) ---
 window.abrirModalCompra = (show = true) => {
     if(!show) { document.getElementById('cartModal').style.display = 'none'; return; }
     const cont = document.getElementById('cartListContainer'); cont.innerHTML = "";
@@ -413,15 +494,24 @@ window.abrirModalCompra = (show = true) => {
     });
     document.getElementById('cartModal').style.display='flex';
 };
+
 window.exportarListaExcel = () => {
     const data = myPaints.buy.map(id => ({ CODIGO: id, NOMBRE: encontrarPintura(id).nombre }));
     const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Compra");
     XLSX.writeFile(wb, "Compra_Maikman.xlsx");
 };
+
 window.exportarExcelPrincipal = () => {
-    const data = modelos.map(m => ({ MARCA: m.fabricante, MODELO: m.modelo, CODIGO: m.codigo, PRECIO: m.precio }));
+    const data = modelos.map(m => ({ 
+        MARCA: m.fabricante, 
+        MODELO: m.modelo, 
+        CODIGO: m.codigo, 
+        PRECIO: m.precio,
+        URL_FOTO: m.foto || "",
+        COLORES_ASOCIADOS: m.paints ? m.paints.join(", ") : ""
+    }));
     const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock");
-    XLSX.writeFile(wb, "Stock_Maikman.xlsx");
+    XLSX.writeFile(wb, "Stock_Maikman_Completo.xlsx");
 };
 
 // --- UTILS ---
