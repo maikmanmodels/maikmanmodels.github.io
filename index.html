@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v6.5.0</title>
+<title>Maikman Models - Pro Stock v6.5.1</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -44,7 +44,6 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .modal-content { background:var(--card); padding:24px; width:100%; max-width:500px; border-radius:12px; display:flex; flex-direction:column; gap:12px; max-height:90vh; overflow-y:auto; }
 input, select { padding:10px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; }
 
-/* Estilos Color Finder */
 #finderCanvas { max-width: 100%; height: auto; border-radius: 8px; cursor: crosshair; border: 2px solid #334155; }
 .match-card { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 12px; margin-bottom: 5px; }
 </style>
@@ -53,8 +52,8 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
 
 <div id="login" style="max-width:320px; margin:80px auto; padding:20px; text-align:center;">
     <h2 style="color:var(--accent)">Maikman Stock</h2>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Contraseña" style="margin-top:10px">
+    <input id="email" type="email" placeholder="Email" style="margin-bottom:10px">
+    <input id="password" type="password" placeholder="Contraseña">
     <button onclick="login()" style="width:100%; margin-top:20px; padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Entrar</button>
 </div>
 
@@ -121,7 +120,9 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
 
 <div id="modelPaintsModal" class="modal"><div class="modal-content"><h3 id="modelPaintsTitle">Colores</h3><div id="modelPaintsList" class="paint-grid" style="grid-template-columns: 1fr;"></div><button onclick="document.getElementById('modelPaintsModal').style.display='none'" style="padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Cerrar</button></div></div>
 
-<div id="cartModal" class="modal"><div class="modal-content"><h3>Lista de Compra</h3><div id="cartListContainer" style="max-height: 300px; overflow-y: auto;"></div><button onclick="exportarListaExcel()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">Exportar Excel</button><button onclick="document.getElementById('cartModal').style.display='none'" style="margin-top:5px;">Cerrar</button></div></div>
+<div id="cartModal" class="modal"><div class="modal-content"><h3>Lista de Compra</h3><div id="cartListContainer" style="max-height: 300px; overflow-y: auto;"></div><button onclick="exportarListaExcel()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">📥 Exportar Excel</button><button onclick="abrirModalCompra(false)" style="padding:10px; margin-top:5px;">Cerrar</button></div></div>
+
+<div id="configModal" class="modal"><div class="modal-content"><h3>Opciones</h3><button onclick="document.body.classList.toggle('light')">🌓 Cambiar Tema</button><button onclick="exportarExcelPrincipal()">📊 Exportar Todo el Stock</button><button onclick="signOutUser()" style="background:var(--danger); color:white; padding:10px; border:none; border-radius:6px; margin-top:10px;">Cerrar Sesión</button><button onclick="openConfigModal(false)" style="margin-top:10px;">Volver</button></div></div>
 
 <div id="scannerModal" class="modal"><div class="modal-content"><h3>Lector</h3><div id="reader"></div><button onclick="cerrarScanner()" style="padding:10px; margin-top:10px;">Cerrar</button></div></div>
 
@@ -156,7 +157,7 @@ let html5QrCode = null;
 window.login = () => {
     const e = document.getElementById('email').value;
     const p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error"));
+    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error de acceso"));
 };
 window.signOutUser = () => signOut(auth);
 window.switchTab = (id) => {
@@ -165,6 +166,7 @@ window.switchTab = (id) => {
     document.getElementById(id).classList.add('active');
     if(event) event.currentTarget.classList.add('active');
 };
+window.openConfigModal = (show = true) => document.getElementById('configModal').style.display = show ? 'flex' : 'none';
 window.openFormModal = () => { document.getElementById('form_id').value = ""; document.getElementById('formModal').style.display = 'flex'; };
 window.closeFormModal = () => document.getElementById('formModal').style.display = 'none';
 
@@ -255,11 +257,11 @@ window.editarModelo = (id) => {
 window.guardarModelo = async () => {
     const id = document.getElementById('form_id').value;
     const d = {
-        codigo: document.getElementById('form_codigo').value,
-        fabricante: document.getElementById('form_fabricante').value,
-        modelo: document.getElementById('form_modelo').value,
-        precio: document.getElementById('form_precio').value,
-        foto: document.getElementById('form_foto_url').value
+        codigo: document.getElementById('form_codigo').value || "",
+        fabricante: document.getElementById('form_fabricante').value || "",
+        modelo: document.getElementById('form_modelo').value || "",
+        precio: document.getElementById('form_precio').value || "",
+        foto: document.getElementById('form_foto_url').value || ""
     };
     if(id) await updateDoc(doc(db, "modelos", id), d);
     else await addDoc(collection(db, "modelos"), d);
@@ -307,21 +309,18 @@ window.togglePaint = (id, type) => {
 
 window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
 
-// --- COLOR FINDER (NUEVA LÓGICA) ---
+// --- COLOR FINDER ---
 function initColorFinder() {
     const input = document.getElementById('finderInput');
     const canvas = document.getElementById('finderCanvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
     input.addEventListener('change', (e) => {
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
-                const maxW = 400;
-                const scale = maxW / img.width;
-                canvas.width = maxW;
-                canvas.height = img.height * scale;
+                const maxW = 400; const scale = maxW / img.width;
+                canvas.width = maxW; canvas.height = img.height * scale;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 document.getElementById('finderResults').style.display = 'block';
             };
@@ -329,14 +328,11 @@ function initColorFinder() {
         };
         reader.readAsDataURL(e.target.files[0]);
     });
-
     canvas.addEventListener('click', (e) => {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const x = e.clientX - rect.left; const y = e.clientY - rect.top;
         const pixel = ctx.getImageData(x, y, 1, 1).data;
         const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
-        
         document.getElementById('pickedColorBox').style.background = hex;
         document.getElementById('pickedHex').innerText = hex;
         findSimilarPaints(pixel[0], pixel[1], pixel[2]);
@@ -348,30 +344,16 @@ function findSimilarPaints(r1, g1, b1) {
     for(let brand in paintCatalogData) {
         paintCatalogData[brand].forEach(p => {
             const rgb2 = hexToRgb(p.hex);
-            // Fórmula de distancia Euclidiana para color
-            const dist = Math.sqrt(
-                Math.pow(r1 - rgb2.r, 2) + 
-                Math.pow(g1 - rgb2.g, 2) + 
-                Math.pow(b1 - rgb2.b, 2)
-            );
+            const dist = Math.sqrt(Math.pow(r1 - rgb2.r, 2) + Math.pow(g1 - rgb2.g, 2) + Math.pow(b1 - rgb2.b, 2));
             matches.push({ ...p, brand, dist });
         });
     }
-    // Ordenar por cercanía (distancia menor es más parecido)
     matches.sort((a, b) => a.dist - b.dist);
     const top3 = matches.slice(0, 3);
-    
     const container = document.getElementById('bestMatches');
     container.innerHTML = "<b>Pinturas sugeridas:</b><br>";
     top3.forEach(m => {
-        container.innerHTML += `
-            <div class="match-card">
-                <div class="color-swatch" style="background:${m.hex}"></div>
-                <div style="flex:1">
-                    <b>${m.brand} - ${m.id}</b><br>
-                    ${m.nombre} (${Math.round((1 - m.dist/441)*100)}% coincidencia)
-                </div>
-            </div>`;
+        container.innerHTML += `<div class="match-card"><div class="color-swatch" style="background:${m.hex}"></div><div style="flex:1"><b>${m.brand} - ${m.id}</b><br>${m.nombre} (${Math.round((1 - m.dist/441)*100)}% coincide)</div></div>`;
     });
 }
 
@@ -392,8 +374,7 @@ function initMixerUI() {
 }
 window.updateMixSlider = (i) => { document.getElementById(`mixLabel${i}`).innerText = document.getElementById(`mixSlider${i}`).value + "%"; calculateMix(); };
 window.calculateMix = () => {
-    let r=0, g=0, b=0, total=0;
-    const lbs=[], dts=[], cls=[];
+    let r=0, g=0, b=0, total=0; const lbs=[], dts=[], cls=[];
     for(let i=1; i<=4; i++) {
         const hex = document.getElementById(`mixColor${i}`).value;
         const p = parseInt(document.getElementById(`mixSlider${i}`).value);
@@ -411,6 +392,37 @@ window.calculateMix = () => {
     mixerChart.data.labels = lbs; mixerChart.data.datasets[0].data = dts; mixerChart.data.datasets[0].backgroundColor = cls; mixerChart.update();
 };
 window.resetMixer = () => { for(let i=1; i<=4; i++) { document.getElementById(`mixColor${i}`).value=""; document.getElementById(`mixSlider${i}`).value=0; document.getElementById(`mixLabel${i}`).innerText="0%"; } calculateMix(); };
+
+// --- SCANNER ---
+window.abrirScanner = () => {
+    document.getElementById('scannerModal').style.display = 'flex';
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 150} }, (text) => {
+        buscarPinturaEscaneada(text);
+    }).catch(()=>{});
+};
+window.cerrarScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => { document.getElementById('scannerModal').style.display='none'; html5QrCode = null; }); else document.getElementById('scannerModal').style.display='none'; };
+
+// --- COMPRA & EXPORT ---
+window.abrirModalCompra = (show = true) => {
+    if(!show) { document.getElementById('cartModal').style.display = 'none'; return; }
+    const cont = document.getElementById('cartListContainer'); cont.innerHTML = "";
+    myPaints.buy.forEach(id => {
+        let p = encontrarPintura(id);
+        cont.innerHTML += `<div style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #333;"><div style="width:15px; height:15px; background:${p.hex}; border-radius:3px;"></div><span>${id} - ${p.nombre}</span></div>`;
+    });
+    document.getElementById('cartModal').style.display='flex';
+};
+window.exportarListaExcel = () => {
+    const data = myPaints.buy.map(id => ({ CODIGO: id, NOMBRE: encontrarPintura(id).nombre }));
+    const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Compra");
+    XLSX.writeFile(wb, "Compra_Maikman.xlsx");
+};
+window.exportarExcelPrincipal = () => {
+    const data = modelos.map(m => ({ MARCA: m.fabricante, MODELO: m.modelo, CODIGO: m.codigo, PRECIO: m.precio }));
+    const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock");
+    XLSX.writeFile(wb, "Stock_Maikman.xlsx");
+};
 
 // --- UTILS ---
 function encontrarPintura(id) { for(let b in paintCatalogData) { let p = paintCatalogData[b].find(x => x.id === id); if(p) return p; } return { nombre: id, hex: "#333", id: id }; }
