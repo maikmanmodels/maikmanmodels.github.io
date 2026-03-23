@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v6.7.0</title>
+<title>Maikman Models - Pro Stock v6.8.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -45,10 +45,13 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .info-modal-content { padding-bottom: 70px; }
 .sticky-close { position: sticky; bottom: -25px; left: 0; right: 0; background: var(--card); padding: 15px 0; border-top: 1px solid #334155; margin-top: 10px; z-index: 10; }
 
-/* Zoom Interactivo */
-#zoomModal { cursor: zoom-out; }
-#zoomImg { transition: transform 0.25s ease; cursor: zoom-in; }
-#zoomImg.zoomed { transform: scale(2.5); }
+/* Zoom Interactivo Avanzado */
+#zoomModal { background: rgba(0,0,0,0.95); overflow: hidden; display: none; cursor: default; }
+#zoomContainer { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#zoomImg { max-width: 90%; max-height: 90%; transition: transform 0.1s ease-out; cursor: grab; user-select: none; }
+#zoomImg:active { cursor: grabbing; }
+.zoom-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; }
+.btn-zoom { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; }
 
 #finderCanvas { max-width: 100%; height: auto; border-radius: 8px; cursor: crosshair; border: 2px solid #334155; }
 .match-card { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 12px; margin-bottom: 5px; }
@@ -96,15 +99,11 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
             <input type="file" id="finderInput" accept="image/*" style="margin-bottom:10px; font-size:12px;">
             <canvas id="finderCanvas"></canvas>
             <div id="finderResults" style="margin-top:15px; display:none;">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                    <div id="pickedColorBox" style="width:40px; height:40px; border-radius:8px; border:2px solid white;"></div>
-                    <div><b id="pickedHex">#------</b><br><small>Color seleccionado</small></div>
-                </div>
                 <div id="bestMatches"></div>
             </div>
         </div>
 
-        <h4 style="margin:0 0 10px 0; color:var(--accent)">🧪 Mezclador Proporcional</h4>
+        <h4 style="margin:0 0 10px 0; color:var(--accent)">🧪 Mezclador Proporcional (Base 10)</h4>
         <div id="mixerCardsContainer" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:10px; margin-bottom:20px;"></div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px;">
             <div id="mixerResultPreview" style="height:100px; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid #444;">
@@ -123,7 +122,7 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
         <h3 id="infoTitle"></h3>
         <div id="infoDetails"></div>
         <hr style="border:0; border-top:1px solid #444;">
-        <b>Galería (Soporta múltiples URLs separadas por , o ;)</b>
+        <b>Galería (Soporta múltiples URLs con , o ;)</b>
         <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;"></div>
         <div style="display:flex; gap:5px;">
             <input type="text" id="urlPhotoInput" placeholder="URL1, URL2...">
@@ -141,7 +140,17 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 
 <div id="configModal" class="modal"><div class="modal-content"><h3>Opciones</h3><button onclick="document.body.classList.toggle('light')">🌓 Tema</button><button onclick="exportarExcelPrincipal()">📊 Exportar Stock</button><button onclick="signOutUser()" style="background:var(--danger); color:white; margin-top:10px;">Salir</button><button onclick="window.openConfigModal(false)" style="margin-top:10px;">Volver</button></div></div>
 
-<div id="zoomModal" class="modal" onclick="closeZoom()"><img id="zoomImg" onclick="toggleZoom(event)"></div>
+<div id="zoomModal" class="modal">
+    <div id="zoomContainer" onwheel="handleWheel(event)">
+        <img id="zoomImg" src="" draggable="false">
+    </div>
+    <div class="zoom-controls">
+        <button class="btn-zoom" onclick="adjustZoom(0.2)">➕</button>
+        <button class="btn-zoom" onclick="resetZoomParams()">🏠</button>
+        <button class="btn-zoom" onclick="adjustZoom(-0.2)">➖</button>
+        <button class="btn-zoom" onclick="closeZoom()" style="background:var(--danger)">CERRAR</button>
+    </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -166,6 +175,9 @@ let paintCatalogData = {};
 let currentModelId = null;
 let myPaints = JSON.parse(localStorage.getItem('maikman_paints')) || { have: [], buy: [] };
 let mixerChart = null;
+
+// --- VARIABLES ZOOM ---
+let scale = 1, posX = 0, posY = 0, isDragging = false, startX, startY;
 
 // --- AUTH & NAV ---
 window.login = () => {
@@ -229,16 +241,12 @@ window.abrirInfoModelo = (id) => {
     document.getElementById("infoModal").style.display = "flex";
 };
 
-// --- MEJORA: AÑADIR MÚLTIPLES URLS ---
 window.añadirUrlsAGaleria = async () => {
     const input = document.getElementById("urlPhotoInput").value.trim();
     if(!input) return;
-    
-    // Separar por coma o punto y coma
     const urls = input.split(/[;,]+/).map(u => u.trim()).filter(u => u.length > 0);
     const m = modelos.find(x => x.id === currentModelId);
     if(!m.galeria) m.galeria = [];
-    
     m.galeria.push(...urls);
     await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
     document.getElementById("urlPhotoInput").value = "";
@@ -252,63 +260,73 @@ window.borrarFotoGaleria = async (idx) => {
     abrirInfoModelo(currentModelId);
 };
 
-// --- MEJORA: ZOOM INTERACTIVO ---
+// --- MEJORA: ZOOM PANORÁMICO Y DESLIZABLE ---
 window.verZoom = (url) => {
     if(url && !url.includes('placeholder')) {
         const img = document.getElementById("zoomImg");
         img.src = url;
-        img.classList.remove('zoomed');
+        resetZoomParams();
         document.getElementById("zoomModal").style.display = "flex";
     }
 };
-window.toggleZoom = (e) => {
-    e.stopPropagation();
-    e.target.classList.toggle('zoomed');
-};
-window.closeZoom = () => {
-    document.getElementById("zoomModal").style.display = 'none';
+
+window.resetZoomParams = () => {
+    scale = 1; posX = 0; posY = 0;
+    applyTransform();
 };
 
-window.abrirPinturasModelo = (id) => {
-    const m = modelos.find(x => x.id === id);
-    const list = document.getElementById('modelPaintsList');
-    document.getElementById('modelPaintsTitle').innerText = "Colores: " + m.modelo;
-    list.innerHTML = "";
-    if(m.paints) {
-        m.paints.forEach(pCode => {
-            let info = encontrarPintura(pCode);
-            list.innerHTML += `<div class="paint-item"><div class="color-swatch" style="background:${info.hex}"></div><div style="flex:1"><b>${info.id}</b><br><small>${info.nombre}</small></div></div>`;
-        });
-    } else { list.innerHTML = "<p>Sin pinturas.</p>"; }
-    document.getElementById('modelPaintsModal').style.display = 'flex';
+window.adjustZoom = (delta) => {
+    scale += delta;
+    if (scale < 0.5) scale = 0.5;
+    applyTransform();
 };
 
-window.editarModelo = (id) => {
-    const m = modelos.find(x => x.id === id);
-    document.getElementById('form_id').value = m.id;
-    document.getElementById('form_codigo').value = m.codigo || "";
-    document.getElementById('form_fabricante').value = m.fabricante || "";
-    document.getElementById('form_modelo').value = m.modelo || "";
-    document.getElementById('form_precio').value = m.precio || "";
-    document.getElementById('form_foto_url').value = m.foto || "";
-    document.getElementById('formModal').style.display = 'flex';
+window.handleWheel = (e) => {
+    e.preventDefault();
+    scale += e.deltaY * -0.001;
+    scale = Math.min(Math.max(.5, scale), 5);
+    applyTransform();
 };
 
-window.guardarModelo = async () => {
-    const id = document.getElementById('form_id').value;
-    const d = {
-        codigo: document.getElementById('form_codigo').value || "",
-        fabricante: document.getElementById('form_fabricante').value || "",
-        modelo: document.getElementById('form_modelo').value || "",
-        precio: document.getElementById('form_precio').value || "",
-        foto: document.getElementById('form_foto_url').value || ""
-    };
-    if(id) await updateDoc(doc(db, "modelos", id), d);
-    else await addDoc(collection(db, "modelos"), d);
-    document.getElementById('formModal').style.display='none'; cargarModelos();
-};
+function applyTransform() {
+    const img = document.getElementById("zoomImg");
+    img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+}
 
-window.borrarModelo = async (id) => { if(confirm("¿Borrar?")) { await deleteDoc(doc(db, "modelos", id)); cargarModelos(); } };
+// Mouse Drag Events
+const img = document.getElementById("zoomImg");
+img.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - posX;
+    startY = e.clientY - posY;
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    posX = e.clientX - startX;
+    posY = e.clientY - startY;
+    applyTransform();
+});
+
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+// Touch Events for Mobile
+img.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    startX = e.touches[0].clientX - posX;
+    startY = e.touches[0].clientY - posY;
+});
+
+img.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    posX = e.touches[0].clientX - startX;
+    posY = e.touches[0].clientY - startY;
+    applyTransform();
+});
+
+img.addEventListener('touchend', () => { isDragging = false; });
+
+window.closeZoom = () => { document.getElementById("zoomModal").style.display = 'none'; };
 
 // --- PINTURAS ---
 async function cargarCatalogoPinturas() {
@@ -319,7 +337,6 @@ async function cargarCatalogoPinturas() {
     Object.keys(paintCatalogData).forEach(b => f.innerHTML += `<option value="${b}">${b}</option>`);
     renderPaintCatalog();
     initMixerUI();
-    initColorFinder();
 }
 
 window.renderPaintCatalog = () => {
@@ -344,54 +361,6 @@ window.togglePaint = (id, type) => {
 };
 
 window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
-
-// --- COLOR FINDER ---
-function initColorFinder() {
-    const input = document.getElementById('finderInput');
-    const canvas = document.getElementById('finderCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    input.addEventListener('change', (e) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => {
-                const maxW = 400; const scale = maxW / img.width;
-                canvas.width = maxW; canvas.height = img.height * scale;
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                document.getElementById('finderResults').style.display = 'block';
-            };
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(e.target.files[0]);
-    });
-    canvas.addEventListener('click', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-        const pixel = ctx.getImageData(x, y, 1, 1).data;
-        const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
-        document.getElementById('pickedColorBox').style.background = hex;
-        document.getElementById('pickedHex').innerText = hex;
-        findSimilarPaints(pixel[0], pixel[1], pixel[2]);
-    });
-}
-
-function findSimilarPaints(r1, g1, b1) {
-    let matches = [];
-    for(let brand in paintCatalogData) {
-        paintCatalogData[brand].forEach(p => {
-            const rgb2 = hexToRgb(p.hex);
-            const dist = Math.sqrt(Math.pow(r1 - rgb2.r, 2) + Math.pow(g1 - rgb2.g, 2) + Math.pow(b1 - rgb2.b, 2));
-            matches.push({ ...p, brand, dist });
-        });
-    }
-    matches.sort((a, b) => a.dist - b.dist);
-    const top3 = matches.slice(0, 3);
-    const container = document.getElementById('bestMatches');
-    container.innerHTML = "<b>Sugerencias:</b><br>";
-    top3.forEach(m => {
-        container.innerHTML += `<div class="match-card"><div class="color-swatch" style="background:${m.hex}"></div><div style="flex:1"><b>${m.brand} - ${m.id}</b><br>${m.nombre} (${Math.round((1 - m.dist/441)*100)}% coincide)</div></div>`;
-    });
-}
 
 // --- MIXER PROPORCIONAL ---
 function initMixerUI() {
@@ -454,7 +423,34 @@ window.calculateMix = () => {
 
 window.resetMixer = () => { for(let i=1; i<=4; i++) { document.getElementById(`mixColor${i}`).value=""; document.getElementById(`mixSlider${i}`).value=0; } calculateMix(); };
 
-// --- EXPORT ---
+// --- CRUD AUX ---
+window.editarModelo = (id) => {
+    const m = modelos.find(x => x.id === id);
+    document.getElementById('form_id').value = m.id;
+    document.getElementById('form_codigo').value = m.codigo || "";
+    document.getElementById('form_fabricante').value = m.fabricante || "";
+    document.getElementById('form_modelo').value = m.modelo || "";
+    document.getElementById('form_precio').value = m.precio || "";
+    document.getElementById('form_foto_url').value = m.foto || "";
+    document.getElementById('formModal').style.display = 'flex';
+};
+
+window.guardarModelo = async () => {
+    const id = document.getElementById('form_id').value;
+    const d = {
+        codigo: document.getElementById('form_codigo').value || "",
+        fabricante: document.getElementById('form_fabricante').value || "",
+        modelo: document.getElementById('form_modelo').value || "",
+        precio: document.getElementById('form_precio').value || "",
+        foto: document.getElementById('form_foto_url').value || ""
+    };
+    if(id) await updateDoc(doc(db, "modelos", id), d);
+    else await addDoc(collection(db, "modelos"), d);
+    document.getElementById('formModal').style.display='none'; cargarModelos();
+};
+
+window.borrarModelo = async (id) => { if(confirm("¿Borrar?")) { await deleteDoc(doc(db, "modelos", id)); cargarModelos(); } };
+
 window.exportarExcelPrincipal = () => {
     const data = modelos.map(m => ({ 
         MARCA: m.fabricante, MODELO: m.modelo, CODIGO: m.codigo, PRECIO: m.precio,
@@ -462,11 +458,6 @@ window.exportarExcelPrincipal = () => {
     }));
     const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock");
     XLSX.writeFile(wb, "Stock_Maikman.xlsx");
-};
-window.exportarListaExcel = () => {
-    const data = myPaints.buy.map(id => ({ CODIGO: id, NOMBRE: encontrarPintura(id).nombre }));
-    const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Compra");
-    XLSX.writeFile(wb, "Compra_Maikman.xlsx");
 };
 
 // --- UTILS ---
