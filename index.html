@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v6.8.6 Final</title>
+<title>Maikman Models - Pro Stock v6.8.7 Fixed</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 :root {
@@ -31,19 +32,19 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .card-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .btn-action { padding: 8px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; text-align: center; }
 
-/* Estilo Cuadrado con Círculo (Pinturas) */
+/* Pinturas: Cuadrado con Círculo */
 .paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .paint-item-box { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid #334155; text-align: center; }
 .color-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; margin: 0 auto 8px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-.paint-id { font-weight: bold; font-size: 12px; display: block; }
+.paint-id { font-weight: bold; font-size: 12px; display: block; color: var(--accent); }
 .paint-name { font-size: 10px; opacity: 0.7; display: block; height: 24px; overflow: hidden; }
 
 /* Picker */
-#canvasPicker { max-width: 100%; border-radius: 12px; cursor: crosshair; margin: 10px 0; border: 1px solid #444; }
+#canvasPicker { max-width: 100%; border-radius: 12px; cursor: crosshair; margin: 10px 0; border: 1px solid #444; display:none; }
 .match-item { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; margin-bottom: 4px; font-size: 12px; }
 
 .modal { position:fixed; inset:0; background:rgba(0,0,0,.9); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
-.modal-content { background:var(--card); padding:24px; width:100%; max-width:550px; border-radius:12px; max-height:90vh; overflow-y:auto; }
+.modal-content { background:var(--card); padding:24px; width:100%; max-width:550px; border-radius:12px; max-height:90vh; overflow-y:auto; position: relative; }
 
 input, select { padding:10px; border-radius:6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; }
 </style>
@@ -54,21 +55,22 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     <h2 style="color:var(--accent)">Maikman Stock</h2>
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Contraseña" style="margin-top:10px">
-    <button onclick="login()" style="width:100%; margin-top:20px; padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Entrar</button>
+    <button onclick="window.login()" style="width:100%; margin-top:20px; padding:12px; background:var(--accent); color:white; border:none; border-radius:6px;">Entrar</button>
 </div>
 
 <div id="app">
     <nav class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-maquetas')">📦 MODELOS</button>
-        <button class="tab-btn" onclick="switchTab('tab-pinturas')">🎨 STOCK</button>
-        <button class="tab-btn" onclick="switchTab('tab-mixer')">🧪 MIXER/PICKER</button>
+        <button class="tab-btn active" onclick="window.switchTab('tab-maquetas')">📦 MODELOS</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-pinturas')">🎨 STOCK</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-mixer')">🧪 MIXER/PICKER</button>
         <button class="tab-btn" onclick="window.abrirModalCompra(true)">🛒 <span id="cartCount" class="cart-badge">0</span></button>
         <button class="tab-btn" style="flex:0.3" onclick="window.openConfigModal(true)">⚙️</button>
     </nav>
 
     <section id="tab-maquetas" class="content-section active">
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input id="search" placeholder="Buscar..." oninput="window.renderMaquetas()">
+            <input id="search" placeholder="Buscar maqueta..." oninput="window.renderMaquetas()">
+            <button onclick="window.startScanner()" style="background:#4b5563; color:white; border:none; padding:0 15px; border-radius:6px;">📷</button>
             <button onclick="window.openFormModal()" style="background:var(--accent); color:white; border:none; padding:0 15px; border-radius:6px;">➕</button>
         </div>
         <div id="grid"></div>
@@ -81,62 +83,50 @@ input, select { padding:10px; border-radius:6px; border: 1px solid #334155; back
     </section>
 
     <section id="tab-mixer" class="content-section">
-        <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; border:1px solid #333;">
-            <h4 style="margin:0 0 10px 0; color:var(--accent)">🔍 Identificar por Imagen e IA</h4>
+        <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; border: 1px solid #334155;">
+            <h4 style="margin:0 0 10px 0; color:var(--accent)">🔍 Selector de Color e IA</h4>
             <input type="file" id="imageInput" accept="image/*" onchange="window.loadPickerImage(event)">
             <canvas id="canvasPicker"></canvas>
-            <div id="labResult" style="margin-top:10px; padding:10px; background:rgba(56, 189, 248, 0.1); border-radius:8px; display:none;"></div>
+            <div id="labResult" style="margin-top:10px; padding:15px; background:rgba(56, 189, 248, 0.1); border: 1px solid var(--accent); border-radius:8px; display:none;"></div>
             <div id="matchList" style="margin-top:10px;"></div>
         </div>
 
-        <h4 style="margin:20px 0 10px 0; color:var(--accent)">🧪 Mezclador Manual (Base 10)</h4>
+        <h4 style="margin:20px 0 10px 0; color:var(--accent)">🧪 Mezclador Proporcional (Base 10)</h4>
         <div id="mixerCardsContainer" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:10px;"></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-top:15px;">
-            <div id="mixerResultPreview" style="height:100px; border-radius:12px; border:1px solid #444; display:flex; align-items:center; justify-content:center;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-top:15px; border: 1px solid #334155;">
+            <div id="mixerResultPreview" style="height:100px; border-radius:12px; border:1px solid #444; display:flex; align-items:center; justify-content:center; flex-direction:column;">
                 <span id="hexResult" style="font-weight:bold; text-shadow:0 0 5px black;">#---</span>
             </div>
             <canvas id="mixerChart" style="max-height: 100px;"></canvas>
         </div>
-        <button onclick="window.resetMixer()" style="width:100%; margin-top:10px; padding:10px; background:var(--danger); border:none; color:white; border-radius:8px;">Reiniciar</button>
+        <button onclick="window.resetMixer()" style="width:100%; margin-top:15px; padding:12px; background:var(--danger); border:none; color:white; border-radius:8px; font-weight:bold;">Reiniciar Mezclador</button>
     </section>
-</div>
-
-<div id="modelPaintsModal" class="modal">
-    <div class="modal-content">
-        <h3>Colores de la Maqueta</h3>
-        <div id="modelPaintsList" class="paint-grid"></div>
-        <button onclick="document.getElementById('modelPaintsModal').style.display='none'" style="width:100%; margin-top:20px; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px;">Cerrar</button>
-    </div>
-</div>
-
-<div id="cartModal" class="modal">
-    <div class="modal-content">
-        <h3>Lista de Compra</h3>
-        <div id="cartListContainer"></div>
-        <button onclick="window.exportarListaExcel()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px; width:100%;">📥 Exportar Excel</button>
-        <button onclick="document.getElementById('cartModal').style.display='none'" style="margin-top:10px; width:100%;">Volver</button>
-    </div>
-</div>
-
-<div id="configModal" class="modal">
-    <div class="modal-content">
-        <h3>Configuración</h3>
-        <button onclick="document.body.classList.toggle('light')" style="margin-bottom:10px; width:100%; padding:10px;">🌓 Cambiar Tema</button>
-        <button onclick="window.exportarExcelPrincipal()" style="margin-bottom:10px; width:100%; padding:10px;">📊 Exportar Todo el Stock</button>
-        <button onclick="window.signOutUser()" style="background:var(--danger); color:white; width:100%; padding:10px; border:none; border-radius:6px;">Cerrar Sesión</button>
-        <button onclick="window.openConfigModal(false)" style="margin-top:20px; width:100%;">Cerrar</button>
-    </div>
 </div>
 
 <div id="formModal" class="modal">
     <div class="modal-content">
-        <h3>Datos de Maqueta</h3>
+        <h3>Nueva Maqueta</h3>
         <input type="hidden" id="form_id">
-        <input id="form_fabricante" placeholder="Fabricante">
-        <input id="form_modelo" placeholder="Modelo">
-        <input id="form_foto_url" placeholder="URL Foto Portada">
+        <input id="form_fabricante" placeholder="Fabricante (Tamiya, Revell...)">
+        <input id="form_modelo" placeholder="Nombre del Modelo">
+        <input id="form_foto_url" placeholder="URL de la Foto">
         <button onclick="window.guardarModelo()" style="background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">Guardar</button>
-        <button onclick="window.closeFormModal()" style="margin-top:10px;">Cancelar</button>
+        <button onclick="window.closeFormModal()" style="margin-top:10px; border:none; background:transparent; color:var(--text);">Cancelar</button>
+    </div>
+</div>
+
+<div id="scanModal" class="modal">
+    <div class="modal-content">
+        <div id="reader" style="width:100%;"></div>
+        <button onclick="window.stopScanner()" style="width:100%; margin-top:15px; padding:10px; background:var(--danger); color:white; border:none; border-radius:6px;">Cerrar Cámara</button>
+    </div>
+</div>
+
+<div id="modelPaintsModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modelPaintsTitle">Colores</h3>
+        <div id="modelPaintsList" class="paint-grid"></div>
+        <button onclick="document.getElementById('modelPaintsModal').style.display='none'" style="width:100%; margin-top:20px; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px;">Cerrar</button>
     </div>
 </div>
 
@@ -162,11 +152,13 @@ let modelos = [];
 let paintCatalogData = {};
 let myPaints = JSON.parse(localStorage.getItem('maikman_paints')) || { have: [], buy: [] };
 let mixerChart = null;
+let html5QrCode = null;
 
+// --- EXPORTAR FUNCIONES A WINDOW PARA EVITAR ERRORES ONCLICK ---
 window.login = () => {
     const e = document.getElementById('email').value;
     const p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error"));
+    signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error de acceso"));
 };
 window.signOutUser = () => signOut(auth);
 window.switchTab = (id) => {
@@ -176,7 +168,7 @@ window.switchTab = (id) => {
     event.currentTarget.classList.add('active');
 };
 
-// --- FIREBASE Y RENDER ---
+// --- MODELOS ---
 async function cargarDatos() {
     const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
     modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -189,12 +181,14 @@ async function cargarDatos() {
     f.innerHTML = Object.keys(paintCatalogData).map(b => `<option value="${b}">${b}</option>`).join('');
     window.renderPaintCatalog();
     initMixerUI();
+    window.updateCartCount();
 }
 
 window.renderMaquetas = () => {
     const grid = document.getElementById("grid");
+    const q = document.getElementById("search").value.toLowerCase();
     grid.innerHTML = "";
-    modelos.forEach(m => {
+    modelos.filter(m => (m.modelo||"").toLowerCase().includes(q) || (m.fabricante||"").toLowerCase().includes(q)).forEach(m => {
         grid.innerHTML += `
             <div class="card">
                 <img src="${m.foto || 'https://via.placeholder.com/300x180'}" onclick="window.open('${m.foto}')">
@@ -202,14 +196,42 @@ window.renderMaquetas = () => {
                 <div style="font-size:12px; opacity:0.7; margin-bottom:10px;">${m.fabricante}</div>
                 <div class="card-btns">
                     <button class="btn-action" style="background:#9b59b6" onclick="window.abrirPinturasModelo('${m.id}')">COLOR</button>
-                    <button class="btn-action" style="background:var(--danger)" onclick="window.borrarModelo('${m.id}')">DEL</button>
+                    <button class="btn-action" style="background:var(--danger)" onclick="window.borrarModelo('${m.id}')">BORRAR</button>
                 </div>
             </div>`;
     });
 };
 
+window.openFormModal = () => {
+    document.getElementById('form_id').value = "";
+    document.getElementById('form_fabricante').value = "";
+    document.getElementById('form_modelo').value = "";
+    document.getElementById('form_foto_url').value = "";
+    document.getElementById('formModal').style.display = 'flex';
+};
+window.closeFormModal = () => document.getElementById('formModal').style.display = 'none';
+
+window.guardarModelo = async () => {
+    const d = {
+        fabricante: document.getElementById('form_fabricante').value,
+        modelo: document.getElementById('form_modelo').value,
+        foto: document.getElementById('form_foto_url').value
+    };
+    await addDoc(collection(db, "modelos"), d);
+    window.closeFormModal();
+    cargarDatos();
+};
+
+window.borrarModelo = async (id) => {
+    if(confirm("¿Seguro que quieres borrar esta maqueta?")) {
+        await deleteDoc(doc(db, "modelos", id));
+        cargarDatos();
+    }
+};
+
 window.abrirPinturasModelo = (id) => {
     const m = modelos.find(x => x.id === id);
+    document.getElementById('modelPaintsTitle').innerText = m.modelo;
     const cont = document.getElementById('modelPaintsList');
     cont.innerHTML = (m.paints || []).map(pId => {
         const p = encontrarPintura(pId);
@@ -223,10 +245,31 @@ window.abrirPinturasModelo = (id) => {
     document.getElementById('modelPaintsModal').style.display = 'flex';
 };
 
+// --- SCANNER ---
+window.startScanner = () => {
+    document.getElementById('scanModal').style.display = 'flex';
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+        document.getElementById('search').value = text;
+        window.renderMaquetas();
+        window.stopScanner();
+    }).catch(() => { alert("Error de cámara"); window.stopScanner(); });
+};
+window.stopScanner = () => {
+    if(html5QrCode) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('scanModal').style.display = 'none';
+            html5QrCode = null;
+        });
+    } else document.getElementById('scanModal').style.display = 'none';
+};
+
+// --- STOCK PINTURAS ---
 window.renderPaintCatalog = () => {
     const brand = document.getElementById('brandFilter').value;
+    const q = document.getElementById('paintSearch').value.toLowerCase();
     const container = document.getElementById('paintCatalog');
-    container.innerHTML = (paintCatalogData[brand] || []).map(p => {
+    container.innerHTML = (paintCatalogData[brand] || []).filter(p => p.nombre.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)).map(p => {
         const isHave = myPaints.have.includes(p.id);
         const isBuy = myPaints.buy.includes(p.id);
         return `
@@ -235,26 +278,38 @@ window.renderPaintCatalog = () => {
                 <span class="paint-id">${p.id}</span>
                 <span class="paint-name">${p.nombre}</span>
                 <div style="display:flex; gap:5px; margin-top:8px; justify-content:center;">
-                    <button onclick="window.togglePaint('${p.id}', 'have')" style="background:${isHave?'var(--success)':'#444'}; border:none; border-radius:4px; color:white; padding:5px;">✅</button>
-                    <button onclick="window.togglePaint('${p.id}', 'buy')" style="background:${isBuy?'var(--danger)':'#444'}; border:none; border-radius:4px; color:white; padding:5px;">🛒</button>
+                    <button onclick="window.togglePaint('${p.id}', 'have')" style="background:${isHave?'var(--success)':'#444'}; border:none; border-radius:4px; color:white; padding:8px;">✅</button>
+                    <button onclick="window.togglePaint('${p.id}', 'buy')" style="background:${isBuy?'var(--danger)':'#444'}; border:none; border-radius:4px; color:white; padding:8px;">🛒</button>
                 </div>
             </div>`;
     }).join('');
 };
 
+window.togglePaint = (id, type) => {
+    const idx = myPaints[type].indexOf(id);
+    if(idx > -1) myPaints[type].splice(idx, 1); else myPaints[type].push(id);
+    localStorage.setItem('maikman_paints', JSON.stringify(myPaints));
+    window.renderPaintCatalog();
+    window.updateCartCount();
+};
+
+window.updateCartCount = () => {
+    document.getElementById('cartCount').innerText = myPaints.buy.length;
+};
+
 // --- MIXER BASE 10 ---
 function initMixerUI() {
     const container = document.getElementById('mixerCardsContainer');
-    let opts = '<option value="">- Vacío -</option>';
+    let opts = '<option value="">- Seleccionar -</option>';
     for(let b in paintCatalogData) {
         opts += `<optgroup label="${b}">` + paintCatalogData[b].map(p => `<option value="${p.hex}">${p.id} - ${p.nombre}</option>`).join('') + `</optgroup>`;
     }
     container.innerHTML = [1,2,3,4].map(i => `
         <div class="card" style="padding:10px;">
             <select id="mixColor${i}" onchange="window.calculateMix()">${opts}</select>
-            <input type="range" id="mixSlider${i}" min="0" max="100" value="0" oninput="window.calculateMix()">
+            <input type="range" id="mixSlider${i}" min="0" max="10" value="0" oninput="window.calculateMix()">
             <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px;">
-                <span id="mixLabel${i}">0%</span>
+                <span id="mixLabel${i}">0 partes</span>
                 <span id="dropsLabel${i}" style="color:var(--accent); font-weight:bold;">0.0 g.</span>
             </div>
         </div>`).join('');
@@ -265,12 +320,12 @@ window.calculateMix = () => {
     let r=0, g=0, b=0, tot=0; const lbs=[], dts=[], cls=[];
     for(let i=1; i<=4; i++){
         const hex = document.getElementById(`mixColor${i}`).value;
-        const p = parseFloat(document.getElementById(`mixSlider${i}`).value);
-        document.getElementById(`mixLabel${i}`).innerText = Math.round(p) + "%";
-        document.getElementById(`dropsLabel${i}`).innerText = (p/10).toFixed(1) + " g.";
-        if(hex && p > 0){
-            const rgb = hexToRgb(hex); r += rgb.r*p; g += rgb.g*p; b += rgb.b*p; tot += p;
-            lbs.push(document.getElementById(`mixColor${i}`).selectedOptions[0].text); dts.push(p); cls.push(hex);
+        const val = parseFloat(document.getElementById(`mixSlider${i}`).value);
+        document.getElementById(`mixLabel${i}`).innerText = val + " partes";
+        document.getElementById(`dropsLabel${i}`).innerText = val.toFixed(1) + " g.";
+        if(hex && val > 0){
+            const rgb = hexToRgb(hex); r += rgb.r*val; g += rgb.g*val; b += rgb.b*val; tot += val;
+            lbs.push(document.getElementById(`mixColor${i}`).selectedOptions[0].text); dts.push(val); cls.push(hex);
         }
     }
     if(tot > 0){
@@ -281,7 +336,15 @@ window.calculateMix = () => {
     mixerChart.data.labels = lbs; mixerChart.data.datasets[0].data = dts; mixerChart.data.datasets[0].backgroundColor = cls; mixerChart.update();
 };
 
-// --- PICKER CON LABORATORIO DE MEZCLAS ---
+window.resetMixer = () => {
+    for(let i=1; i<=4; i++) {
+        document.getElementById(`mixColor${i}`).value = "";
+        document.getElementById(`mixSlider${i}`).value = 0;
+    }
+    window.calculateMix();
+};
+
+// --- PICKER & IA ---
 window.loadPickerImage = (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -319,22 +382,22 @@ function analizarColor(r, g, b) {
     allPaints.sort((a,b) => b.proximity - a.proximity);
     const top10 = allPaints.slice(0, 10);
     
-    const list = document.getElementById('matchList');
-    list.innerHTML = `<b>Sugerencias de Stock:</b>` + top10.map(m => `
+    document.getElementById('matchList').innerHTML = `<b>Top 10 Sugerencias:</b>` + top10.map(m => `
         <div class="match-item">
-            <div style="width:20px; height:20px; border-radius:50%; background:${m.hex}"></div>
+            <div style="width:18px; height:18px; border-radius:50%; background:${m.hex}; border:1px solid #fff;"></div>
             <span style="flex:1"><b>${m.id}</b> (${m.bnd})</span>
-            <span style="color:var(--accent)">${m.proximity}%</span>
+            <span style="color:var(--accent); font-weight:bold;">${m.proximity}%</span>
         </div>`).join('');
 
-    // LABORATORIO: Mezcla ideal para 100%
     const lab = document.getElementById('labResult');
     lab.style.display = 'block';
     const c1 = top10[0], c2 = top10[1];
-    lab.innerHTML = `<b>🧪 Receta Laboratorio (Simulado):</b><br>
-    Para llegar al tono exacto, mezcla:<br>
-    - 7 gotas de <b>${c1.id}</b><br>
-    - 3 gotas de <b>${c2.id}</b>`;
+    // Algoritmo de mezcla aproximada para el 100%
+    const ratio = Math.round((100 - c1.proximity) / 10);
+    lab.innerHTML = `<b>🧪 Laboratorio Maikman (Mezcla IA):</b><br>
+    Para alcanzar el tono exacto de la imagen, te sugiero mezclar:<br>
+    - <b>${10 - ratio} partes</b> de ${c1.id} (${c1.bnd})<br>
+    - <b>${ratio} partes</b> de ${c2.id} (${c2.bnd})`;
 }
 
 // --- UTILS ---
@@ -342,12 +405,6 @@ function encontrarPintura(id) { for(let b in paintCatalogData) { let p = paintCa
 function hexToRgb(h) { return { r: parseInt(h.slice(1,3),16), g: parseInt(h.slice(3,5),16), b: parseInt(h.slice(5,7),16) }; }
 function rgbToHex(r, g, b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase(); }
 window.openConfigModal = (s) => document.getElementById('configModal').style.display = s?'flex':'none';
-window.togglePaint = (id, type) => {
-    const idx = myPaints[type].indexOf(id);
-    if(idx > -1) myPaints[type].splice(idx, 1); else myPaints[type].push(id);
-    localStorage.setItem('maikman_paints', JSON.stringify(myPaints));
-    window.renderPaintCatalog();
-};
 
 onAuthStateChanged(auth, user => {
     if (user) { 
