@@ -131,7 +131,7 @@
   { "id": "LP-37", "nombre": "Light Ghost Grey", "hex": "#b2b8bd", "ean": "4950344821372" },
   { "id": "LP-38", "nombre": "Flat Aluminum", "hex": "#b2b2b2", "ean": "4950344821389" },
   { "id": "LP-39", "nombre": "Racing White", "hex": "#fdfdf0", "ean": "4950344821396" },
-  { "id": "LP-40", "nombre": "Metallic Black", "hex": "#1a1a1a", "ean": "4950344821402" },
+  { "id": "LP-40", "nombre": "Metallic Black", "hex": "#1a1a1a", "ean": "4950344821402", "45207112" },
   { "id": "LP-41", "nombre": "Mica Blue", "hex": "#003399", "ean": "4950344821419" },
   { "id": "LP-42", "nombre": "Mica Red", "hex": "#b20000", "ean": "4950344821426" },
   { "id": "LP-43", "nombre": "Mica Silver", "hex": "#c0c0c0", "ean": "4950344821433" },
