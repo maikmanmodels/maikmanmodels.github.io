@@ -292,14 +292,23 @@ window.renderPaintCatalog = () => {
     const brand = document.getElementById('brandFilter').value;
     const search = document.getElementById('paintSearch').value.toLowerCase();
     const container = document.getElementById('paintCatalog');
+    if (!container) return;
     container.innerHTML = "";
+    
     if(!paintCatalogData[brand]) return;
-    paintCatalogData[brand].filter(p => p.id.toLowerCase().includes(search) || p.nombre.toLowerCase().includes(search)).forEach(p => {
-        const have = myPaints.have.includes(p.id); const buy = myPaints.buy.includes(p.id);
+
+    paintCatalogData[brand].filter(p => {
+        // Protección contra datos vacíos en el JSON
+        const id = (p.id || "").toLowerCase();
+        const nombre = (p.nombre || "").toLowerCase();
+        return id.includes(search) || nombre.includes(search);
+    }).forEach(p => {
+        const have = myPaints.have.includes(p.id); 
+        const buy = myPaints.buy.includes(p.id);
         container.innerHTML += `<div class="paint-item-box">
-            <div class="color-circle" style="background:${p.hex}"></div>
-            <span style="font-size:11px; font-weight:bold;">${p.id}</span><br>
-            <span style="font-size:10px;">${p.nombre}</span>
+            <div class="color-circle" style="background:${p.hex || '#ccc'}"></div>
+            <span style="font-size:11px; font-weight:bold;">${p.id || 'S/N'}</span><br>
+            <span style="font-size:10px;">${p.nombre || ''}</span>
             <div style="display:flex; gap:5px; margin-top:8px;">
                 <button onclick="window.togglePaint('${p.id}','have')" style="flex:1; background:${have?'var(--success)':'#444'}; border:none; padding:5px; border-radius:4px; color:white;">✅</button>
                 <button onclick="window.togglePaint('${p.id}','buy')" style="flex:1; background:${buy?'var(--danger)':'#444'}; border:none; padding:5px; border-radius:4px; color:white;">🛒</button>
