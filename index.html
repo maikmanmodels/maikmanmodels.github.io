@@ -103,7 +103,30 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
 
 <div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle">Maqueta</h3><input type="hidden" id="f_id"><input id="f_fabricante" placeholder="Fabricante"><input id="f_modelo" placeholder="Modelo"><input id="f_precio" placeholder="Precio"><input id="f_foto" placeholder="URL Foto"><input id="f_paints" placeholder="Pinturas (IDs)"><button onclick="window.guardarModelo()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">GUARDAR</button><button onclick="window.toggleModal('formModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Cancelar</button></div></div>
 
-<div id="infoModal" class="modal"><div class="modal-content"><h3 id="infoTitle"></h3><p id="infoFabricante" style="color:var(--accent); margin:0;"></p><p id="infoPrecio" style="font-weight:bold;"></p><div id="galleryGrid" class="gallery-container"></div><div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;"><input id="urlPhotoInput" placeholder="URL nueva foto..."><button onclick="window.añadirUrlsAGaleria()" style="width:100%; background:var(--success); color:white; padding:10px; border:none; border-radius:6px;">Añadir Foto</button></div><button onclick="window.toggleModal('infoModal', false)" style="width:100%; margin-top:20px; background:#444; color:white; border:none; padding:10px; border-radius:6px;">Cerrar</button></div></div>
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h3 id="infoTitle" style="margin-top:0;"></h3>
+        <p id="infoFabricante" style="color:var(--accent); margin:0; font-weight:bold;"></p>
+        <p id="infoPrecio" style="margin-bottom:15px;"></p>
+        
+        <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; min-height:50px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+            </div>
+
+        <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+            <input id="urlPhotoInput" placeholder="Pegar URL de nueva foto...">
+            <button onclick="window.añadirUrlsAGaleria()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Añadir a Galería</button>
+        </div>
+        <button onclick="window.toggleModal('infoModal', false)" style="width:100%; margin-top:15px; background:#444; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">Cerrar</button>
+    </div>
+</div>
+
+        <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+            <input id="urlPhotoInput" placeholder="Pegar URL de nueva foto...">
+            <button onclick="window.añadirUrlsAGaleria()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Añadir a Galería</button>
+        </div>
+        <button onclick="window.toggleModal('infoModal', false)" style="width:100%; margin-top:15px; background:#444; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">Cerrar</button>
+    </div>
+</div>
 
 <div id="modelPaintsModal" class="modal"><div class="modal-content"><h3>Pinturas Necesarias</h3><div id="mPaintsList" class="paint-grid" style="grid-template-columns: 1fr;"></div><button onclick="window.toggleModal('modelPaintsModal', false)" style="width:100%; margin-top:20px; background:var(--accent); color:white; border:none; padding:10px; border-radius:6px;">Cerrar</button></div></div>
 
@@ -188,59 +211,51 @@ window.renderMaquetas = () => {
 
 window.abrirInfoModelo = (id) => {
     currentModelId = id;
-    // Buscamos el modelo en el array local
     const m = modelos.find(x => x.id === id);
-    if (!m) {
-        console.error("No se encontró el modelo con ID:", id);
-        return;
-    }
+    if (!m) return;
 
-    // 1. Rellenar textos (verificando que existan)
-    document.getElementById('infoTitle').innerText = m.modelo || "Sin nombre";
-    document.getElementById('infoFabricante').innerText = m.fabricante || "Desconocido";
+    // Rellenar textos
+    document.getElementById('infoTitle').innerText = m.modelo || "Modelo";
+    document.getElementById('infoFabricante').innerText = m.fabricante || "";
     document.getElementById('infoPrecio').innerText = "Precio: " + (m.precio || "0") + "€";
     
-    // 2. Referencia al contenedor de fotos
     const container = document.getElementById('galleryGrid');
-    if (!container) return;
-    container.innerHTML = ""; // Limpiar galería anterior
-
-    // 3. Crear lista de fotos asegurando que la principal siempre esté
-    let fotosFinales = [];
+    if (!container) {
+        alert("Error: No se encuentra el contenedor 'galleryGrid' en el HTML");
+        return;
+    }
     
-    // Añadimos la foto de portada si existe
-    if (m.foto && m.foto.includes('http')) {
-        fotosFinales.push(m.foto);
+    container.innerHTML = ""; // Limpiar
+
+    // Recolectar todas las fotos
+    let fotos = [];
+    if (m.foto) fotos.push(m.foto); // Foto principal
+    if (m.gallery && Array.isArray(m.gallery)) {
+        fotos = fotos.concat(m.gallery); // Fotos extra
     }
 
-    // Añadimos las fotos de la galería (si es un array o si existe)
-    if (m.gallery && Array.isArray(m.gallery)) {
-        m.gallery.forEach(url => {
-            if (url && url.length > 5 && url.includes('http')) {
-                fotosFinales.push(url);
-            }
+    // Filtrar solo URLs válidas
+    const fotosLimpias = fotos.filter(u => u && typeof u === 'string' && u.includes('http'));
+
+    if (fotosLimpias.length === 0) {
+        container.innerHTML = '<p style="grid-column:1/-1; text-align:center; font-size:12px; opacity:0.5;">No hay fotos en este modelo</p>';
+    } else {
+        // Inyectar imágenes
+        fotosLimpias.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.width = "100%";
+            img.style.height = "120px";
+            img.style.objectFit = "cover";
+            img.style.borderRadius = "8px";
+            img.style.cursor = "pointer";
+            img.style.border = "1px solid #334155";
+            img.onclick = () => window.open(url, '_blank');
+            img.onerror = () => { img.style.display = 'none'; }; // Si falla el link, se oculta
+            container.appendChild(img);
         });
     }
-
-    // 4. Renderizado final
-    if (fotosFinales.length === 0) {
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding:20px; opacity:0.5;">
-            No hay imágenes disponibles para este modelo.
-        </p>`;
-    } else {
-        // Generar el HTML de las imágenes
-        container.innerHTML = fotosFinales.map(url => `
-            <div class="gallery-item">
-                <img src="${url}" 
-                     class="gallery-img" 
-                     style="width:100%; height:120px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #334155;"
-                     onclick="window.open('${url}', '_blank')"
-                     onerror="this.src='https://via.placeholder.com/150?text=Error+Link'">
-            </div>
-        `).join('');
-    }
     
-    // 5. Mostrar el modal
     window.toggleModal('infoModal', true);
 };
 
