@@ -191,36 +191,30 @@ window.abrirInfoModelo = (id) => {
     const m = modelos.find(x => x.id === id);
     if (!m) return;
 
-    // Rellenar textos básicos
-    document.getElementById('infoTitle').innerText = m.modelo || "Sin nombre";
-    document.getElementById('infoFabricante').innerText = m.fabricante || "Sin fabricante";
+    document.getElementById('infoTitle').innerText = m.modelo || "Modelo";
+    document.getElementById('infoFabricante').innerText = m.fabricante || "";
     document.getElementById('infoPrecio').innerText = "Precio: " + (m.precio || "0") + "€";
     
-    // Lógica de la Galería
     const container = document.getElementById('galleryGrid');
-    container.innerHTML = ""; // Limpiar antes de cargar
+    container.innerHTML = ""; 
 
-    // Creamos un array combinando la foto principal y la galería (si existe)
-    // Filtramos para que solo intente cargar cosas que parezcan links (http)
-    const fotosParaMostrar = [];
-    if (m.foto) fotosParaMostrar.push(m.foto);
+    // Juntamos la foto principal y el array de galería
+    let fotos = [];
+    if (m.foto) fotos.push(m.foto);
     if (m.gallery && Array.isArray(m.gallery)) {
-        m.gallery.forEach(url => {
-            if (url && url.includes('http')) fotosParaMostrar.push(url);
-        });
+        fotos = fotos.concat(m.gallery);
     }
 
-    // Si no hay fotos, ponemos un placeholder
-    if (fotosParaMostrar.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; opacity:0.5;">No hay fotos disponibles</p>';
+    // Limpiamos links vacíos
+    fotos = fotos.filter(u => u && typeof u === 'string' && u.includes('http'));
+
+    if (fotos.length === 0) {
+        container.innerHTML = "<p style='grid-column:1/-1; opacity:0.5'>Sin imágenes adicionales</p>";
     } else {
-        // Renderizamos cada foto
-        container.innerHTML = fotosParaMostrar.map(url => `
-            <div class="gallery-item" style="position:relative;">
-                <img src="${url}" class="gallery-img" 
-                     onclick="window.open('${url}', '_blank')" 
-                     style="width:100%; height:120px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #334155;">
-            </div>
+        container.innerHTML = fotos.map(u => `
+            <img src="${u}" class="gallery-img" 
+                 onclick="window.open('${u}', '_blank')" 
+                 style="width:100%; height:120px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #334155;">
         `).join('');
     }
     
