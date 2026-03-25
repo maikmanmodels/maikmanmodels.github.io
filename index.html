@@ -171,39 +171,33 @@ onAuthStateChanged(auth, user => {
 });
 
 async function cargarTodo() {
+    // Primero intentamos cargar el catálogo de pinturas
     try {
         const resp = await fetch('pinturas.json');
+        if (!resp.ok) throw new Error("No se pudo encontrar pinturas.json");
         paintCatalogData = await resp.json();
-        document.getElementById('brandFilter').innerHTML = Object.keys(paintCatalogData).map(b => `<option value="${b}">${b}</option>`).join('');
-        window.renderPaintCatalog();
-        initMixer();
-    } catch(e) { console.error("Error pinturas.json", e); }
+        
+        // Llenamos el selector de marcas
+        const brandFilter = document.getElementById('brandFilter');
+        brandFilter.innerHTML = Object.keys(paintCatalogData)
+            .map(b => `<option value="${b}">${b}</option>`).join('');
+        
+        window.renderPaintCatalog(); // Dibujamos las pinturas
+        initMixer(); // Iniciamos el mezclador
+    } catch(e) {
+        console.error("Error cargando el JSON de pinturas:", e);
+    }
 
-    const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
-    modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    window.renderMaquetas();
-    window.updateCartCount();
+    // Luego cargamos los modelos de Firebase (incluyendo sus links de fotos)
+    try {
+        const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
+        modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.renderMaquetas();
+        window.updateCartCount();
+    } catch(e) {
+        console.error("Error cargando modelos de Firebase:", e);
+    }
 }
-
-// --- GESTIÓN MODELOS (RESURRECCIÓN v6.8.4) ---
-window.renderMaquetas = () => {
-    const grid = document.getElementById("grid");
-    const q = document.getElementById("search").value.toLowerCase();
-    grid.innerHTML = "";
-    modelos.filter(m => (m.modelo||"").toLowerCase().includes(q) || (m.fabricante||"").toLowerCase().includes(q)).forEach(m => {
-        grid.innerHTML += `
-            <div class="card">
-                <img src="${m.foto || 'https://via.placeholder.com/300'}" onclick="window.abrirInfoModelo('${m.id}')">
-                <b>${m.modelo}</b><small>${m.fabricante}</small>
-                <div class="card-btns">
-                    <button class="btn-action" style="background:#3498db" onclick="window.abrirInfoModelo('${m.id}')">INFO</button>
-                    <button class="btn-action" style="background:#9b59b6" onclick="window.abrirPinturasModelo('${m.id}')">COLOR</button>
-                    <button class="btn-action" style="background:#f39c12" onclick="window.openFormModal('${m.id}')">EDIT</button>
-                    <button class="btn-action" style="background:var(--danger)" onclick="window.borrarModelo('${m.id}')">DEL</button>
-                </div>
-            </div>`;
-    });
-};
 
 window.openFormModal = (id = null) => {
     if(id) {
@@ -248,11 +242,19 @@ window.borrarModelo = async (id) => { if(confirm("¿Seguro?")) { await deleteDoc
 window.abrirInfoModelo = (id) => {
     currentModelId = id;
     const m = modelos.find(x => x.id === id);
+    if (!m) return;
+
     document.getElementById('infoTitle').innerText = m.modelo;
     document.getElementById('infoFabricante').innerText = m.fabricante;
-    document.getElementById('infoPrecio').innerText = "Precio: " + (m.precio || "0") + "€";
-    const gallery = [m.foto, ...(m.gallery || [])].filter(u => u && u.includes('http'));
-    document.getElementById('galleryGrid').innerHTML = gallery.map(u => `<img src="${u}" class="gallery-img">`).join('');
+    
+    // Aquí está la clave: Juntamos la foto principal con el array de la galería
+    const todasLasFotos = [m.foto, ...(m.gallery || [])].filter(url => url && url.includes('http'));
+    
+    const grid = document.getElementById('galleryGrid');
+    grid.innerHTML = todasLasFotos.map(url => `
+        <img src="${url}" style="width:100%; border-radius:8px; margin-bottom:10px; border:1px solid #334155;">
+    `).join('');
+    
     window.toggleModal('infoModal', true);
 };
 
