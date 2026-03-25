@@ -189,11 +189,41 @@ window.renderMaquetas = () => {
 window.abrirInfoModelo = (id) => {
     currentModelId = id;
     const m = modelos.find(x => x.id === id);
-    document.getElementById('infoTitle').innerText = m.modelo;
-    document.getElementById('infoFabricante').innerText = m.fabricante;
+    if (!m) return;
+
+    // Rellenar textos básicos
+    document.getElementById('infoTitle').innerText = m.modelo || "Sin nombre";
+    document.getElementById('infoFabricante').innerText = m.fabricante || "Sin fabricante";
     document.getElementById('infoPrecio').innerText = "Precio: " + (m.precio || "0") + "€";
-    const todas = [m.foto, ...(m.gallery || [])].filter(u => u && u.includes('http'));
-    document.getElementById('galleryGrid').innerHTML = todas.map(u => `<img src="${u}" class="gallery-img" onclick="window.open('${u}', '_blank')">`).join('');
+    
+    // Lógica de la Galería
+    const container = document.getElementById('galleryGrid');
+    container.innerHTML = ""; // Limpiar antes de cargar
+
+    // Creamos un array combinando la foto principal y la galería (si existe)
+    // Filtramos para que solo intente cargar cosas que parezcan links (http)
+    const fotosParaMostrar = [];
+    if (m.foto) fotosParaMostrar.push(m.foto);
+    if (m.gallery && Array.isArray(m.gallery)) {
+        m.gallery.forEach(url => {
+            if (url && url.includes('http')) fotosParaMostrar.push(url);
+        });
+    }
+
+    // Si no hay fotos, ponemos un placeholder
+    if (fotosParaMostrar.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; opacity:0.5;">No hay fotos disponibles</p>';
+    } else {
+        // Renderizamos cada foto
+        container.innerHTML = fotosParaMostrar.map(url => `
+            <div class="gallery-item" style="position:relative;">
+                <img src="${url}" class="gallery-img" 
+                     onclick="window.open('${url}', '_blank')" 
+                     style="width:100%; height:120px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #334155;">
+            </div>
+        `).join('');
+    }
+    
     window.toggleModal('infoModal', true);
 };
 
