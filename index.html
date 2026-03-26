@@ -104,29 +104,20 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
 <div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle">Maqueta</h3><input type="hidden" id="f_id"><input id="f_fabricante" placeholder="Fabricante"><input id="f_modelo" placeholder="Modelo"><input id="f_precio" placeholder="Precio"><input id="f_foto" placeholder="URL Foto"><input id="f_paints" placeholder="Pinturas (IDs)"><button onclick="window.guardarModelo()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">GUARDAR</button><button onclick="window.toggleModal('formModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Cancelar</button></div></div>
 
 <div id="infoModal" class="modal">
-    <div class="modal-content info-modal-content">
-        <h3 id="infoTitle"></h3>
-        <div id="infoDetails"></div> <hr style="border:0; border-top:1px solid #444;">
-        <b>Galería</b>
+    <div class="modal-content">
+        <h3 id="infoTitle" style="margin-top:0;"></h3>
+        <div id="infoDetails" style="margin-bottom:10px;"></div>
+        <hr style="border:0; border-top:1px solid #444;">
+        <b style="display:block; margin:10px 0;">Galería</b>
         
-        <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;"></div>
+        <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px;"></div>
         
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="urlPhotoInput" placeholder="Añadir URLs separadas por coma...">
-            <button onclick="window.añadirUrlsAGaleria()" style="background:var(--success); color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">Añadir</button>
+        <div style="display:flex; gap:5px; margin-bottom:15px;">
+            <input type="text" id="urlPhotoInput" placeholder="Pegar URL foto..." style="margin-bottom:0;">
+            <button onclick="window.añadirUrlsAGaleria()" style="background:var(--success); color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold;">Añadir</button>
         </div>
         
-        <div class="sticky-close">
-            <button onclick="document.getElementById('infoModal').style.display='none'" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer;">Cerrar Galería</button>
-        </div>
-    </div>
-</div>
-
-        <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
-            <input id="urlPhotoInput" placeholder="Pegar URL de nueva foto...">
-            <button onclick="window.añadirUrlsAGaleria()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Añadir a Galería</button>
-        </div>
-        <button onclick="window.toggleModal('infoModal', false)" style="width:100%; margin-top:15px; background:#444; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">Cerrar</button>
+        <button onclick="window.toggleModal('infoModal', false)" style="width:100%; padding:12px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer;">Cerrar</button>
     </div>
 </div>
 
@@ -216,34 +207,44 @@ window.abrirInfoModelo = (id) => {
     const m = modelos.find(x => x.id === id);
     if (!m) return;
 
-    // Rellenar textos básicos
-    document.getElementById("infoTitle").innerText = m.modelo;
-    // Usamos infoDetails si existe en tu HTML, o los IDs individuales
+    document.getElementById("infoTitle").innerText = m.modelo || "Modelo";
     const details = document.getElementById("infoDetails");
-    if (details) {
-        details.innerHTML = `<b>Marca:</b> ${m.fabricante} | <b>Precio:</b> ${m.precio || '--'}€`;
-    }
+    if (details) details.innerHTML = `<b>Marca:</b> ${m.fabricante || '-'} | <b>Precio:</b> ${m.precio || '--'}€`;
 
-    // LÓGICA DE GALERÍA (Copiada de tu index (8).html)
     const gal = document.getElementById("galleryGrid");
     if (gal) {
         gal.innerHTML = "";
-        // IMPORTANTE: Aquí usamos 'galeria' que es como está en tu Firebase
         (m.galeria || []).forEach((url, idx) => {
             gal.innerHTML += `
                 <div style="position:relative;">
-                    <img src="${url}" style="width:100%; height:80px; object-fit:cover; border-radius:4px; cursor:pointer;" 
-                         onclick="window.open('${url}', '_blank')">
+                    <img src="${url}" class="gallery-img" style="height:100px; cursor:pointer;" onclick="window.open('${url}', '_blank')">
                     <button onclick="window.borrarFotoGaleria(${idx})" 
                             style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:3px; padding:2px 5px; cursor:pointer; font-size:10px;">X</button>
                 </div>`;
         });
     }
-    
-    document.getElementById("infoModal").style.display = "flex";
-};
-    
     window.toggleModal('infoModal', true);
+};
+
+window.añadirUrlsAGaleria = async () => {
+    const input = document.getElementById('urlPhotoInput').value.trim();
+    if(!input) return;
+    const m = modelos.find(x => x.id === currentModelId);
+    if(!m.galeria) m.galeria = [];
+    
+    const nuevasUrls = input.split(/[;,]+/).map(u => u.trim()).filter(u => u !== "");
+    m.galeria.push(...nuevasUrls);
+    
+    await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
+    document.getElementById('urlPhotoInput').value = "";
+    window.abrirInfoModelo(currentModelId);
+};
+
+window.borrarFotoGaleria = async (idx) => {
+    const m = modelos.find(x => x.id === currentModelId);
+    m.galeria.splice(idx, 1);
+    await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
+    window.abrirInfoModelo(currentModelId);
 };
 
 window.openFormModal = (id = null) => {
@@ -282,15 +283,6 @@ window.guardarModelo = async () => {
 
 window.borrarModelo = async (id) => { if(confirm("¿Seguro?")) { await deleteDoc(doc(db, "modelos", id)); cargarTodo(); } };
 
-window.añadirUrlsAGaleria = async () => {
-    const url = document.getElementById('urlPhotoInput').value; if(!url) return;
-    const m = modelos.find(x => x.id === currentModelId);
-    const newGal = m.gallery || []; newGal.push(url);
-    await updateDoc(doc(db, "modelos", currentModelId), { gallery: newGal });
-    document.getElementById('urlPhotoInput').value = "";
-    cargarTodo(); window.toggleModal('infoModal', false);
-};
-
 window.abrirPinturasModelo = (id) => {
     const m = modelos.find(x => x.id === id);
     const cont = document.getElementById('mPaintsList'); cont.innerHTML = "";
@@ -313,11 +305,9 @@ window.renderPaintCatalog = () => {
     const container = document.getElementById('paintCatalog');
     if (!container) return;
     container.innerHTML = "";
-    
     if(!paintCatalogData[brand]) return;
 
     paintCatalogData[brand].filter(p => {
-        // Protección contra datos vacíos en el JSON
         const id = (p.id || "").toLowerCase();
         const nombre = (p.nombre || "").toLowerCase();
         return id.includes(search) || nombre.includes(search);
