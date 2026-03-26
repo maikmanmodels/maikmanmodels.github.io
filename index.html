@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v7.8.0</title>
+<title>Maikman Models - Pro Stock v7.9.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -45,8 +45,13 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .modal-content { background: var(--card); padding: 20px; width: 100%; max-width: 500px; border-radius: 12px; max-height: 90vh; overflow-y: auto; border: 1px solid #334155; }
 input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; margin-bottom: 10px; }
 
-.gallery-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-.gallery-img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #334155; }
+/* Picker Estilos */
+.picker-results-container { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 500px) { .picker-results-container { grid-template-columns: 1fr; } }
+.match-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid #334155; display: flex; align-items: center; gap: 10px; }
+.match-circle { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #fff; flex-shrink: 0; }
+.match-info { flex: 1; font-size: 11px; }
+.match-score { font-size: 10px; color: var(--accent); font-weight: bold; }
 </style>
 </head>
 <body class="dark">
@@ -93,8 +98,10 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
             </div>
             <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)">
             <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:10px; cursor:crosshair;"></canvas>
-            <div id="pickerResults"></div>
+            
+            <div id="pickerResults" class="picker-results-container"></div>
         </div>
+
         <h4>🧪 Mezclador (10 Gotas)</h4>
         <div id="mixerInputs" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
@@ -373,8 +380,7 @@ window.loadPickerImage = (e) => {
 
 window.resetPicker = () => {
     const cvs = document.getElementById('canvasPicker');
-    const ctx = cvs.getContext('2d');
-    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    if(cvs.getContext) cvs.getContext('2d').clearRect(0, 0, cvs.width, cvs.height);
     cvs.style.display = 'none';
     document.getElementById('pickerInput').value = "";
     document.getElementById('pickerResults').innerHTML = "";
@@ -389,15 +395,37 @@ document.getElementById('canvasPicker').addEventListener('mousedown', (e) => {
 });
 
 function analizarColorPicker(r,g,b) {
-    let list = [];
+    let allPaints = [];
+    const priorities = ["tamiya", "ammo mig", "mr.color"];
+
     for(let brand in paintCatalogData) {
         paintCatalogData[brand].forEach(p => {
-            const t = hexToRgb(p.hex); const dist = Math.sqrt((r-t.r)**2 + (g-t.g)**2 + (b-t.b)**2);
-            list.push({...p, score: Math.max(0, 100 - (dist / 4.41)), brand});
+            const t = hexToRgb(p.hex);
+            const dist = Math.sqrt((r-t.r)**2 + (g-t.g)**2 + (b-t.b)**2);
+            let score = Math.max(0, 100 - (dist / 4.41));
+            
+            // Priorización: Si la marca está en la lista, le damos un boost ficticio para el orden
+            let priorityBoost = priorities.some(pr => brand.toLowerCase().includes(pr)) ? 5 : 0;
+            
+            allPaints.push({...p, brand, realScore: score, sortScore: score + priorityBoost});
         });
     }
-    list.sort((a,b) => b.score - a.score);
-    document.getElementById('pickerResults').innerHTML = list.slice(0,3).map(best => `<div style="margin-top:5px; border-left:3px solid ${best.hex}; padding-left:10px;"><b>${best.brand}: ${best.id}</b> (${best.score.toFixed(1)}%) <button onclick="window.togglePaint('${best.id}','buy')">🛒</button></div>`).join('');
+
+    // Ordenamos por el sortScore (que incluye el boost) pero mostramos el realScore
+    allPaints.sort((a,b) => b.sortScore - a.sortScore);
+    const top9 = allPaints.slice(0, 9);
+
+    document.getElementById('pickerResults').innerHTML = top9.map(p => `
+        <div class="match-card">
+            <div class="match-circle" style="background:${p.hex}"></div>
+            <div class="match-info">
+                <div style="font-weight:bold;">${p.brand}</div>
+                <div>${p.id} - ${p.nombre}</div>
+                <div class="match-score">${p.realScore.toFixed(1)}% coincidencia</div>
+            </div>
+            <button onclick="window.togglePaint('${p.id}','buy')" style="background:none; border:none; cursor:pointer; font-size:16px;">🛒</button>
+        </div>
+    `).join('');
 }
 
 // --- SCANNER ---
