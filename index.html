@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v7.7.9</title>
+<title>Maikman Models - Pro Stock v7.8.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -87,8 +87,11 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
 
     <section id="tab-mixer" class="content-section">
         <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
-            <h4>🎯 Picker IA</h4>
-            <input type="file" accept="image/*" onchange="window.loadPickerImage(event)">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="margin:0;">🎯 Picker IA</h4>
+                <button onclick="window.resetPicker()" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:4px; font-size:10px; cursor:pointer; font-weight:bold;">RESET</button>
+            </div>
+            <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)">
             <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:10px; cursor:crosshair;"></canvas>
             <div id="pickerResults"></div>
         </div>
@@ -109,14 +112,11 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
         <div id="infoDetails" style="margin-bottom:10px;"></div>
         <hr style="border:0; border-top:1px solid #444;">
         <b style="display:block; margin:10px 0;">Galería</b>
-        
         <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px;"></div>
-        
         <div style="display:flex; gap:5px; margin-bottom:15px;">
             <input type="text" id="urlPhotoInput" placeholder="Pegar URL foto..." style="margin-bottom:0;">
             <button onclick="window.añadirUrlsAGaleria()" style="background:var(--success); color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold;">Añadir</button>
         </div>
-        
         <button onclick="window.toggleModal('infoModal', false)" style="width:100%; padding:12px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer;">Cerrar</button>
     </div>
 </div>
@@ -206,11 +206,9 @@ window.abrirInfoModelo = (id) => {
     currentModelId = id;
     const m = modelos.find(x => x.id === id);
     if (!m) return;
-
     document.getElementById("infoTitle").innerText = m.modelo || "Modelo";
     const details = document.getElementById("infoDetails");
     if (details) details.innerHTML = `<b>Marca:</b> ${m.fabricante || '-'} | <b>Precio:</b> ${m.precio || '--'}€`;
-
     const gal = document.getElementById("galleryGrid");
     if (gal) {
         gal.innerHTML = "";
@@ -231,10 +229,8 @@ window.añadirUrlsAGaleria = async () => {
     if(!input) return;
     const m = modelos.find(x => x.id === currentModelId);
     if(!m.galeria) m.galeria = [];
-    
     const nuevasUrls = input.split(/[;,]+/).map(u => u.trim()).filter(u => u !== "");
     m.galeria.push(...nuevasUrls);
-    
     await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
     document.getElementById('urlPhotoInput').value = "";
     window.abrirInfoModelo(currentModelId);
@@ -306,7 +302,6 @@ window.renderPaintCatalog = () => {
     if (!container) return;
     container.innerHTML = "";
     if(!paintCatalogData[brand]) return;
-
     paintCatalogData[brand].filter(p => {
         const id = (p.id || "").toLowerCase();
         const nombre = (p.nombre || "").toLowerCase();
@@ -374,6 +369,15 @@ window.loadPickerImage = (e) => {
             cvs.width = img.width; cvs.height = img.height; ctx.drawImage(img, 0, 0); cvs.style.display = 'block';
         }; img.src = ev.target.result;
     }; reader.readAsDataURL(e.target.files[0]);
+};
+
+window.resetPicker = () => {
+    const cvs = document.getElementById('canvasPicker');
+    const ctx = cvs.getContext('2d');
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    cvs.style.display = 'none';
+    document.getElementById('pickerInput').value = "";
+    document.getElementById('pickerResults').innerHTML = "";
 };
 
 document.getElementById('canvasPicker').addEventListener('mousedown', (e) => {
