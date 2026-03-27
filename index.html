@@ -111,7 +111,7 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
     </section>
 </div>
 
-<div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle">Maqueta</h3><input type="hidden" id="f_id"><input id="f_fabricante" placeholder="Fabricante"><input id="f_modelo" placeholder="Modelo"><input id="f_precio" placeholder="Precio"><input id="f_foto" placeholder="URL Foto"><input id="f_paints" placeholder="Pinturas (IDs)"><button onclick="window.guardarModelo()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">GUARDAR</button><button onclick="window.toggleModal('formModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Cancelar</button></div></div>
+<div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle">Maqueta</h3><input type="hidden" id="f_id"><input id="f_codigo" placeholder="Código (Referencia)"><input id="f_fabricante" placeholder="Fabricante"><input id="f_modelo" placeholder="Modelo"><input id="f_precio" placeholder="Precio"><input id="f_foto" placeholder="URL Foto"><input id="f_paints" placeholder="Pinturas (IDs)"><button onclick="window.guardarModelo()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">GUARDAR</button><button onclick="window.toggleModal('formModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Cancelar</button></div></div>
 
 <div id="infoModal" class="modal">
     <div class="modal-content">
@@ -198,6 +198,7 @@ window.renderMaquetas = () => {
         grid.innerHTML += `
             <div class="card">
                 <img src="${m.foto || 'https://via.placeholder.com/300'}" onclick="window.open('${m.foto}', '_blank')">
+                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${m.codigo || 'S/N'}</div>
                 <b>${m.modelo}</b><small>${m.fabricante}</small>
                 <div class="card-btns">
                     <button class="btn-action" style="background:#3498db" onclick="window.abrirInfoModelo('${m.id}')">INFO</button>
@@ -215,14 +216,14 @@ window.abrirInfoModelo = (id) => {
     if (!m) return;
     document.getElementById("infoTitle").innerText = m.modelo || "Modelo";
     const details = document.getElementById("infoDetails");
-    if (details) details.innerHTML = `<b>Marca:</b> ${m.fabricante || '-'} | <b>Precio:</b> ${m.precio || '--'}€`;
+    if (details) details.innerHTML = `<b>Ref:</b> ${m.codigo || '-'} | <b>Marca:</b> ${m.fabricante || '-'} | <b>Precio:</b> ${m.precio || '--'}€`;
     const gal = document.getElementById("galleryGrid");
     if (gal) {
         gal.innerHTML = "";
         (m.galeria || []).forEach((url, idx) => {
             gal.innerHTML += `
                 <div style="position:relative;">
-                    <img src="${url}" class="gallery-img" style="height:100px; cursor:pointer;" onclick="window.open('${url}', '_blank')">
+                    <img src="${url}" class="gallery-img" style="height:100px; width:100%; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="window.open('${url}', '_blank')">
                     <button onclick="window.borrarFotoGaleria(${idx})" 
                             style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:3px; padding:2px 5px; cursor:pointer; font-size:10px;">X</button>
                 </div>`;
@@ -255,6 +256,7 @@ window.openFormModal = (id = null) => {
         const m = modelos.find(x => x.id === id);
         document.getElementById('formTitle').innerText = "Editar Maqueta";
         document.getElementById('f_id').value = m.id;
+        document.getElementById('f_codigo').value = m.codigo || "";
         document.getElementById('f_fabricante').value = m.fabricante || "";
         document.getElementById('f_modelo').value = m.modelo || "";
         document.getElementById('f_precio').value = m.precio || "";
@@ -262,9 +264,10 @@ window.openFormModal = (id = null) => {
         document.getElementById('f_paints').value = (m.paints || []).join(', ');
     } else {
         document.getElementById('formTitle').innerText = "Nueva Maqueta";
-        document.getElementById('f_id').value = ""; document.getElementById('f_fabricante').value = "";
-        document.getElementById('f_modelo').value = ""; document.getElementById('f_precio').value = "";
-        document.getElementById('f_foto').value = ""; document.getElementById('f_paints').value = "";
+        document.getElementById('f_id').value = ""; document.getElementById('f_codigo').value = "";
+        document.getElementById('f_fabricante').value = ""; document.getElementById('f_modelo').value = ""; 
+        document.getElementById('f_precio').value = ""; document.getElementById('f_foto').value = ""; 
+        document.getElementById('f_paints').value = "";
     }
     window.toggleModal('formModal', true);
 };
@@ -272,6 +275,7 @@ window.openFormModal = (id = null) => {
 window.guardarModelo = async () => {
     const id = document.getElementById('f_id').value;
     const d = { 
+        codigo: document.getElementById('f_codigo').value,
         fabricante: document.getElementById('f_fabricante').value, 
         modelo: document.getElementById('f_modelo').value,
         precio: document.getElementById('f_precio').value,
@@ -443,7 +447,7 @@ window.stopScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => windo
 // --- UTILS ---
 window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
 window.exportarExcelPrincipal = () => {
-    const ws = XLSX.utils.json_to_sheet(modelos.map(m => ({ MARCA: m.fabricante, MODELO: m.modelo, PRECIO: m.precio })));
+    const ws = XLSX.utils.json_to_sheet(modelos.map(m => ({ CODIGO: m.codigo, MARCA: m.fabricante, MODELO: m.modelo, PRECIO: m.precio })));
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock"); XLSX.writeFile(wb, "Stock_Maikman.xlsx");
 };
 window.exportarListaExcel = () => {
