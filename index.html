@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v7.9.1</title>
+<title>Maikman Models - Pro Stock v7.9.5</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -39,6 +39,13 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 .paint-item-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
 .color-circle { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #fff; margin: 0 auto 8px; }
+
+/* Mixer Layout de 3 Columnas */
+#mixerInputs { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; 
+    gap: 10px; 
+}
 
 /* Modales */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
@@ -98,12 +105,11 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
             </div>
             <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)">
             <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:10px; cursor:crosshair;"></canvas>
-            
             <div id="pickerResults" class="picker-results-container"></div>
         </div>
 
-        <h4>🧪 Mezclador (10 Gotas)</h4>
-        <div id="mixerInputs" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
+        <h4>🧪 Mezclador (6 Colores / 3 Columnas)</h4>
+        <div id="mixerInputs"></div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
             <div id="mixerResultPreview" style="height:100px; border-radius:10px; border:1px solid #444; display:flex; align-items:center; justify-content:center; font-weight:bold;">#---</div>
             <canvas id="mixerChart" style="max-height:100px;"></canvas>
@@ -349,21 +355,36 @@ window.abrirModalCompra = (s) => {
     window.toggleModal('cartModal', true);
 };
 
-// --- MIXER & PICKER ---
+// --- MIXER & PICKER (Modificados para 6 colores y 3 columnas) ---
 function initMixer() {
     const cont = document.getElementById('mixerInputs');
     let opts = '<option value="">-</option>';
     for(let b in paintCatalogData) opts += `<optgroup label="${b}">${paintCatalogData[b].map(p => `<option value="${p.hex}">${p.id}</option>`).join('')}</optgroup>`;
-    cont.innerHTML = [1,2,3,4].map(i => `<div><select id="mc${i}" onchange="window.calcMix()">${opts}</select><input type="range" id="mv${i}" min="0" max="10" step="1" value="0" oninput="window.calcMix()"><div id="ml${i}" style="font-size:10px;">0 gotas</div></div>`).join('');
+    
+    // Generamos 6 elementos para formar las 3 columnas x 2 filas
+    cont.innerHTML = [1,2,3,4,5,6].map(i => `
+        <div>
+            <select id="mc${i}" onchange="window.calcMix()">${opts}</select>
+            <input type="range" id="mv${i}" min="0" max="10" step="1" value="0" oninput="window.calcMix()">
+            <div id="ml${i}" style="font-size:10px; text-align:center;">0 gotas</div>
+        </div>`).join('');
+    
     mixerChart = new Chart(document.getElementById('mixerChart'), { type:'pie', data:{labels:[], datasets:[{data:[], backgroundColor:[]}]}, options:{plugins:{legend:{display:false}}, animation:false} });
 }
 
 window.calcMix = () => {
     let r=0, g=0, b=0, tot=0; const lbs=[], dts=[], cls=[];
-    for(let i=1; i<=4; i++){
+    // Recorremos los 6 campos
+    for(let i=1; i<=6; i++){
         const h = document.getElementById(`mc${i}`).value, v = parseInt(document.getElementById(`mv${i}`).value);
         document.getElementById(`ml${i}`).innerText = v + " gotas";
-        if(h && v > 0){ const c = hexToRgb(h); r+=c.r*v; g+=c.g*v; b+=c.b*v; tot+=v; lbs.push(document.getElementById(`mc${i}`).selectedOptions[0].text); dts.push(v); cls.push(h); }
+        if(h && v > 0){ 
+            const c = hexToRgb(h); 
+            r+=c.r*v; g+=c.g*v; b+=c.b*v; tot+=v; 
+            lbs.push(document.getElementById(`mc${i}`).selectedOptions[0].text); 
+            dts.push(v); 
+            cls.push(h); 
+        }
     }
     const resDiv = document.getElementById('mixerResultPreview');
     if(tot>0){
@@ -401,24 +422,17 @@ document.getElementById('canvasPicker').addEventListener('mousedown', (e) => {
 function analizarColorPicker(r,g,b) {
     let allPaints = [];
     const priorities = ["tamiya", "ammo mig", "mr.color"];
-
     for(let brand in paintCatalogData) {
         paintCatalogData[brand].forEach(p => {
             const t = hexToRgb(p.hex);
             const dist = Math.sqrt((r-t.r)**2 + (g-t.g)**2 + (b-t.b)**2);
             let score = Math.max(0, 100 - (dist / 4.41));
-            
-            // Priorización: Si la marca está en la lista, le damos un boost ficticio para el orden
             let priorityBoost = priorities.some(pr => brand.toLowerCase().includes(pr)) ? 5 : 0;
-            
             allPaints.push({...p, brand, realScore: score, sortScore: score + priorityBoost});
         });
     }
-
-    // Ordenamos por el sortScore (que incluye el boost) pero mostramos el realScore
     allPaints.sort((a,b) => b.sortScore - a.sortScore);
     const top9 = allPaints.slice(0, 9);
-
     document.getElementById('pickerResults').innerHTML = top9.map(p => `
         <div class="match-card">
             <div class="match-circle" style="background:${p.hex}"></div>
