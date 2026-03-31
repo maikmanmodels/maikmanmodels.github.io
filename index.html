@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v7.9.5</title>
+<title>Maikman Models - Pro Stock v8.0.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -36,8 +36,8 @@ body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text);
 .btn-action { padding: 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; text-align: center; }
 
 /* Pinturas */
-.paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-.paint-item-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+.paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+.paint-item-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center; position: relative; }
 .color-circle { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #fff; margin: 0 auto 8px; }
 
 /* Mixer Layout de 3 Columnas */
@@ -74,7 +74,7 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
     <nav class="nav-tabs">
         <button class="tab-btn active" onclick="window.switchTab('tab-maquetas', this)">📦 MODELOS</button>
         <button class="tab-btn" onclick="window.switchTab('tab-pinturas', this)">🎨 PINTURAS</button>
-        <button class="tab-btn" onclick="window.switchTab('tab-mixer', this)">🧪 MIXER / PICK</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-mixer', this)">🧪 MIXER/PICK</button>
         <button class="tab-btn" onclick="window.abrirModalCompra(true)">🛒 <span id="cartCount" class="cart-badge">0</span></button>
         <button class="tab-btn" style="flex:0.3" onclick="window.toggleModal('configModal', true)">⚙️</button>
     </nav>
@@ -108,7 +108,7 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
             <div id="pickerResults" class="picker-results-container"></div>
         </div>
 
-        <h4>🧪 Mezclador</h4>
+        <h4>🧪 Mezclador (6 Colores / 3 Columnas)</h4>
         <div id="mixerInputs"></div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
             <div id="mixerResultPreview" style="height:100px; border-radius:10px; border:1px solid #444; display:flex; align-items:center; justify-content:center; font-weight:bold;">#---</div>
@@ -134,7 +134,13 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
     </div>
 </div>
 
-<div id="modelPaintsModal" class="modal"><div class="modal-content"><h3>Pinturas Necesarias</h3><div id="mPaintsList" class="paint-grid" style="grid-template-columns: 1fr;"></div><button onclick="window.toggleModal('modelPaintsModal', false)" style="width:100%; margin-top:20px; background:var(--accent); color:white; border:none; padding:10px; border-radius:6px;">Cerrar</button></div></div>
+<div id="modelPaintsModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <h3>Pinturas Necesarias</h3>
+        <div id="mPaintsList" class="paint-grid"></div>
+        <button onclick="window.toggleModal('modelPaintsModal', false)" style="width:100%; margin-top:20px; background:var(--accent); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cerrar</button>
+    </div>
+</div>
 
 <div id="scanModal" class="modal"><div class="modal-content"><div id="reader"></div><button onclick="window.stopScanner()" style="width:100%; margin-top:10px; background:var(--danger); color:white; border:none; padding:10px; border-radius:6px;">Cerrar Cámara</button></div></div>
 
@@ -296,17 +302,25 @@ window.guardarModelo = async () => {
 
 window.borrarModelo = async (id) => { if(confirm("¿Seguro?")) { await deleteDoc(doc(db, "modelos", id)); cargarTodo(); } };
 
+// MODIFICADO: Ahora usa el estilo visual de la pestaña pinturas
 window.abrirPinturasModelo = (id) => {
     const m = modelos.find(x => x.id === id);
-    const cont = document.getElementById('mPaintsList'); cont.innerHTML = "";
+    const cont = document.getElementById('mPaintsList'); 
+    cont.innerHTML = "";
+    
     (m.paints || []).forEach(pid => {
         const p = encontrarPintura(pid);
-        const has = myPaints.have.includes(pid);
-        cont.innerHTML += `<div class="paint-item-box" style="display:flex; align-items:center; gap:10px; text-align:left;">
-            <div class="color-circle" style="background:${p.hex}; margin:0;"></div>
-            <div style="flex:1"><b>${p.id}</b><br><small>${p.nombre}</small></div>
-            <div style="color:${has?'var(--success)':'var(--danger)'}; font-weight:bold;">${has?'SÍ':'NO'}</div>
-        </div>`;
+        const has = myPaints.have.includes(p.id);
+        
+        cont.innerHTML += `
+            <div class="paint-item-box" style="border-color: ${has ? 'var(--success)' : 'var(--danger)'}">
+                <div class="color-circle" style="background:${p.hex}"></div>
+                <div style="font-size:11px; font-weight:bold;">${p.id}</div>
+                <div style="font-size:10px; opacity:0.8;">${p.nombre}</div>
+                <div style="margin-top:5px; font-size:10px; font-weight:bold; color:${has?'var(--success)':'var(--danger)'}">
+                    ${has ? 'EN STOCK' : 'FALTA'}
+                </div>
+            </div>`;
     });
     window.toggleModal('modelPaintsModal', true);
 };
@@ -331,8 +345,8 @@ window.renderPaintCatalog = () => {
             <span style="font-size:11px; font-weight:bold;">${p.id || 'S/N'}</span><br>
             <span style="font-size:10px;">${p.nombre || ''}</span>
             <div style="display:flex; gap:5px; margin-top:8px;">
-                <button onclick="window.togglePaint('${p.id}','have')" style="flex:1; background:${have?'var(--success)':'#444'}; border:none; padding:5px; border-radius:4px; color:white;">✅</button>
-                <button onclick="window.togglePaint('${p.id}','buy')" style="flex:1; background:${buy?'var(--danger)':'#444'}; border:none; padding:5px; border-radius:4px; color:white;">🛒</button>
+                <button onclick="window.togglePaint('${p.id}','have')" style="flex:1; background:${have?'var(--success)':'#444'}; border:none; padding:5px; border-radius:4px; color:white; cursor:pointer;">✅</button>
+                <button onclick="window.togglePaint('${p.id}','buy')" style="flex:1; background:${buy?'var(--danger)':'#444'}; border:none; padding:5px; border-radius:4px; color:white; cursor:pointer;">🛒</button>
             </div>
         </div>`;
     });
@@ -355,13 +369,12 @@ window.abrirModalCompra = (s) => {
     window.toggleModal('cartModal', true);
 };
 
-// --- MIXER & PICKER (Modificados para 6 colores y 3 columnas) ---
+// --- MIXER & PICKER (6 Colores / 3 Columnas) ---
 function initMixer() {
     const cont = document.getElementById('mixerInputs');
     let opts = '<option value="">-</option>';
     for(let b in paintCatalogData) opts += `<optgroup label="${b}">${paintCatalogData[b].map(p => `<option value="${p.hex}">${p.id}</option>`).join('')}</optgroup>`;
     
-    // Generamos 6 elementos para formar las 3 columnas x 2 filas
     cont.innerHTML = [1,2,3,4,5,6].map(i => `
         <div>
             <select id="mc${i}" onchange="window.calcMix()">${opts}</select>
@@ -374,7 +387,6 @@ function initMixer() {
 
 window.calcMix = () => {
     let r=0, g=0, b=0, tot=0; const lbs=[], dts=[], cls=[];
-    // Recorremos los 6 campos
     for(let i=1; i<=6; i++){
         const h = document.getElementById(`mc${i}`).value, v = parseInt(document.getElementById(`mv${i}`).value);
         document.getElementById(`ml${i}`).innerText = v + " gotas";
