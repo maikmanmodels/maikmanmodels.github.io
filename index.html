@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v8.1.0</title>
+<title>Maikman Models - Pro Stock v8.0.0</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -54,6 +54,7 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
 
 /* Picker Estilos */
 .picker-results-container { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 500px) { .picker-results-container { grid-template-columns: 1fr; } }
 .match-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid #334155; display: flex; align-items: center; gap: 10px; }
 .match-circle { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #fff; flex-shrink: 0; }
 .match-info { flex: 1; font-size: 11px; }
@@ -92,7 +93,7 @@ input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; ba
             <select id="brandFilter" onchange="window.renderPaintCatalog()" style="flex:1"></select>
             <button onclick="window.startScanner('paint')" style="background:#4b5563; border:none; padding:0 15px; border-radius:6px; color:white;">📷</button>
         </div>
-        <input id="paintSearch" placeholder="Escribe ID, Nombre o escanea código..." onkeyup="window.renderPaintCatalog()">
+        <input id="paintSearch" placeholder="Filtrar pintura..." onkeyup="window.renderPaintCatalog()">
         <div id="paintCatalog" class="paint-grid"></div>
     </section>
 
@@ -301,6 +302,7 @@ window.guardarModelo = async () => {
 
 window.borrarModelo = async (id) => { if(confirm("¿Seguro?")) { await deleteDoc(doc(db, "modelos", id)); cargarTodo(); } };
 
+// MODIFICADO: Ahora usa el estilo visual de la pestaña pinturas
 window.abrirPinturasModelo = (id) => {
     const m = modelos.find(x => x.id === id);
     const cont = document.getElementById('mPaintsList'); 
@@ -323,21 +325,18 @@ window.abrirPinturasModelo = (id) => {
     window.toggleModal('modelPaintsModal', true);
 };
 
-// --- PINTURAS (Mejorado para Escáner) ---
+// --- PINTURAS ---
 window.renderPaintCatalog = () => {
     const brand = document.getElementById('brandFilter').value;
-    const search = document.getElementById('paintSearch').value.toLowerCase().trim();
+    const search = document.getElementById('paintSearch').value.toLowerCase();
     const container = document.getElementById('paintCatalog');
     if (!container) return;
     container.innerHTML = "";
     if(!paintCatalogData[brand]) return;
-
     paintCatalogData[brand].filter(p => {
         const id = (p.id || "").toLowerCase();
         const nombre = (p.nombre || "").toLowerCase();
-        const ean = (p.ean || "").toLowerCase(); // Por si añades códigos de barras al JSON
-        // Si el buscador tiene texto, filtramos. Si no, mostramos todos.
-        return !search || id.includes(search) || nombre.includes(search) || ean === search;
+        return id.includes(search) || nombre.includes(search);
     }).forEach(p => {
         const have = myPaints.have.includes(p.id); 
         const buy = myPaints.buy.includes(p.id);
@@ -370,7 +369,7 @@ window.abrirModalCompra = (s) => {
     window.toggleModal('cartModal', true);
 };
 
-// --- MIXER & PICKER ---
+// --- MIXER & PICKER (6 Colores / 3 Columnas) ---
 function initMixer() {
     const cont = document.getElementById('mixerInputs');
     let opts = '<option value="">-</option>';
@@ -464,38 +463,12 @@ window.startScanner = (target) => {
     window.toggleModal('scanModal', true);
     html5QrCode = new Html5Qrcode("reader");
     html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
-        // Limpiamos el texto del código de barras por si tiene caracteres raros
-        const cleanedCode = t.trim();
-        if(target === 'model') { 
-            document.getElementById("search").value = cleanedCode; 
-            window.renderMaquetas(); 
-            window.switchTab('tab-maquetas'); 
-        } else { 
-            // Si escaneamos una pintura, buscamos en TODAS las marcas
-            // Intentamos encontrar automáticamente a qué marca pertenece ese código
-            buscarMarcaPorId(cleanedCode);
-            document.getElementById("paintSearch").value = cleanedCode; 
-            window.renderPaintCatalog(); 
-            window.switchTab('tab-pinturas'); 
-        }
+        if(target === 'model') { document.getElementById("search").value = t; window.renderMaquetas(); window.switchTab('tab-maquetas'); }
+        else { document.getElementById("paintSearch").value = t; window.renderPaintCatalog(); window.switchTab('tab-pinturas'); }
         window.stopScanner();
     }).catch(() => alert("Cámara no encontrada"));
 };
 window.stopScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => window.toggleModal('scanModal', false)); };
-
-// Función nueva para que el escáner cambie la marca automáticamente si encuentra el ID
-function buscarMarcaPorId(idEscaneado) {
-    const idLower = idEscaneado.toLowerCase();
-    for (let brand in paintCatalogData) {
-        const found = paintCatalogData[brand].some(p => 
-            (p.id||"").toLowerCase() === idLower || (p.ean||"") === idLower
-        );
-        if (found) {
-            document.getElementById('brandFilter').value = brand;
-            break;
-        }
-    }
-}
 
 // --- UTILS ---
 window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
