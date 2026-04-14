@@ -355,7 +355,7 @@
   { "id": "C90", "nombre": "Shine Silver", "hex": "#e5e5e5", "ean": ["4973028535907"] },
   { "id": "C92", "nombre": "Semi-Gloss Black", "hex": "#1a1a1b", "ean": ["4973028535921"] },
   { "id": "C97", "nombre": "Light Grey", "hex": "#d3d3d3", "ean": ["4973028535976"] },
-  { "id": "C100", "nombre": "Maroon", "hex": "#800000", "ean": ["4973028536003" }
+  { "id": "C100", "nombre": "Maroon", "hex": "#800000", "ean": ["4973028536003"] }
   ],
   
   "Humbrol Enamel": [
