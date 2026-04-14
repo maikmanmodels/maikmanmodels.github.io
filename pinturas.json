@@ -171,7 +171,7 @@
   { "id": "LP-77", "nombre": "Light Brown", "hex": "#a38c6b", "ean": ["4950344821778"] },
   { "id": "LP-78", "nombre": "Flat Flesh (Carne)", "hex": "#f5d0b9", "ean": ["4950344821785"] },
   { "id": "LP-79", "nombre": "Flat Red", "hex": "#b22222", "ean": ["4950344821792"] },
-  { "id": "LP-80", "nombre": "Flat Blue", "hex": "#00477e", "ean": ["4950344821808" }
+  { "id": "LP-80", "nombre": "Flat Blue", "hex": "#00477e", "ean": ["4950344821808"] }
   ],
   
   "Tamiya TS (Spray Paint)": [
