@@ -751,7 +751,7 @@
 { "id": "2452", "nombre": "Candy Rojo Rubí", "hex": "#e0115f", "ean": [""] },
 { "id": "2451", "nombre": "Candy Rojo", "hex": "#ff0000", "ean": [""] },
 { "id": "2450", "nombre": "Candy Base Plata Brillante", "hex": "#e6e8fa", "ean": [""] }
-]
+],
   
   "AMMO Alclad II": [
   { "id": "ALC101", "nombre": "Chrome for Plastic", "hex": "#e5e5e5", "ean": ["8432034057000"] },
