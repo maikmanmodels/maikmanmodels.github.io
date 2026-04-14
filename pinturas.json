@@ -791,6 +791,6 @@
   { "id": "ALC311", "nombre": "Satin Klear Kote (Barniz Satinado)", "hex": "#ffffff06", "ean": ["8432034057512"] },
   { "id": "ALC312", "nombre": "Semi-Matte Klear Kote", "hex": "#ffffff07", "ean": ["8432034057529"] },
   { "id": "ALC313", "nombre": "Matte Klear Kote (Barniz Mate)", "hex": "#ffffff08", "ean": ["8432034057536"] },
-  { "id": "ALC314", "nombre": "Flat Klear Kote (Barniz Extra Mate)", "hex": "#ffffff09", "ean": ["8432034057543" }
+  { "id": "ALC314", "nombre": "Flat Klear Kote (Barniz Extra Mate)", "hex": "#ffffff09", "ean": ["8432034057543"] }
 ]
 }
