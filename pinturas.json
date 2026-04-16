@@ -358,7 +358,7 @@
   { "id": "C100", "nombre": "Maroon", "hex": "#800000", "ean": ["4973028536003"] }
   ],
 
-  "Hobby Color (Gunze Sangyo)": [
+  "Hobby Color": [
   { "id": "H1", "nombre": "White (Gloss)", "hex": "#ffffff", "ean": ["4973028535013"] },
   { "id": "H2", "nombre": "Black (Gloss)", "hex": "#000000", "ean": ["4973028535020"] },
   { "id": "H3", "nombre": "Red (Gloss)", "hex": "#ff0000", "ean": ["4973028535037"] },
