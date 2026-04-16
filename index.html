@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v8.1.2</title>
+<title>Maikman Models - Pro Stock v8.1.3</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -161,7 +161,7 @@ let myPaints = { stock: [], buy: [] };
 let currentMix = [];
 let mixerChart = null; // Variable global para controlar Chart.js
 
-// Firebase Placeholder (Sustituir por tu config real)
+// Firebase Placeholder
 const FB_URL = "https://maikman-models-default-rtdb.europe-west1.firebasedatabase.app/data.json";
 
 // --- INICIO ---
@@ -171,7 +171,7 @@ window.onload = async () => {
         paintCatalogData = await resp.json();
         fillMixerSelect();
         await cargarTodo();
-    } catch (e) { alert("Error al cargar pinturas.json. Asegúrate de que el archivo existe."); }
+    } catch (e) { alert("Error al cargar pinturas.json"); }
 };
 
 async function cargarTodo() {
@@ -210,6 +210,18 @@ function renderModelos() {
             list.appendChild(card);
         }
     });
+}
+
+function editModelo(idx) {
+    const m = modelos[idx];
+    document.getElementById('editIdx').value = idx;
+    document.getElementById('mCodigo').value = m.codigo;
+    document.getElementById('mFab').value = m.fabricante;
+    document.getElementById('mMod').value = m.modelo;
+    document.getElementById('mPre').value = m.precio;
+    document.getElementById('mNotas').value = m.notas;
+    document.getElementById('modalTitle').innerText = "Editar Modelo";
+    toggleModal('modelModal', true);
 }
 
 async function guardarModelo() {
@@ -293,9 +305,10 @@ async function toggleCart(id) {
     if(document.getElementById('cartModal').style.display === 'block') renderCart();
 }
 
-// --- MIXER ---
+// --- MIXER (AQUÍ ESTÁ EL CAMBIO) ---
 function fillMixerSelect() {
     const sel = document.getElementById('mixerSelect');
+    sel.innerHTML = '<option value="">-- Añadir al Mezclador --</option>';
     for (let b in paintCatalogData) {
         const group = document.createElement('optgroup');
         group.label = b;
@@ -313,10 +326,12 @@ function initMixer() {
     const ctx = document.getElementById('mixerChart');
     if (!ctx) return;
 
-    // SOLUCIÓN AL ERROR: Destruir gráfico si ya existe
+    // --- CORRECCIÓN DEL ERROR ---
+    // Destruye el gráfico existente antes de crear uno nuevo
     if (mixerChart instanceof Chart) {
         mixerChart.destroy();
     }
+    // ----------------------------
 
     mixerChart = new Chart(ctx, {
         type: 'doughnut',
@@ -395,22 +410,12 @@ function captureColor() {
     canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0);
-    
-    // Tomar el centro
     const pixel = ctx.getImageData(canvas.width/2, canvas.height/2, 1, 1).data;
     const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
-    
     const matches = findClosestPaints(hex);
     let html = `<h3>Color Detectado: <span style="color:${hex}">${hex}</span></h3><div class="grid">`;
     matches.forEach(m => {
-        html += `
-            <div class="card">
-                <span class="color-dot" style="background:${m.hex}"></span>
-                <strong>${m.id}</strong> - ${m.nombre}
-                <p>Similitud: ${m.score}%</p>
-                <button onclick="addPinturaToMix('${m.id}')" class="btn-primary" style="width:100%; margin-top:5px; font-size:10px;">AÑADIR AL MIXER</button>
-            </div>
-        `;
+        html += `<div class="card"><span class="color-dot" style="background:${m.hex}"></span><strong>${m.id}</strong> - ${m.nombre}<p>Similitud: ${m.score}%</p><button onclick="addPinturaToMix('${m.id}')" class="btn-primary" style="width:100%; margin-top:5px; font-size:10px;">AÑADIR AL MIXER</button></div>`;
     });
     document.getElementById('pickerResult').innerHTML = html + "</div>";
 }
@@ -438,7 +443,7 @@ window.switchTab = (id) => {
     if(id === 'tab-picker') initPicker();
     else {
         const v = document.getElementById('camera-preview');
-        if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
+        if(v && v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
     }
 };
 
@@ -471,24 +476,15 @@ window.startScanner = () => {
     window.toggleModal('scanModal', true);
     html5QrCode = new Html5Qrcode("reader");
     html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
-        // Buscar en modelos
         const m = modelos.find(x => x.codigo === t);
         if(m) { document.getElementById("modelSearch").value = t; renderModelos(); window.switchTab('tab-modelos'); }
         else { document.getElementById("paintSearch").value = t; window.renderPaintCatalog(); window.switchTab('tab-pinturas'); }
         window.stopScanner();
-    }).catch(() => alert("Cámara no encontrada"));
+    }).catch(() => {});
 };
 window.stopScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => window.toggleModal('scanModal', false)); };
 
 // --- EXPORTACIÓN ---
-window.exportarStockPinturas = () => {
-    const listado = myPaints.stock.map(id => {
-        const p = encontrarPintura(id);
-        return { CODIGO: p.id, NOMBRE: p.nombre, MARCA: p.marca || "Desconocida" };
-    });
-    const ws = XLSX.utils.json_to_sheet(listado);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Mis Pinturas"); XLSX.writeFile(wb, "Mis_Pinturas_Stock.xlsx");
-};
 window.exportarExcelPrincipal = () => {
     const ws = XLSX.utils.json_to_sheet(modelos.map(m => ({ CODIGO: m.codigo, MARCA: m.fabricante, MODELO: m.modelo, PRECIO: m.precio })));
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock"); XLSX.writeFile(wb, "Stock_Maikman.xlsx");
@@ -514,18 +510,6 @@ function hexToRgb(hex) {
     return {r,g,b};
 }
 function rgbToHex(r,g,b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1); }
-
-function editModelo(idx) {
-    const m = modelos[idx];
-    document.getElementById('editIdx').value = idx;
-    document.getElementById('mCodigo').value = m.codigo;
-    document.getElementById('mFab').value = m.fabricante;
-    document.getElementById('mMod').value = m.modelo;
-    document.getElementById('mPre').value = m.precio;
-    document.getElementById('mNotas').value = m.notas;
-    document.getElementById('modalTitle').innerText = "Editar Modelo";
-    toggleModal('modelModal', true);
-}
 </script>
 </body>
 </html>
