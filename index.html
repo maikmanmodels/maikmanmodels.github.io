@@ -19,440 +19,470 @@ body.light { --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb; }
 body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); padding-bottom: 20px; }
 
 /* Navegación */
-.nav-tabs { display: flex; align-items: center; background: var(--card); padding: 8px; gap: 4px; position: sticky; top: 0; z-index: 900; border-bottom: 1px solid #334155; }
-.tab-btn { flex: 1; padding: 12px 5px; border: none; background: rgba(255,255,255,0.05); color: var(--text); cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 11px; }
-.tab-btn.active { background: var(--accent); color: white; }
-.cart-badge { background: var(--danger); color: white; font-size: 10px; padding: 2px 5px; border-radius: 10px; margin-left: 3px; }
+.nav-tabs { display: flex; align-items: center; background: var(--card); padding: 8px; gap: 4px; position: sticky; top: 0; z-index: 900; border-bottom: 1px solid #334155; overflow-x: auto; }
+.tab-btn { padding: 10px 16px; border: none; background: transparent; color: var(--text); cursor: pointer; border-radius: 8px; font-weight: 600; white-space: nowrap; font-size: 14px; }
+.tab-btn.active { background: var(--accent); color: #fff; }
+.tab-btn:hover:not(.active) { background: #1e293b; }
 
-/* Secciones */
-.content-section { display: none; padding: 15px; }
-.content-section.active { display: block; }
+/* Contenido */
+.tab-content { display: none; padding: 16px; max-width: 1200px; margin: 0 auto; }
+.tab-content.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Grid Modelos */
-#grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr)); gap: 16px; }
-.card { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid #334155; display: flex; flex-direction: column; }
-.card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
-.card-btns { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: auto; }
-.btn-action { padding: 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; text-align: center; }
+/* Cards y Rejilla */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr)); gap: 16px; margin-top: 16px; }
+.card { background: var(--card); border-radius: 12px; padding: 16px; border: 1px solid #334155; position: relative; }
+.card h3 { margin: 0 0 8px 0; font-size: 18px; color: var(--accent); }
+.card p { margin: 4px 0; font-size: 14px; opacity: 0.9; }
 
-/* Pinturas */
-.paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-.paint-item-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center; position: relative; }
-.color-circle { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #fff; margin: 0 auto 8px; }
+/* Formularios y Buscadores */
+.search-container { position: sticky; top: 60px; background: var(--bg); padding: 10px 0; z-index: 800; display: flex; gap: 8px; }
+input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #fff; font-size: 14px; margin-bottom: 8px; }
+button { padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
 
-/* Mixer Layout de 3 Columnas */
-#mixerInputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+/* Mixer y Colores */
+.color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; border: 1px solid #fff3; }
+.mixer-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: var(--card); padding: 20px; border-radius: 12px; margin-top: 20px; }
+@media (max-width: 768px) { .mixer-container { grid-template-columns: 1fr; } }
+.preview-box { height: 100px; border-radius: 12px; border: 2px solid #334155; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-shadow: 0 0 4px #000; }
 
 /* Modales */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.modal-content { background: var(--card); padding: 20px; width: 100%; max-width: 500px; border-radius: 12px; max-height: 90vh; overflow-y: auto; border: 1px solid #334155; }
-input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; margin-bottom: 10px; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; padding: 20px; overflow-y: auto; }
+.modal-content { background: var(--card); max-width: 500px; margin: 40px auto; padding: 24px; border-radius: 16px; border: 1px solid var(--accent); }
 
-/* Picker Estilos */
-.picker-results-container { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.match-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid #334155; display: flex; align-items: center; gap: 10px; }
-.match-circle { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #fff; flex-shrink: 0; }
-.match-info { flex: 1; font-size: 11px; }
-.match-score { font-size: 10px; color: var(--accent); font-weight: bold; }
+/* IA Picker */
+#camera-preview { width: 100%; border-radius: 12px; margin-bottom: 10px; background: #000; }
+.picked-color-card { padding: 15px; border-radius: 12px; background: #1e293b; margin-top: 10px; display: flex; align-items: center; gap: 15px; }
+
+/* Flotantes */
+.fab { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 28px; background: var(--accent); color: #fff; font-size: 24px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 </style>
 </head>
-<body class="dark">
+<body>
 
-<div id="login" style="max-width:320px; margin:100px auto; padding:20px; text-align:center;">
-    <h2 style="color:var(--accent)">Maikman Models</h2>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Contraseña">
-    <button onclick="window.login()" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:6px; font-weight:bold;">ENTRAR</button>
+<nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-modelos')">📦 STOCK</button>
+    <button class="tab-btn" onclick="switchTab('tab-pinturas')">🎨 PINTURAS</button>
+    <button class="tab-btn" onclick="switchTab('tab-mixer')">🧪 MIXER</button>
+    <button class="tab-btn" onclick="switchTab('tab-picker')">👁️ PICKER IA</button>
+    <div style="margin-left:auto; display:flex; gap:10px; padding-right:10px;">
+        <button onclick="toggleTheme()" style="background:none; font-size:20px;">🌓</button>
+        <button onclick="toggleModal('cartModal', true)" class="btn-primary" style="padding:8px 12px;">🛒 <span id="cartCount">0</span></button>
+    </div>
+</nav>
+
+<div id="tab-modelos" class="tab-content active">
+    <div class="search-container">
+        <input type="text" id="modelSearch" placeholder="Buscar modelo, marca o código..." oninput="renderModelos()">
+        <button onclick="toggleModal('modelModal', true)" class="btn-success">➕</button>
+        <button onclick="exportarExcelPrincipal()" class="btn-primary">📊</button>
+    </div>
+    <div id="modelList" class="grid"></div>
 </div>
 
-<div id="app" style="display:none;">
-    <nav class="nav-tabs">
-        <button class="tab-btn active" onclick="window.switchTab('tab-maquetas', this)">📦 MODELOS</button>
-        <button class="tab-btn" onclick="window.switchTab('tab-pinturas', this)">🎨 PINTURAS</button>
-        <button class="tab-btn" onclick="window.switchTab('tab-mixer', this)">🧪 MIXER/PICK</button>
-        <button class="tab-btn" onclick="window.abrirModalCompra(true)">🛒 <span id="cartCount" class="cart-badge">0</span></button>
-        <button class="tab-btn" style="flex:0.3" onclick="window.toggleModal('configModal', true)">⚙️</button>
-    </nav>
-
-    <section id="tab-maquetas" class="content-section active">
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <input id="search" placeholder="Buscar..." oninput="window.renderMaquetas()">
-            <button onclick="window.startScanner('model')" style="background:#4b5563; border:none; padding:0 15px; border-radius:6px; color:white;">📷</button>
-            <button onclick="window.openFormModal()" style="background:var(--accent); border:none; padding:0 15px; border-radius:6px; color:white;">➕</button>
-        </div>
-        <div id="grid"></div>
-    </section>
-
-    <section id="tab-pinturas" class="content-section">
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <select id="brandFilter" onchange="window.renderPaintCatalog()" style="flex:1"></select>
-            <button onclick="window.startScanner('paint')" style="background:#4b5563; border:none; padding:0 15px; border-radius:6px; color:white;">📷</button>
-        </div>
-        <input id="paintSearch" placeholder="Filtrar pintura..." onkeyup="window.renderPaintCatalog()">
-        <div id="paintCatalog" class="paint-grid"></div>
-    </section>
-
-    <section id="tab-mixer" class="content-section">
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4 style="margin:0;">🎯 Picker IA</h4>
-                <button onclick="window.resetPicker()" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:4px; font-size:10px; cursor:pointer; font-weight:bold;">RESET</button>
-            </div>
-            <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)">
-            <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:10px; cursor:crosshair;"></canvas>
-            <div id="pickerResults" class="picker-results-container"></div>
-        </div>
-
-        <h4>🧪 Mezclador (6 Colores / 3 Columnas)</h4>
-        <div id="mixerInputs"></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
-            <div id="mixerResultPreview" style="height:100px; border-radius:10px; border:1px solid #444; display:flex; align-items:center; justify-content:center; font-weight:bold;">#---</div>
-            <canvas id="mixerChart" style="max-height:100px;"></canvas>
-        </div>
-    </section>
+<div id="tab-pinturas" class="tab-content">
+    <div class="search-container">
+        <input type="text" id="paintSearch" placeholder="Buscar pintura o escanear..." oninput="renderPaintCatalog()">
+        <button onclick="window.startScanner()" class="btn-primary">📷</button>
+    </div>
+    <div id="paintCatalog" class="grid"></div>
 </div>
 
-<div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle">Maqueta</h3><input type="hidden" id="f_id"><input id="f_codigo" placeholder="Código (Referencia)"><input id="f_fabricante" placeholder="Fabricante"><input id="f_modelo" placeholder="Modelo"><input id="f_precio" placeholder="Precio"><input id="f_foto" placeholder="URL Foto"><input id="f_paints" placeholder="Pinturas (IDs)"><button onclick="window.guardarModelo()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">GUARDAR</button><button onclick="window.toggleModal('formModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Cancelar</button></div></div>
+<div id="tab-mixer" class="tab-content">
+    <h2>Mezclador Pro</h2>
+    <div class="mixer-container">
+        <div>
+            <label>Seleccionar Pintura:</label>
+            <select id="mixerSelect" onchange="addPinturaToMix(this.value)">
+                <option value="">-- Añadir al Mezclador --</option>
+            </select>
+            <div id="mixList" style="margin-top:20px;"></div>
+        </div>
+        <div style="text-align:center;">
+            <div id="mixPreview" class="preview-box">VISTA PREVIA</div>
+            <canvas id="mixerChart" width="200" height="200"></canvas>
+            <button onclick="limpiarMix()" class="btn-danger" style="margin-top:20px; width:100%;">BORRAR MEZCLA</button>
+        </div>
+    </div>
+</div>
 
-<div id="infoModal" class="modal">
+<div id="tab-picker" class="tab-content">
+    <h2>Identificador de Color IA</h2>
+    <video id="camera-preview" autoplay playsinline></video>
+    <div style="display:flex; gap:10px;">
+        <button onclick="captureColor()" class="btn-primary" style="flex:1;">CAPTURAR COLOR</button>
+    </div>
+    <div id="pickerResult"></div>
+</div>
+
+<div id="modelModal" class="modal">
     <div class="modal-content">
-        <h3 id="infoTitle" style="margin-top:0;"></h3>
-        <div id="infoDetails" style="margin-bottom:10px;"></div>
-        <hr style="border:0; border-top:1px solid #444;">
-        <b style="display:block; margin:10px 0;">Galería</b>
-        <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; margin-bottom:15px;"></div>
-        <div style="display:flex; gap:5px; margin-bottom:15px;">
-            <input type="text" id="urlPhotoInput" placeholder="Pegar URL foto..." style="margin-bottom:0;">
-            <button onclick="window.añadirUrlsAGaleria()" style="background:var(--success); color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold;">Añadir</button>
+        <h2 id="modalTitle">Nuevo Modelo</h2>
+        <input type="hidden" id="editIdx">
+        <input type="text" id="mCodigo" placeholder="Código/Referencia (EAN)">
+        <input type="text" id="mFab" placeholder="Fabricante (Tamiya, Italeri...)">
+        <input type="text" id="mMod" placeholder="Nombre del Modelo">
+        <input type="number" id="mPre" placeholder="Precio (€)">
+        <textarea id="mNotas" placeholder="Notas adicionales..."></textarea>
+        <div style="display:flex; gap:10px;">
+            <button onclick="guardarModelo()" class="btn-success" style="flex:1;">GUARDAR</button>
+            <button onclick="toggleModal('modelModal', false)" class="btn-danger">CANCELAR</button>
         </div>
-        <button onclick="window.toggleModal('infoModal', false)" style="width:100%; padding:12px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer;">Cerrar</button>
     </div>
 </div>
 
-<div id="modelPaintsModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
-        <h3>Pinturas Necesarias</h3>
-        <div id="mPaintsList" class="paint-grid"></div>
-        <button onclick="window.toggleModal('modelPaintsModal', false)" style="width:100%; margin-top:20px; background:var(--accent); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cerrar</button>
+<div id="cartModal" class="modal">
+    <div class="modal-content">
+        <h2>Lista de Compra</h2>
+        <div id="cartItems"></div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="exportarListaExcel()" class="btn-success" style="flex:1;">EXPORTAR EXCEL</button>
+            <button onclick="toggleModal('cartModal', false)" class="btn-danger">CERRAR</button>
+        </div>
     </div>
 </div>
 
-<div id="scanModal" class="modal"><div class="modal-content"><div id="reader"></div><button onclick="window.stopScanner()" style="width:100%; margin-top:10px; background:var(--danger); color:white; border:none; padding:10px; border-radius:6px;">Cerrar Cámara</button></div></div>
+<div id="scanModal" class="modal">
+    <div class="modal-content">
+        <h2>Escanear Código</h2>
+        <div id="reader" style="width:100%;"></div>
+        <button onclick="window.stopScanner()" class="btn-danger" style="width:100%; margin-top:10px;">CERRAR</button>
+    </div>
+</div>
 
-<div id="cartModal" class="modal"><div class="modal-content"><h3>Lista de Compra</h3><div id="cartListContainer"></div><button onclick="window.exportarListaExcel()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">Exportar Excel</button><button onclick="window.toggleModal('cartModal', false)" style="width:100%; margin-top:10px; background:#444; color:white; border:none; padding:10px; border-radius:6px;">Cerrar</button></div></div>
+<script>
+// --- CONFIGURACIÓN Y ESTADO ---
+let modelos = [];
+let paintCatalogData = {};
+let myPaints = { stock: [], buy: [] };
+let currentMix = [];
+let mixerChart = null; // Variable global para controlar Chart.js
 
-<div id="configModal" class="modal"><div class="modal-content"><h3>Ajustes</h3>
-    <button onclick="window.toggleTheme()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #444; background:none; color:inherit;">🌓 Cambiar Modo Claro/Oscuro</button>
-    <button onclick="window.exportarExcelPrincipal()" style="width:100%; padding:10px; margin-bottom:10px; background:var(--accent); color:white; border:none; border-radius:6px;">📊 Exportar Maquetas (Excel)</button>
-    <button onclick="window.exportarMisPinturasExcel()" style="width:100%; padding:10px; margin-bottom:10px; background:var(--success); color:white; border:none; border-radius:6px;">🎨 Exportar Mis Pinturas (Excel)</button>
-    <button onclick="window.signOutUser()" style="width:100%; padding:10px; background:var(--danger); color:white; border:none; border-radius:6px;">Cerrar Sesión</button>
-    <button onclick="window.toggleModal('configModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Volver</button>
-</div></div>
+// Firebase Placeholder (Sustituir por tu config real)
+const FB_URL = "https://maikman-models-default-rtdb.europe-west1.firebasedatabase.app/data.json";
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = { apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8", authDomain: "maikmanmodelsstock.firebaseapp.com", projectId: "maikmanmodelsstock", storageBucket: "maikmanmodelsstock.appspot.com", messagingSenderId: "871520809912", appId: "1:871520809912:web:4042f15ef200832a95d54d" };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let modelos = [], paintCatalogData = {}, html5QrCode = null, mixerChart = null, currentModelId = null;
-let myPaints = { have: [], buy: [] };
-
-// --- CORE ---
-window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).catch(()=>alert("Acceso denegado"));
-window.signOutUser = () => signOut(auth);
-window.toggleModal = (id, show) => document.getElementById(id).style.display = show ? 'flex' : 'none';
-window.switchTab = (id, btn) => {
-    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    if(btn) btn.classList.add('active');
-};
-window.toggleTheme = () => {
-    document.body.classList.toggle('light');
-    localStorage.setItem('maikman_theme', document.body.classList.contains('light') ? 'light' : 'dark');
-};
-if(localStorage.getItem('maikman_theme') === 'light') document.body.classList.add('light');
-
-onAuthStateChanged(auth, user => {
-    document.getElementById('login').style.display = user ? 'none' : 'block';
-    document.getElementById('app').style.display = user ? 'block' : 'none';
-    if(user) cargarTodo();
-});
-
-async function cargarTodo() {
+// --- INICIO ---
+window.onload = async () => {
     try {
         const resp = await fetch('pinturas.json');
         paintCatalogData = await resp.json();
-        const brandSel = document.getElementById('brandFilter');
-        brandSel.innerHTML = Object.keys(paintCatalogData).map(b => `<option value="${b}">${b}</option>`).join('');
-        initMixer();
-    } catch(e) { console.error("Error JSON:", e); }
+        fillMixerSelect();
+        await cargarTodo();
+    } catch (e) { alert("Error al cargar pinturas.json. Asegúrate de que el archivo existe."); }
+};
 
-    // Sincronización con Firebase
-    try {
-        const pDoc = await getDoc(doc(db, "usuarios_datos", auth.currentUser.uid));
-        if(pDoc.exists()) {
-            myPaints = pDoc.data();
-        } else {
-            const localData = localStorage.getItem('maikman_paints');
-            if(localData) {
-                myPaints = JSON.parse(localData);
-                await setDoc(doc(db, "usuarios_datos", auth.currentUser.uid), myPaints);
-            }
+async function cargarTodo() {
+    const res = await fetch(FB_URL);
+    const data = await res.json();
+    if (data) {
+        modelos = data.modelos || [];
+        myPaints = data.myPaints || { stock: [], buy: [] };
+    }
+    renderModelos();
+    renderPaintCatalog();
+    initMixer();
+    updateCartCount();
+}
+
+// --- GESTIÓN MODELOS ---
+function renderModelos() {
+    const query = document.getElementById('modelSearch').value.toLowerCase();
+    const list = document.getElementById('modelList');
+    list.innerHTML = "";
+    
+    modelos.forEach((m, idx) => {
+        if (m.fabricante.toLowerCase().includes(query) || m.modelo.toLowerCase().includes(query) || m.codigo.includes(query)) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h3>${m.modelo}</h3>
+                <p><strong>Ref:</strong> ${m.codigo}</p>
+                <p><strong>Marca:</strong> ${m.fabricante}</p>
+                <p><strong>Precio:</strong> ${m.precio}€</p>
+                <div style="margin-top:10px; display:flex; gap:5px;">
+                    <button onclick="editModelo(${idx})" class="btn-primary" style="padding:5px 10px; font-size:12px;">✏️</button>
+                    <button onclick="borrarModelo(${idx})" class="btn-danger" style="padding:5px 10px; font-size:12px;">🗑️</button>
+                </div>
+            `;
+            list.appendChild(card);
         }
-        window.renderPaintCatalog();
-        window.updateCartCount();
-    } catch(e) { console.error("Error Firebase Pinturas:", e); }
-
-    try {
-        const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
-        modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        window.renderMaquetas();
-    } catch(e) { console.error("Error Firebase Modelos:", e); }
+    });
 }
 
-// --- MODELOS ---
-window.renderMaquetas = () => {
-    const grid = document.getElementById("grid");
-    const q = document.getElementById("search").value.toLowerCase();
-    grid.innerHTML = "";
-    modelos.filter(m => (m.modelo||"").toLowerCase().includes(q) || (m.fabricante||"").toLowerCase().includes(q)).forEach(m => {
-        grid.innerHTML += `
-            <div class="card">
-                <img src="${m.foto || 'https://via.placeholder.com/300'}" onclick="window.open('${m.foto}', '_blank')">
-                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${m.codigo || 'S/N'}</div>
-                <b>${m.modelo}</b><small>${m.fabricante}</small>
-                <div class="card-btns">
-                    <button class="btn-action" style="background:#3498db" onclick="window.abrirInfoModelo('${m.id}')">INFO</button>
-                    <button class="btn-action" style="background:#9b59b6" onclick="window.abrirPinturasModelo('${m.id}')">COLOR</button>
-                    <button class="btn-action" style="background:#f39c12" onclick="window.openFormModal('${m.id}')">EDIT</button>
-                    <button class="btn-action" style="background:var(--danger)" onclick="window.borrarModelo('${m.id}')">DEL</button>
-                </div>
-            </div>`;
-    });
-};
-
-window.abrirInfoModelo = (id) => {
-    currentModelId = id;
-    const m = modelos.find(x => x.id === id);
-    if (!m) return;
-    document.getElementById("infoTitle").innerText = m.modelo;
-    document.getElementById("infoDetails").innerHTML = `<b>Ref:</b> ${m.codigo || '-'} | <b>Marca:</b> ${m.fabricante} | <b>Precio:</b> ${m.precio || '--'}€`;
-    const gal = document.getElementById("galleryGrid");
-    gal.innerHTML = "";
-    (m.galeria || []).forEach((url, idx) => {
-        gal.innerHTML += `<div style="position:relative;"><img src="${url}" style="height:100px; width:100%; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="window.open('${url}', '_blank')"><button onclick="window.borrarFotoGaleria(${idx})" style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:3px; padding:2px 5px; cursor:pointer; font-size:10px;">X</button></div>`;
-    });
-    window.toggleModal('infoModal', true);
-};
-
-window.añadirUrlsAGaleria = async () => {
-    const input = document.getElementById('urlPhotoInput').value.trim();
-    if(!input) return;
-    const m = modelos.find(x => x.id === currentModelId);
-    if(!m.galeria) m.galeria = [];
-    m.galeria.push(...input.split(/[;,]+/).map(u => u.trim()).filter(u => u !== ""));
-    await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
-    document.getElementById('urlPhotoInput').value = "";
-    window.abrirInfoModelo(currentModelId);
-};
-
-window.borrarFotoGaleria = async (idx) => {
-    const m = modelos.find(x => x.id === currentModelId);
-    m.galeria.splice(idx, 1);
-    await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
-    window.abrirInfoModelo(currentModelId);
-};
-
-window.openFormModal = (id = null) => {
-    if(id) {
-        const m = modelos.find(x => x.id === id);
-        document.getElementById('formTitle').innerText = "Editar Maqueta";
-        document.getElementById('f_id').value = m.id;
-        document.getElementById('f_codigo').value = m.codigo || "";
-        document.getElementById('f_fabricante').value = m.fabricante;
-        document.getElementById('f_modelo').value = m.modelo;
-        document.getElementById('f_precio').value = m.precio || "";
-        document.getElementById('f_foto').value = m.foto || "";
-        document.getElementById('f_paints').value = (m.paints || []).join(', ');
-    } else {
-        document.getElementById('formTitle').innerText = "Nueva Maqueta";
-        document.getElementById('f_id').value = ""; document.getElementById('f_codigo').value = "";
-        document.getElementById('f_fabricante').value = ""; document.getElementById('f_modelo').value = ""; 
-        document.getElementById('f_precio').value = ""; document.getElementById('f_foto').value = ""; 
-        document.getElementById('f_paints').value = "";
-    }
-    window.toggleModal('formModal', true);
-};
-
-window.guardarModelo = async () => {
-    const id = document.getElementById('f_id').value;
-    const d = { 
-        codigo: document.getElementById('f_codigo').value,
-        fabricante: document.getElementById('f_fabricante').value, 
-        modelo: document.getElementById('f_modelo').value,
-        precio: document.getElementById('f_precio').value,
-        foto: document.getElementById('f_foto').value,
-        paints: document.getElementById('f_paints').value.split(',').map(s => s.trim()).filter(s => s !== "")
+async function guardarModelo() {
+    const idx = document.getElementById('editIdx').value;
+    const nuevo = {
+        codigo: document.getElementById('mCodigo').value,
+        fabricante: document.getElementById('mFab').value,
+        modelo: document.getElementById('mMod').value,
+        precio: document.getElementById('mPre').value,
+        notas: document.getElementById('mNotas').value
     };
-    if(id) await updateDoc(doc(db, "modelos", id), d);
-    else await addDoc(collection(db, "modelos"), d);
-    window.toggleModal('formModal', false);
+
+    if (idx === "") modelos.push(nuevo);
+    else modelos[idx] = nuevo;
+
+    await fetch(FB_URL, { method: 'PUT', body: JSON.stringify({ modelos, myPaints }) });
+    toggleModal('modelModal', false);
     cargarTodo();
-};
-
-window.borrarModelo = async (id) => { if(confirm("¿Seguro?")) { await deleteDoc(doc(db, "modelos", id)); cargarTodo(); } };
-
-window.abrirPinturasModelo = (id) => {
-    const m = modelos.find(x => x.id === id);
-    const cont = document.getElementById('mPaintsList'); cont.innerHTML = "";
-    (m.paints || []).forEach(pid => {
-        const p = encontrarPintura(pid);
-        const has = myPaints.have.includes(p.id);
-        cont.innerHTML += `
-            <div class="paint-item-box" style="border-color: ${has ? 'var(--success)' : 'var(--danger)'}">
-                <div class="color-circle" style="background:${p.hex}"></div>
-                <div style="font-size:11px; font-weight:bold;">${p.id}</div>
-                <div style="font-size:10px; opacity:0.8;">${p.nombre}</div>
-                <div style="margin-top:5px; font-size:10px; font-weight:bold; color:${has?'var(--success)':'var(--danger)'}">
-                    ${has ? 'EN STOCK' : 'FALTA'}
-                </div>
-            </div>`;
-    });
-    window.toggleModal('modelPaintsModal', true);
-};
-
-// --- PINTURAS ---
-window.renderPaintCatalog = () => {
-    const brand = document.getElementById('brandFilter').value;
-    const search = document.getElementById('paintSearch').value.toLowerCase();
-    const container = document.getElementById('paintCatalog');
-    if (!container || !paintCatalogData[brand]) return;
-    container.innerHTML = "";
-    paintCatalogData[brand].filter(p => (p.id||"").toLowerCase().includes(search) || (p.nombre||"").toLowerCase().includes(search)).forEach(p => {
-        const have = myPaints.have.includes(p.id); const buy = myPaints.buy.includes(p.id);
-        container.innerHTML += `<div class="paint-item-box">
-            <div class="color-circle" style="background:${p.hex || '#ccc'}"></div>
-            <span style="font-size:11px; font-weight:bold;">${p.id || 'S/N'}</span><br>
-            <span style="font-size:10px;">${p.nombre || ''}</span>
-            <div style="display:flex; gap:5px; margin-top:8px;">
-                <button onclick="window.togglePaint('${p.id}','have')" style="flex:1; background:${have?'var(--success)':'#444'}; border:none; padding:5px; border-radius:4px; color:white; cursor:pointer;">✅</button>
-                <button onclick="window.togglePaint('${p.id}','buy')" style="flex:1; background:${buy?'var(--danger)':'#444'}; border:none; padding:5px; border-radius:4px; color:white; cursor:pointer;">🛒</button>
-            </div>
-        </div>`;
-    });
-};
-
-window.togglePaint = async (id, type) => {
-    const idx = myPaints[type].indexOf(id);
-    if(idx > -1) myPaints[type].splice(idx,1); else myPaints[type].push(id);
-    try {
-        await setDoc(doc(db, "usuarios_datos", auth.currentUser.uid), myPaints);
-        window.renderPaintCatalog(); window.updateCartCount();
-    } catch(e) { console.error("Error Sync:", e); alert("Error de permisos en Firebase."); }
-};
-
-window.abrirModalCompra = (s) => {
-    if(!s) return window.toggleModal('cartModal', false);
-    const cont = document.getElementById('cartListContainer');
-    cont.innerHTML = myPaints.buy.map(id => {
-        const p = encontrarPintura(id);
-        return `<div style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #333;"><div class="color-circle" style="width:20px; height:20px; background:${p.hex}; margin:0;"></div><span>${id} - ${p.nombre}</span></div>`;
-    }).join('');
-    window.toggleModal('cartModal', true);
-};
-
-// --- MIXER & PICKER ---
-function initMixer() {
-    const cont = document.getElementById('mixerInputs');
-    let opts = '<option value="">-</option>';
-    for(let b in paintCatalogData) opts += `<optgroup label="${b}">${paintCatalogData[b].map(p => `<option value="${p.hex}">${p.id}</option>`).join('')}</optgroup>`;
-    cont.innerHTML = [1,2,3,4,5,6].map(i => `<div><select id="mc${i}" onchange="window.calcMix()">${opts}</select><input type="range" id="mv${i}" min="0" max="10" step="1" value="0" oninput="window.calcMix()"><div id="ml${i}" style="font-size:10px; text-align:center;">0 gotas</div></div>`).join('');
-    mixerChart = new Chart(document.getElementById('mixerChart'), { type:'pie', data:{labels:[], datasets:[{data:[], backgroundColor:[]}]}, options:{plugins:{legend:{display:false}}, animation:false} });
 }
 
-window.calcMix = () => {
-    let r=0, g=0, b=0, tot=0; const lbs=[], dts=[], cls=[];
-    for(let i=1; i<=6; i++){
-        const h = document.getElementById(`mc${i}`).value, v = parseInt(document.getElementById(`mv${i}`).value);
-        document.getElementById(`ml${i}`).innerText = v + " gotas";
-        if(h && v > 0){ const c = hexToRgb(h); r+=c.r*v; g+=c.g*v; b+=c.b*v; tot+=v; lbs.push(document.getElementById(`mc${i}`).selectedOptions[0].text); dts.push(v); cls.push(h); }
+function borrarModelo(idx) {
+    if (confirm("¿Borrar modelo?")) {
+        modelos.splice(idx, 1);
+        guardarModelo();
     }
-    const resDiv = document.getElementById('mixerResultPreview');
-    if(tot>0){
-        const hex = rgbToHex(Math.round(r/tot), Math.round(g/tot), Math.round(b/tot));
-        resDiv.style.backgroundColor = hex; resDiv.innerText = hex;
-    } else { resDiv.style.backgroundColor = 'transparent'; resDiv.innerText = '#---'; }
-    mixerChart.data.labels = lbs; mixerChart.data.datasets[0].data = dts; mixerChart.data.datasets[0].backgroundColor = cls; mixerChart.update();
-};
+}
 
-window.loadPickerImage = (e) => {
-    const reader = new FileReader(); reader.onload = (ev) => {
-        const img = new Image(); img.onload = () => {
-            const cvs = document.getElementById('canvasPicker'); const ctx = cvs.getContext('2d');
-            cvs.width = img.width; cvs.height = img.height; ctx.drawImage(img, 0, 0); cvs.style.display = 'block';
-        }; img.src = ev.target.result;
-    }; reader.readAsDataURL(e.target.files[0]);
-};
+// --- GESTIÓN PINTURAS ---
+function renderPaintCatalog() {
+    const query = document.getElementById('paintSearch').value.toLowerCase();
+    const container = document.getElementById('paintCatalog');
+    container.innerHTML = "";
 
-window.resetPicker = () => {
-    const cvs = document.getElementById('canvasPicker');
-    if(cvs.getContext) cvs.getContext('2d').clearRect(0, 0, cvs.width, cvs.height);
-    cvs.style.display = 'none'; document.getElementById('pickerInput').value = ""; document.getElementById('pickerResults').innerHTML = "";
-};
-
-document.getElementById('canvasPicker').addEventListener('mousedown', (e) => {
-    const cvs = document.getElementById('canvasPicker'); const rect = cvs.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (cvs.width / rect.width);
-    const y = (e.clientY - rect.top) * (cvs.height / rect.height);
-    const pix = cvs.getContext('2d').getImageData(x,y,1,1).data;
-    analizarColorPicker(pix[0], pix[1], pix[2]);
-});
-
-function analizarColorPicker(r,g,b) {
-    let allPaints = [];
-    for(let brand in paintCatalogData) {
+    for (let brand in paintCatalogData) {
         paintCatalogData[brand].forEach(p => {
-            const t = hexToRgb(p.hex);
-            const dist = Math.sqrt((r-t.r)**2 + (g-t.g)**2 + (b-t.b)**2);
-            let score = Math.max(0, 100 - (dist / 4.41));
-            allPaints.push({...p, brand, score});
+            const matchesSearch = p.id.toLowerCase().includes(query) || p.nombre.toLowerCase().includes(query) || (p.ean && p.ean.includes(query));
+            if (matchesSearch) {
+                const inStock = myPaints.stock.includes(p.id);
+                const inCart = myPaints.buy.includes(p.id);
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <div>
+                            <span class="color-dot" style="background:${p.hex}"></span>
+                            <strong style="color:var(--accent)">${p.id}</strong>
+                            <p>${p.nombre}</p>
+                            <small>${brand}</small>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px; display:flex; gap:8px;">
+                        <button onclick="toggleStock('${p.id}')" class="${inStock ? 'btn-success' : 'btn-primary'}" style="flex:1; padding:8px; font-size:11px;">
+                            ${inStock ? 'EN STOCK ✅' : '¿TENGO?'}
+                        </button>
+                        <button onclick="toggleCart('${p.id}')" class="${inCart ? 'btn-danger' : 'btn-primary'}" style="padding:8px;">
+                            🛒
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
         });
     }
-    allPaints.sort((a,b) => b.score - a.score);
-    document.getElementById('pickerResults').innerHTML = allPaints.slice(0, 8).map(p => `
-        <div class="match-card">
-            <div class="match-circle" style="background:${p.hex}"></div>
-            <div class="match-info">
-                <div style="font-weight:bold;">${p.brand}</div>
-                <div>${p.id} - ${p.nombre}</div>
-                <div class="match-score">${p.score.toFixed(1)}%</div>
-            </div>
-            <button onclick="window.togglePaint('${p.id}','buy')" style="background:none; border:none; cursor:pointer; font-size:16px;">🛒</button>
-        </div>
-    `).join('');
 }
 
+async function toggleStock(id) {
+    const i = myPaints.stock.indexOf(id);
+    if (i > -1) myPaints.stock.splice(i, 1);
+    else myPaints.stock.push(id);
+    await fetch(FB_URL, { method: 'PUT', body: JSON.stringify({ modelos, myPaints }) });
+    renderPaintCatalog();
+}
+
+async function toggleCart(id) {
+    const i = myPaints.buy.indexOf(id);
+    if (i > -1) myPaints.buy.splice(i, 1);
+    else myPaints.buy.push(id);
+    await fetch(FB_URL, { method: 'PUT', body: JSON.stringify({ modelos, myPaints }) });
+    updateCartCount();
+    renderPaintCatalog();
+    if(document.getElementById('cartModal').style.display === 'block') renderCart();
+}
+
+// --- MIXER ---
+function fillMixerSelect() {
+    const sel = document.getElementById('mixerSelect');
+    for (let b in paintCatalogData) {
+        const group = document.createElement('optgroup');
+        group.label = b;
+        paintCatalogData[b].forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.text = `${p.id} - ${p.nombre}`;
+            group.appendChild(opt);
+        });
+        sel.appendChild(group);
+    }
+}
+
+function initMixer() {
+    const ctx = document.getElementById('mixerChart');
+    if (!ctx) return;
+
+    // SOLUCIÓN AL ERROR: Destruir gráfico si ya existe
+    if (mixerChart instanceof Chart) {
+        mixerChart.destroy();
+    }
+
+    mixerChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: currentMix.map(m => m.id),
+            datasets: [{
+                data: currentMix.map(m => m.parts),
+                backgroundColor: currentMix.map(m => m.hex)
+            }]
+        },
+        options: { plugins: { legend: { display: false } } }
+    });
+    updateMixPreview();
+}
+
+function addPinturaToMix(id) {
+    if (!id) return;
+    const p = encontrarPintura(id);
+    const exists = currentMix.find(m => m.id === id);
+    if (exists) exists.parts++;
+    else currentMix.push({ ...p, parts: 1 });
+    renderMixList();
+    initMixer();
+}
+
+function renderMixList() {
+    const cont = document.getElementById('mixList');
+    cont.innerHTML = "";
+    currentMix.forEach((m, i) => {
+        const item = document.createElement('div');
+        item.style = "display:flex; align-items:center; gap:10px; margin-bottom:10px; background:#1e293b; padding:10px; border-radius:8px;";
+        item.innerHTML = `
+            <span class="color-dot" style="background:${m.hex}"></span>
+            <span style="flex:1">${m.id}</span>
+            <input type="number" value="${m.parts}" style="width:60px; margin:0;" onchange="updateParts(${i}, this.value)">
+            <button onclick="removeFromMix(${i})" class="btn-danger" style="padding:5px 10px;">✕</button>
+        `;
+        cont.appendChild(item);
+    });
+}
+
+function updateParts(i, val) { currentMix[i].parts = parseInt(val); initMixer(); }
+function removeFromMix(i) { currentMix.splice(i, 1); renderMixList(); initMixer(); }
+function limpiarMix() { currentMix = []; renderMixList(); initMixer(); }
+
+function updateMixPreview() {
+    const box = document.getElementById('mixPreview');
+    if (currentMix.length === 0) {
+        box.style.background = "#334155";
+        box.innerText = "VISTA PREVIA";
+        return;
+    }
+    let r=0, g=0, b=0, total=0;
+    currentMix.forEach(m => {
+        const rgb = hexToRgb(m.hex);
+        r += rgb.r * m.parts; g += rgb.g * m.parts; b += rgb.b * m.parts;
+        total += m.parts;
+    });
+    const finalHex = rgbToHex(Math.round(r/total), Math.round(g/total), Math.round(b/total));
+    box.style.background = finalHex;
+    box.innerText = finalHex.toUpperCase();
+}
+
+// --- PICKER IA ---
+async function initPicker() {
+    const video = document.getElementById('camera-preview');
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+    } catch (e) { alert("Error cámara Picker"); }
+}
+
+function captureColor() {
+    const video = document.getElementById('camera-preview');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    
+    // Tomar el centro
+    const pixel = ctx.getImageData(canvas.width/2, canvas.height/2, 1, 1).data;
+    const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+    
+    const matches = findClosestPaints(hex);
+    let html = `<h3>Color Detectado: <span style="color:${hex}">${hex}</span></h3><div class="grid">`;
+    matches.forEach(m => {
+        html += `
+            <div class="card">
+                <span class="color-dot" style="background:${m.hex}"></span>
+                <strong>${m.id}</strong> - ${m.nombre}
+                <p>Similitud: ${m.score}%</p>
+                <button onclick="addPinturaToMix('${m.id}')" class="btn-primary" style="width:100%; margin-top:5px; font-size:10px;">AÑADIR AL MIXER</button>
+            </div>
+        `;
+    });
+    document.getElementById('pickerResult').innerHTML = html + "</div>";
+}
+
+function findClosestPaints(targetHex) {
+    const target = hexToRgb(targetHex);
+    let all = [];
+    for (let b in paintCatalogData) {
+        paintCatalogData[b].forEach(p => {
+            const current = hexToRgb(p.hex);
+            const dist = Math.sqrt(Math.pow(target.r-current.r,2) + Math.pow(target.g-current.g,2) + Math.pow(target.b-current.b,2));
+            const score = Math.max(0, (100 - (dist / 441) * 100).toFixed(1));
+            all.push({ ...p, score });
+        });
+    }
+    return all.sort((a,b) => b.score - a.score).slice(0, 4);
+}
+
+// --- NAVEGACIÓN Y UI ---
+window.switchTab = (id) => {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
+    if(id === 'tab-picker') initPicker();
+    else {
+        const v = document.getElementById('camera-preview');
+        if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
+    }
+};
+
+window.toggleModal = (id, show) => {
+    document.getElementById(id).style.display = show ? 'block' : 'none';
+    if(id === 'cartModal' && show) renderCart();
+};
+
+function renderCart() {
+    const cont = document.getElementById('cartItems');
+    cont.innerHTML = "";
+    myPaints.buy.forEach(id => {
+        const p = encontrarPintura(id);
+        const item = document.createElement('div');
+        item.style = "display:flex; align-items:center; gap:10px; margin-bottom:8px; border-bottom:1px solid #334155; padding:8px;";
+        item.innerHTML = `
+            <span class="color-dot" style="background:${p.hex}"></span>
+            <strong style="flex:1">${p.id} - ${p.nombre}</strong>
+            <button onclick="toggleCart('${id}')" class="btn-danger">✕</button>
+        `;
+        cont.appendChild(item);
+    });
+}
+
+window.toggleTheme = () => document.body.classList.toggle('light');
+
 // --- SCANNER ---
-window.startScanner = (target) => {
+let html5QrCode;
+window.startScanner = () => {
     window.toggleModal('scanModal', true);
     html5QrCode = new Html5Qrcode("reader");
     html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
-        if(target === 'model') { document.getElementById("search").value = t; window.renderMaquetas(); window.switchTab('tab-maquetas'); }
+        // Buscar en modelos
+        const m = modelos.find(x => x.codigo === t);
+        if(m) { document.getElementById("modelSearch").value = t; renderModelos(); window.switchTab('tab-modelos'); }
         else { document.getElementById("paintSearch").value = t; window.renderPaintCatalog(); window.switchTab('tab-pinturas'); }
         window.stopScanner();
     }).catch(() => alert("Cámara no encontrada"));
 };
 window.stopScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => window.toggleModal('scanModal', false)); };
 
-// --- EXCEL ---
-window.exportarMisPinturasExcel = () => {
-    const listado = myPaints.have.map(id => {
+// --- EXPORTACIÓN ---
+window.exportarStockPinturas = () => {
+    const listado = myPaints.stock.map(id => {
         const p = encontrarPintura(id);
         return { CODIGO: p.id, NOMBRE: p.nombre, MARCA: p.marca || "Desconocida" };
     });
@@ -473,13 +503,29 @@ window.updateCartCount = () => document.getElementById('cartCount').innerText = 
 function encontrarPintura(id) { 
     for(let b in paintCatalogData) { 
         let p = paintCatalogData[b].find(x => x.id === id); 
-        if(p) { p.marca = b; return p; } 
+        if(p) return p; 
     } 
-    return { nombre: id, hex: "#333", id: id, marca: "---" }; 
+    return { id, nombre:'?', hex:'#000' };
 }
-function hexToRgb(h) { return { r: parseInt(h.slice(1,3),16), g: parseInt(h.slice(3,5),16), b: parseInt(h.slice(5,7),16) }; }
-function rgbToHex(r, g, b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase(); }
+function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return {r,g,b};
+}
+function rgbToHex(r,g,b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1); }
 
+function editModelo(idx) {
+    const m = modelos[idx];
+    document.getElementById('editIdx').value = idx;
+    document.getElementById('mCodigo').value = m.codigo;
+    document.getElementById('mFab').value = m.fabricante;
+    document.getElementById('mMod').value = m.modelo;
+    document.getElementById('mPre').value = m.precio;
+    document.getElementById('mNotas').value = m.notas;
+    document.getElementById('modalTitle').innerText = "Editar Modelo";
+    toggleModal('modelModal', true);
+}
 </script>
 </body>
 </html>
