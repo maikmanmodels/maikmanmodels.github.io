@@ -369,32 +369,11 @@ window.abrirModalCompra = (s) => {
 
 // --- MIXER & PICKER ---
 function initMixer() {
-    const ctx = document.getElementById('mixerChart');
-    if (!ctx) return;
-
-    // --- ESTA ES LA PARTE CLAVE ---
-    // Si la variable mixerChart ya tiene un gráfico, lo destruimos
-    if (mixerChart instanceof Chart) {
-        mixerChart.destroy();
-    }
-    // ------------------------------
-
-    mixerChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: currentMix.map(m => m.id),
-            datasets: [{
-                data: currentMix.map(m => m.parts),
-                backgroundColor: currentMix.map(m => m.hex)
-            }]
-        },
-        options: { 
-            responsive: true,
-            plugins: { 
-                legend: { display: false } 
-            } 
-        }
-    });
+    const cont = document.getElementById('mixerInputs');
+    let opts = '<option value="">-</option>';
+    for(let b in paintCatalogData) opts += `<optgroup label="${b}">${paintCatalogData[b].map(p => `<option value="${p.hex}">${p.id}</option>`).join('')}</optgroup>`;
+    cont.innerHTML = [1,2,3,4,5,6].map(i => `<div><select id="mc${i}" onchange="window.calcMix()">${opts}</select><input type="range" id="mv${i}" min="0" max="10" step="1" value="0" oninput="window.calcMix()"><div id="ml${i}" style="font-size:10px; text-align:center;">0 gotas</div></div>`).join('');
+    mixerChart = new Chart(document.getElementById('mixerChart'), { type:'pie', data:{labels:[], datasets:[{data:[], backgroundColor:[]}]}, options:{plugins:{legend:{display:false}}, animation:false} });
 }
 
 window.calcMix = () => {
