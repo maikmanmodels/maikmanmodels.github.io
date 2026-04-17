@@ -368,7 +368,7 @@
   { "id": "H7", "nombre": "Brown (Gloss)", "hex": "#663300", "ean": ["4973028738384"] },
   { "id": "H8", "nombre": "Silver", "hex": "#c0c0c0", "ean": ["4973028738391"] },
   { "id": "H9", "nombre": "Gold", "hex": "#d4af37", "ean": ["4973028738407"] },
-  { "id": "H10", "nombre": "Copper", "hex": "#b87333", "ean": ["4973028738414"] }
+  { "id": "H10", "nombre": "Copper", "hex": "#b87333", "ean": ["4973028738414"] },
   { "id": "H11", "nombre": "Flat White", "hex": "#f5f5f5", "ean": ["4973028738421"] },
   { "id": "H12", "nombre": "Flat Black", "hex": "#1c1c1c", "ean": ["4973028738438"] },
   { "id": "H13", "nombre": "Flat Red", "hex": "#9c2a2a", "ean": ["4973028738445"] },
@@ -383,7 +383,7 @@
   { "id": "H22", "nombre": "Gloss Gray", "hex": "#d0d0d0", "ean": [] },
   { "id": "H23", "nombre": "Gloss Light Blue", "hex": "#a0d8ff", "ean": [] },
   { "id": "H24", "nombre": "Orange Yellow", "hex": "#ffaa00", "ean": [] },
-  { "id": "H25", "nombre": "Sky Blue", "hex": "#87ceeb", "ean": [] }
+  { "id": "H25", "nombre": "Sky Blue", "hex": "#87ceeb", "ean": [] },
   { "id": "H26", "nombre": "Bright Green (Gloss)", "hex": "#00cc66", "ean": [] },
   { "id": "H27", "nombre": "Tan (Gloss)", "hex": "#d2b48c", "ean": [] },
   { "id": "H28", "nombre": "Metallic Black", "hex": "#2c2c2c", "ean": [] },
@@ -408,7 +408,7 @@
   { "id": "H47", "nombre": "Red Brown (Gloss)", "hex": "#8b4513", "ean": [] },
   { "id": "H48", "nombre": "Field Grey 2 (Gloss)", "hex": "#4a5d4e", "ean": [] },
   { "id": "H49", "nombre": "Violet (Metallic Gloss)", "hex": "#9400d3", "ean": [] },
-  { "id": "H50", "nombre": "Lime Green (Gloss)", "hex": "#bfff00", "ean": [] }
+  { "id": "H50", "nombre": "Lime Green (Gloss)", "hex": "#bfff00", "ean": [] },
   { "id": "H51", "nombre": "Light Gull Grey (Gloss)", "hex": "#d0d8e0", "ean": [] },
   { "id": "H52", "nombre": "Olive Drab (Semi-Gloss)", "hex": "#5a5f4a", "ean": [] },
   { "id": "H53", "nombre": "Neutral Grey (Semi-Gloss)", "hex": "#a8b0b8", "ean": [] },
@@ -433,7 +433,7 @@
   { "id": "H72", "nombre": "Dark Earth (Semi-Gloss)", "hex": "#8f6f4f", "ean": [] },
   { "id": "H73", "nombre": "Dark Green (Semi-Gloss)", "hex": "#3f4f2f", "ean": [] },
   { "id": "H74", "nombre": "Sky (Duck Egg Green) (Semi-Gloss)", "hex": "#c8d8b8", "ean": [] },
-  { "id": "H75", "nombre": "Dark Sea Grey (Semi-Gloss)", "hex": "#5a6b7a", "ean": [] }
+  { "id": "H75", "nombre": "Dark Sea Grey (Semi-Gloss)", "hex": "#5a6b7a", "ean": [] },
   { "id": "H76", "nombre": "Burnt Iron (Metallic)", "hex": "#3c3c3c", "ean": [] },
   { "id": "H77", "nombre": "Tire Black (Semi-Gloss)", "hex": "#1a1a1a", "ean": [] },
   { "id": "H78", "nombre": "Olive Drab 2 (Semi-Gloss)", "hex": "#4a4f3a", "ean": [] },
