@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v8.2</title>
+<title>Maikman Models — Pro Stock v8.1.1</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -556,6 +556,198 @@ body {
 .settings-group { display: flex; flex-direction: column; gap: 8px; }
 
 /* =========================================================
+   SUB-PESTAÑAS (dentro de MIXER)
+   ========================================================= */
+.sub-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    background: var(--bg2);
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+.sub-tab-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 7px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+}
+.sub-tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.sub-tab-btn.active { background: var(--card); color: var(--accent); box-shadow: 0 1px 6px rgba(0,0,0,0.3); }
+
+.sub-section { display: none; }
+.sub-section.active { display: block; }
+
+/* =========================================================
+   RECETAS
+   ========================================================= */
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+.recipe-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+.recipe-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-bright);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+}
+.recipe-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px 10px;
+}
+.recipe-color-preview {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.recipe-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+.recipe-date {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+.recipe-card-body { padding: 0 16px 14px; }
+.recipe-paints {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+.recipe-paint-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 8px 3px 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text);
+}
+.recipe-paint-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.recipe-card-actions {
+    display: flex;
+    gap: 6px;
+}
+.recipe-card-actions button {
+    flex: 1;
+    padding: 7px;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.recipe-card-actions button:hover { opacity: 0.82; }
+.recipe-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-dim);
+}
+.recipe-empty .recipe-empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.recipe-empty p { font-size: 13px; }
+
+/* Botón guardar mezcla */
+.save-mix-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    align-items: center;
+}
+.save-mix-row input {
+    flex: 1;
+    padding: 9px 13px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.save-mix-row input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+}
+.save-mix-row button {
+    padding: 9px 16px;
+    background: var(--success);
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.save-mix-row button:hover { opacity: 0.85; }
+.save-mix-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Toast de confirmación */
+#toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--success);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    z-index: 9999;
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    opacity: 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* =========================================================
    SCROLLBAR
    ========================================================= */
 ::-webkit-scrollbar { width: 6px; }
@@ -621,28 +813,49 @@ body {
         <div id="paintCatalog" class="paint-grid"></div>
     </section>
 
-    <!-- TAB MIXER / PICKER -->
+    <!-- TAB MIXER / PICKER / RECETAS -->
     <section id="tab-mixer" class="content-section">
 
-        <!-- PICKER IA -->
-        <div class="mixer-section">
-            <div class="mixer-header">
-                <h4>🎯 Picker IA</h4>
-                <button class="btn-action" style="background:var(--danger); padding:6px 12px;" onclick="window.resetPicker()">RESET</button>
-            </div>
-            <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)" aria-label="Cargar imagen para picker">
-            <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:12px; cursor:crosshair;" aria-label="Canvas de selección de color"></canvas>
-            <div id="pickerResults" class="picker-results-container"></div>
+        <!-- SUB-PESTAÑAS -->
+        <div class="sub-tabs" role="tablist">
+            <button class="sub-tab-btn active" id="stb-mezclador" onclick="window.switchSubTab('sub-mezclador', this)" role="tab" aria-selected="true">🧪 Mezclador</button>
+            <button class="sub-tab-btn" id="stb-picker" onclick="window.switchSubTab('sub-picker', this)" role="tab" aria-selected="false">🎯 Picker IA</button>
+            <button class="sub-tab-btn" id="stb-recetas" onclick="window.switchSubTab('sub-recetas', this)" role="tab" aria-selected="false">📖 Mis Recetas</button>
         </div>
 
-        <!-- MEZCLADOR -->
-        <div class="mixer-section">
-            <h4>🧪 Mezclador</h4>
-            <div id="mixerInputs"></div>
-            <div class="mixer-preview-row">
-                <div id="mixerResultPreview">#---</div>
-                <canvas id="mixerChart" style="max-height:100px;" aria-label="Gráfico de mezcla"></canvas>
+        <!-- SUB: MEZCLADOR -->
+        <div id="sub-mezclador" class="sub-section active" role="tabpanel">
+            <div class="mixer-section">
+                <h4>🧪 Mezclador de Colores</h4>
+                <div id="mixerInputs"></div>
+                <div class="mixer-preview-row">
+                    <div id="mixerResultPreview">#---</div>
+                    <canvas id="mixerChart" style="max-height:100px;" aria-label="Gráfico de mezcla"></canvas>
+                </div>
+                <!-- Guardar mezcla -->
+                <div class="save-mix-row">
+                    <input type="text" id="mixRecipeName" placeholder='Nombre de la mezcla (ej: "Verde Tanque Alemán")' maxlength="60" aria-label="Nombre de la mezcla">
+                    <button id="btnSaveMix" onclick="window.guardarReceta()" disabled>💾 Guardar</button>
+                </div>
             </div>
+        </div>
+
+        <!-- SUB: PICKER IA -->
+        <div id="sub-picker" class="sub-section" role="tabpanel">
+            <div class="mixer-section">
+                <div class="mixer-header">
+                    <h4>🎯 Picker IA</h4>
+                    <button class="btn-action" style="background:var(--danger); padding:6px 12px;" onclick="window.resetPicker()">RESET</button>
+                </div>
+                <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)" aria-label="Cargar imagen para picker">
+                <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:12px; cursor:crosshair;" aria-label="Canvas de selección de color"></canvas>
+                <div id="pickerResults" class="picker-results-container"></div>
+            </div>
+        </div>
+
+        <!-- SUB: MIS RECETAS -->
+        <div id="sub-recetas" class="sub-section" role="tabpanel">
+            <div id="recipeList" class="recipe-grid"></div>
         </div>
 
     </section>
@@ -724,11 +937,14 @@ body {
     </div>
 </div>
 
+<!-- TOAST -->
+<div id="toast"></div>
+
 <!-- ======================= SCRIPTS ======================= -->
 <script type="module">
 import { initializeApp }                                                                     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }                  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // --- CONFIG FIREBASE ---
 const firebaseConfig = {
@@ -751,6 +967,7 @@ let html5QrCode      = null;
 let mixerChart       = null;
 let currentModelId   = null;
 let myPaints         = { have: [], buy: [] };
+let recetas          = [];          // ← Mezclas favoritas guardadas
 
 // --- AUTENTICACIÓN ---
 window.login = () =>
@@ -771,6 +988,14 @@ window.switchTab = (id, btn) => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     if (btn) btn.classList.add('active');
+};
+
+window.switchSubTab = (id, btn) => {
+    document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sub-tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+    document.getElementById(id).classList.add('active');
+    if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected', 'true'); }
+    if (id === 'sub-recetas') window.renderRecetas();
 };
 
 window.toggleModal = (id, show) => {
@@ -818,6 +1043,13 @@ async function cargarTodo() {
         modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         window.renderMaquetas();
     } catch (e) { console.error("Error Firebase Modelos:", e); }
+
+    // Recetas de mezclas
+    try {
+        const uid = auth.currentUser.uid;
+        const snap = await getDocs(query(collection(db, "usuarios_datos", uid, "recetas"), orderBy("creadoEn", "desc")));
+        recetas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) { console.error("Error cargando recetas:", e); }
 }
 
 // --- MODELOS ---
@@ -1021,6 +1253,140 @@ window.abrirModalCompra = (show) => {
     window.toggleModal('cartModal', true);
 };
 
+// --- RECETAS DE MEZCLA ---
+
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+window.guardarReceta = async () => {
+    const nombre = document.getElementById('mixRecipeName').value.trim();
+    if (!nombre) { alert("Ponle un nombre a la mezcla antes de guardar."); return; }
+
+    // Recopilar los colores activos del mezclador
+    const ingredientes = [];
+    for (let i = 1; i <= 6; i++) {
+        const sel = document.getElementById(`mc${i}`);
+        const gotas = parseInt(document.getElementById(`mv${i}`).value);
+        if (sel.value && gotas > 0) {
+            const paintId = sel.selectedOptions[0].text;
+            ingredientes.push({ colorId: paintId, hex: sel.value, gotas });
+        }
+    }
+    if (ingredientes.length === 0) { alert("Selecciona al menos un color con gotas > 0."); return; }
+
+    // Calcular color resultante para preview
+    let r = 0, g = 0, b = 0, tot = 0;
+    ingredientes.forEach(ing => {
+        const c = hexToRgb(ing.hex); const v = ing.gotas;
+        r += c.r * v; g += c.g * v; b += c.b * v; tot += v;
+    });
+    const hexResult = rgbToHex(Math.round(r / tot), Math.round(g / tot), Math.round(b / tot));
+
+    const receta = { nombre, ingredientes, hexResult, creadoEn: serverTimestamp() };
+
+    try {
+        const uid = auth.currentUser.uid;
+        const ref = await addDoc(collection(db, "usuarios_datos", uid, "recetas"), receta);
+        recetas.unshift({ id: ref.id, ...receta, creadoEn: new Date() });
+        document.getElementById('mixRecipeName').value = "";
+        showToast(`✓ "${nombre}" guardada`);
+    } catch (e) {
+        console.error("Error guardando receta:", e);
+        showToast("Error al guardar la receta", 'danger');
+    }
+};
+
+window.borrarReceta = async (id) => {
+    if (!confirm("¿Eliminar esta receta de mezcla?")) return;
+    try {
+        const uid = auth.currentUser.uid;
+        await deleteDoc(doc(db, "usuarios_datos", uid, "recetas", id));
+        recetas = recetas.filter(r => r.id !== id);
+        window.renderRecetas();
+        showToast("Receta eliminada");
+    } catch (e) { console.error("Error eliminando receta:", e); }
+};
+
+window.cargarRecetaEnMixer = (id) => {
+    const receta = recetas.find(r => r.id === id);
+    if (!receta) return;
+
+    // Limpiar todos los slots primero
+    for (let i = 1; i <= 6; i++) {
+        document.getElementById(`mc${i}`).value = "";
+        document.getElementById(`mv${i}`).value = 0;
+        document.getElementById(`ml${i}`).textContent = "0 gotas";
+    }
+    // Cargar ingredientes en slots
+    receta.ingredientes.forEach((ing, idx) => {
+        const i = idx + 1;
+        if (i > 6) return;
+        const sel = document.getElementById(`mc${i}`);
+        // Buscar la opción por colorId (texto) o hex (valor)
+        const opt = Array.from(sel.options).find(o => o.text === ing.colorId || o.value === ing.hex);
+        if (opt) sel.value = opt.value;
+        document.getElementById(`mv${i}`).value = ing.gotas;
+        document.getElementById(`ml${i}`).textContent = ing.gotas + " gotas";
+    });
+    window.calcMix();
+    // Ir al mezclador
+    window.switchSubTab('sub-mezclador', document.getElementById('stb-mezclador'));
+    showToast(`↩ "${receta.nombre}" cargada`);
+};
+
+window.renderRecetas = () => {
+    const cont = document.getElementById('recipeList');
+    if (!cont) return;
+    if (recetas.length === 0) {
+        cont.innerHTML = `
+            <div class="recipe-empty" style="grid-column:1/-1;">
+                <div class="recipe-empty-icon">🧪</div>
+                <p>Todavía no tienes mezclas guardadas.</p>
+                <p style="margin-top:6px; font-size:12px;">Ve al <b>Mezclador</b>, crea una mezcla y pulsa <b>💾 Guardar</b>.</p>
+            </div>`;
+        return;
+    }
+    cont.innerHTML = "";
+    recetas.forEach(receta => {
+        const fecha = receta.creadoEn?.toDate
+            ? receta.creadoEn.toDate().toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })
+            : (receta.creadoEn instanceof Date ? receta.creadoEn.toLocaleDateString('es-ES') : '—');
+
+        const chipsHTML = receta.ingredientes.map(ing =>
+            `<div class="recipe-paint-chip">
+                <div class="recipe-paint-dot" style="background:${ing.hex};"></div>
+                <span>${ing.colorId} × ${ing.gotas}gt</span>
+            </div>`
+        ).join('');
+
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+        card.innerHTML = `
+            <div class="recipe-card-header">
+                <div class="recipe-color-preview" style="background:${receta.hexResult};"></div>
+                <div>
+                    <div class="recipe-name">${receta.nombre}</div>
+                    <div class="recipe-date">📅 ${fecha} · ${receta.hexResult}</div>
+                </div>
+            </div>
+            <div class="recipe-card-body">
+                <div class="recipe-paints">${chipsHTML}</div>
+                <div class="recipe-card-actions">
+                    <button style="background:var(--accent); color:white;"
+                            onclick="window.cargarRecetaEnMixer('${receta.id}')">↩ Cargar en Mixer</button>
+                    <button style="background:var(--danger); color:white;"
+                            onclick="window.borrarReceta('${receta.id}')">🗑 Borrar</button>
+                </div>
+            </div>`;
+        cont.appendChild(card);
+    });
+};
+
 // --- MIXER & PICKER ---
 function initMixer() {
     const cont = document.getElementById('mixerInputs');
@@ -1073,6 +1439,9 @@ window.calcMix = () => {
     mixerChart.data.datasets[0].data            = dts;
     mixerChart.data.datasets[0].backgroundColor = cls;
     mixerChart.update();
+    // Habilitar botón guardar solo si hay mezcla activa
+    const btn = document.getElementById('btnSaveMix');
+    if (btn) btn.disabled = (tot === 0);
 };
 
 window.loadPickerImage = (e) => {
