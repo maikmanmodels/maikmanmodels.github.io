@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v8.3</title>
+<title>Maikman Models — Pro Stock v8.1.1</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -907,9 +907,30 @@ body {
 <!-- MODAL SCANNER -->
 <div id="scanModal" class="modal" role="dialog" aria-modal="true">
     <div class="modal-content">
-        <h3>📷 Escáner QR</h3>
+        <h3>📷 Escáner QR / Código de Barras</h3>
         <div id="reader"></div>
         <button class="btn-modal danger" style="margin-top:12px;" onclick="window.stopScanner()">Cerrar Cámara</button>
+    </div>
+</div>
+
+<!-- MODAL RESULTADO ESCAN PINTURA -->
+<div id="scanPaintModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content" style="max-width:380px;">
+        <h3>🎨 Pintura Encontrada</h3>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+            <div id="scanPaintColor" style="width:64px; height:64px; border-radius:12px; flex-shrink:0; border:2px solid rgba(255,255,255,0.15); box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>
+            <div>
+                <div id="scanPaintBrand" style="font-size:11px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:2px;"></div>
+                <div id="scanPaintId" style="font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--accent);"></div>
+                <div id="scanPaintName" style="font-size:13px; color:var(--text); margin-top:1px;"></div>
+                <div id="scanPaintHex" style="font-size:11px; color:var(--text-dim); margin-top:3px; font-family:monospace;"></div>
+            </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+            <button id="scanBtnHave" class="btn-modal" style="color:white;">➕ Añadir a Mi Stock</button>
+            <button id="scanBtnBuy"  class="btn-modal" style="color:white;">🛒 Añadir a Lista Compra</button>
+        </div>
+        <button class="btn-modal ghost" onclick="window.toggleModal('scanPaintModal', false)">Cerrar</button>
     </div>
 </div>
 
@@ -1513,16 +1534,25 @@ window.startScanner = (target) => {
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         (text) => {
+            window.stopScanner();
             if (target === 'model') {
+                // Para modelos: búsqueda por código como antes
                 document.getElementById("search").value = text;
                 window.renderMaquetas();
                 window.switchTab('tab-maquetas');
             } else {
-                document.getElementById("paintSearch").value = text;
-                window.renderPaintCatalog();
-                window.switchTab('tab-pinturas');
+                // Para pinturas: buscar el EAN en el catálogo
+                const resultado = buscarPinturaPorEAN(text);
+                if (resultado) {
+                    mostrarModalEscanPintura(resultado.pintura, resultado.marca);
+                } else {
+                    // EAN no encontrado: copiar en búsqueda como fallback
+                    document.getElementById("paintSearch").value = text;
+                    window.renderPaintCatalog();
+                    window.switchTab('tab-pinturas');
+                    showToast(`Código "${text}" no encontrado en el catálogo`, 'danger');
+                }
             }
-            window.stopScanner();
         }
     ).catch(() => alert("Cámara no encontrada o permiso denegado."));
 };
@@ -1530,6 +1560,51 @@ window.startScanner = (target) => {
 window.stopScanner = () => {
     if (html5QrCode) html5QrCode.stop().then(() => window.toggleModal('scanModal', false));
 };
+
+function buscarPinturaPorEAN(ean) {
+    for (const marca in paintCatalogData) {
+        const pintura = paintCatalogData[marca].find(p =>
+            p.ean === ean ||
+            (Array.isArray(p.ean) && p.ean.includes(ean)) ||
+            p.id === ean
+        );
+        if (pintura) return { pintura, marca };
+    }
+    return null;
+}
+
+function mostrarModalEscanPintura(pintura, marca) {
+    const have = myPaints.have.includes(pintura.id);
+    const buy  = myPaints.buy.includes(pintura.id);
+    document.getElementById('scanPaintColor').style.background = pintura.hex || '#555';
+    document.getElementById('scanPaintBrand').textContent  = marca;
+    document.getElementById('scanPaintId').textContent     = pintura.id;
+    document.getElementById('scanPaintName').textContent   = pintura.nombre || '—';
+    document.getElementById('scanPaintHex').textContent    = pintura.hex || '—';
+
+    const btnHave = document.getElementById('scanBtnHave');
+    const btnBuy  = document.getElementById('scanBtnBuy');
+    btnHave.textContent  = have ? '✅ En tu stock' : '➕ Añadir a Mi Stock';
+    btnHave.style.background = have ? 'var(--success)' : '#2d4a6e';
+    btnBuy.textContent   = buy  ? '🛒 En lista de compra' : '🛒 Añadir a Lista Compra';
+    btnBuy.style.background  = buy  ? 'var(--warning)' : '#2d4a6e';
+
+    btnHave.onclick = async () => {
+        await window.togglePaint(pintura.id, 'have');
+        const nowHave = myPaints.have.includes(pintura.id);
+        btnHave.textContent = nowHave ? '✅ En tu stock' : '➕ Añadir a Mi Stock';
+        btnHave.style.background = nowHave ? 'var(--success)' : '#2d4a6e';
+        showToast(nowHave ? `✓ ${pintura.id} añadida al stock` : `${pintura.id} retirada del stock`);
+    };
+    btnBuy.onclick = async () => {
+        await window.togglePaint(pintura.id, 'buy');
+        const nowBuy = myPaints.buy.includes(pintura.id);
+        btnBuy.textContent = nowBuy ? '🛒 En lista de compra' : '🛒 Añadir a Lista Compra';
+        btnBuy.style.background = nowBuy ? 'var(--warning)' : '#2d4a6e';
+        showToast(nowBuy ? `✓ ${pintura.id} añadida a la lista` : `${pintura.id} retirada de la lista`);
+    };
+    window.toggleModal('scanPaintModal', true);
+}
 
 // --- EXCEL ---
 window.exportarMisPinturasExcel = () => {
