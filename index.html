@@ -3,259 +3,882 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models - Pro Stock v8.1.1</title>
+<title>Maikman Models — Pro Stock v8.1.1</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
+/* =========================================================
+   VARIABLES & RESET
+   ========================================================= */
 :root {
-    --bg:#0f172a; --card:#020617; --text:#e5e7eb; --accent:#38bdf8; --success:#00b894; --danger:#d63031;
-    --min-card-width: 260px;
+    --bg: #080e1a;
+    --bg2: #0d1526;
+    --card: #0f1d35;
+    --card-hover: #162340;
+    --border: rgba(56, 189, 248, 0.12);
+    --border-bright: rgba(56, 189, 248, 0.35);
+    --text: #c8d8f0;
+    --text-dim: #6a84a8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --success: #10b981;
+    --danger: #f43f5e;
+    --warning: #f59e0b;
+    --glow: rgba(56, 189, 248, 0.15);
+    --nav-h: 60px;
+    --radius: 12px;
+    --font-display: 'Rajdhani', sans-serif;
+    --font-body: 'Inter', sans-serif;
 }
-body.light { --bg:#f1f5f9; --card:#fff; --text:#020617; --accent:#2563eb; }
-* { box-sizing:border-box; transition:.3s; }
-body { margin:0; font-family:system-ui; background:var(--bg); color:var(--text); padding-bottom: 20px; }
 
-/* Navegación */
-.nav-tabs { display: flex; align-items: center; background: var(--card); padding: 8px; gap: 4px; position: sticky; top: 0; z-index: 900; border-bottom: 1px solid #334155; }
-.tab-btn { flex: 1; padding: 12px 5px; border: none; background: rgba(255,255,255,0.05); color: var(--text); cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 11px; }
-.tab-btn.active { background: var(--accent); color: white; }
-.cart-badge { background: var(--danger); color: white; font-size: 10px; padding: 2px 5px; border-radius: 10px; margin-left: 3px; }
+body.light {
+    --bg: #eef2f9;
+    --bg2: #e2e8f5;
+    --card: #ffffff;
+    --card-hover: #f0f5ff;
+    --border: rgba(37, 99, 235, 0.12);
+    --border-bright: rgba(37, 99, 235, 0.35);
+    --text: #1e293b;
+    --text-dim: #64748b;
+    --accent: #2563eb;
+    --accent2: #7c3aed;
+    --success: #059669;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --glow: rgba(37, 99, 235, 0.08);
+}
 
-/* Secciones */
-.content-section { display: none; padding: 15px; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 30px;
+    transition: background 0.4s, color 0.4s;
+    background-image:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(56,189,248,0.05) 0%, transparent 70%);
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+#login {
+    max-width: 360px;
+    margin: 80px auto 0;
+    padding: 40px 32px;
+    text-align: center;
+    background: var(--card);
+    border: 1px solid var(--border-bright);
+    border-radius: 20px;
+    box-shadow: 0 0 40px var(--glow), 0 20px 60px rgba(0,0,0,0.4);
+    animation: fadeUp .5s ease both;
+}
+#login .brand {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+#login .sub {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+}
+#login input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+#login input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+}
+#login .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 4px;
+}
+#login .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+#login .login-btn:active { transform: translateY(0); }
+
+/* =========================================================
+   NAVEGACIÓN
+   ========================================================= */
+.nav-tabs {
+    display: flex;
+    align-items: center;
+    background: var(--bg2);
+    padding: 8px 12px;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    height: var(--nav-h);
+}
+.tab-btn {
+    flex: 1;
+    padding: 10px 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 8px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.tab-btn:hover { background: var(--glow); color: var(--text); }
+.tab-btn.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 16px rgba(56,189,248,0.3);
+}
+.cart-badge {
+    background: var(--danger);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 20px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 14px;
+}
+
+/* =========================================================
+   SECCIONES
+   ========================================================= */
+.content-section { display: none; padding: 20px; animation: fadeIn .25s ease; }
 .content-section.active { display: block; }
 
-/* Grid Modelos */
-#grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--min-card-width), 1fr)); gap: 16px; }
-.card { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid #334155; display: flex; flex-direction: column; }
-.card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
-.card-btns { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: auto; }
-.btn-action { padding: 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; text-align: center; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Pinturas */
-.paint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-.paint-item-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center; position: relative; }
-.color-circle { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #fff; margin: 0 auto 8px; }
+/* =========================================================
+   TOOLBAR / BUSCADOR
+   ========================================================= */
+.toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+.toolbar input, .toolbar select {
+    flex: 1;
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    margin-bottom: 0;
+}
+.toolbar input:focus, .toolbar select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+}
+.icon-btn {
+    padding: 11px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--card-hover); border-color: var(--border-bright); }
+.icon-btn.accent { background: var(--accent); border-color: transparent; color: white; }
+.icon-btn.accent:hover { opacity: 0.88; }
 
-/* Mixer Layout de 3 Columnas */
-#mixerInputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+/* =========================================================
+   GRID DE MODELOS
+   ========================================================= */
+#grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-bright);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 0 20px var(--glow);
+}
+.card img {
+    width: 100%;
+    height: 175px;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+    transition: transform 0.3s;
+}
+.card:hover img { transform: scale(1.03); }
+.card-body { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.card-code {
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.card-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+}
+.card-brand { font-size: 11px; color: var(--text-dim); margin-bottom: 10px; }
+.card-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 5px;
+    margin-top: auto;
+}
+.btn-action {
+    padding: 8px 4px;
+    font-size: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.1s;
+}
+.btn-action:hover { opacity: 0.85; transform: scale(1.03); }
 
-/* Modales */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.modal-content { background: var(--card); padding: 20px; width: 100%; max-width: 500px; border-radius: 12px; max-height: 90vh; overflow-y: auto; border: 1px solid #334155; }
-input, select { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: white; width: 100%; margin-bottom: 10px; }
+/* =========================================================
+   PINTURAS
+   ========================================================= */
+.paint-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+}
+.paint-item-box {
+    background: var(--card);
+    padding: 14px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.paint-item-box:hover { transform: translateY(-2px); border-color: var(--border-bright); }
+.color-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    margin: 0 auto 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.paint-id { font-size: 11px; font-weight: 600; color: var(--text); }
+.paint-name { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.paint-actions { display: flex; gap: 5px; margin-top: 10px; }
+.paint-actions button {
+    flex: 1;
+    background: #1e2d45;
+    border: none;
+    padding: 6px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+}
 
-/* Picker Estilos */
-.picker-results-container { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.match-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid #334155; display: flex; align-items: center; gap: 10px; }
-.match-circle { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #fff; flex-shrink: 0; }
+/* =========================================================
+   MIXER & PICKER
+   ========================================================= */
+.mixer-section {
+    background: var(--card);
+    padding: 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+.mixer-section h4 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    color: var(--text);
+}
+.mixer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+#mixerInputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+.mixer-slot select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    margin-bottom: 6px;
+    outline: none;
+}
+.mixer-slot input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    margin-bottom: 2px;
+}
+.mixer-slot .drop-label {
+    font-size: 10px;
+    text-align: center;
+    color: var(--text-dim);
+}
+.mixer-preview-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+#mixerResultPreview {
+    height: 100px;
+    border-radius: 10px;
+    border: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 2px;
+    transition: background-color 0.4s;
+}
+.picker-results-container {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.match-card {
+    background: var(--bg2);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s;
+}
+.match-card:hover { border-color: var(--border-bright); }
+.match-circle { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; }
 .match-info { flex: 1; font-size: 11px; }
-.match-score { font-size: 10px; color: var(--accent); font-weight: bold; }
+.match-score { font-size: 10px; color: var(--accent); font-weight: 700; margin-top: 2px; }
+
+/* =========================================================
+   MODALES
+   ========================================================= */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+    animation: fadeIn .2s ease;
+}
+.modal-content {
+    background: var(--card);
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-bright);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px var(--glow);
+    animation: fadeUp .25s ease;
+}
+.modal-content h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 18px;
+    color: var(--text);
+}
+.modal-content input,
+.modal-content select {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.modal-content input:focus,
+.modal-content select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+}
+
+/* Botones genéricos en modales */
+.btn-modal {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-bottom: 8px;
+}
+.btn-modal:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-modal.success { background: var(--success); color: white; }
+.btn-modal.accent  { background: var(--accent);  color: white; }
+.btn-modal.danger  { background: var(--danger);  color: white; }
+.btn-modal.ghost   { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
+.btn-modal.warning { background: var(--warning); color: white; }
+
+/* =========================================================
+   GALERÍA
+   ========================================================= */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+}
+.gallery-thumb { position: relative; border-radius: 6px; overflow: hidden; }
+.gallery-thumb img { height: 90px; width: 100%; object-fit: cover; display: block; cursor: pointer; transition: transform 0.2s; }
+.gallery-thumb img:hover { transform: scale(1.05); }
+.gallery-thumb .del-photo {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.gallery-thumb:hover .del-photo { opacity: 1; }
+
+/* Separador */
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* URL input row */
+.url-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+.url-row input { margin-bottom: 0; }
+
+/* =========================================================
+   AJUSTES MODAL
+   ========================================================= */
+.settings-group { display: flex; flex-direction: column; gap: 8px; }
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 480px) {
+    #mixerInputs { grid-template-columns: 1fr 1fr; }
+    .picker-results-container { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+    #grid { grid-template-columns: 1fr; }
+    .tab-btn { font-size: 9px; padding: 8px 4px; }
+}
 </style>
 </head>
-<body class="dark">
+<body>
 
-<div id="login" style="max-width:320px; margin:100px auto; padding:20px; text-align:center;">
-    <h2 style="color:var(--accent)">Maikman Models</h2>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Contraseña">
-    <button onclick="window.login()" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:6px; font-weight:bold;">ENTRAR</button>
+<!-- ======================= LOGIN ======================= -->
+<div id="login" style="display:block;">
+    <div class="brand">Maikman</div>
+    <div class="sub">Models — Pro Stock</div>
+    <input id="email" type="email" placeholder="Email" autocomplete="email">
+    <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
+    <button class="login-btn" onclick="window.login()">ENTRAR</button>
 </div>
 
+<!-- ======================= APP ======================= -->
 <div id="app" style="display:none;">
-    <nav class="nav-tabs">
-        <button class="tab-btn active" onclick="window.switchTab('tab-maquetas', this)">📦 MODELOS</button>
-        <button class="tab-btn" onclick="window.switchTab('tab-pinturas', this)">🎨 PINTURAS</button>
-        <button class="tab-btn" onclick="window.switchTab('tab-mixer', this)">🧪 MIXER/PICK</button>
-        <button class="tab-btn" onclick="window.abrirModalCompra(true)">🛒 <span id="cartCount" class="cart-badge">0</span></button>
-        <button class="tab-btn" style="flex:0.3" onclick="window.toggleModal('configModal', true)">⚙️</button>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="nav-tabs" role="navigation" aria-label="Navegación principal">
+        <button class="tab-btn active" onclick="window.switchTab('tab-maquetas', this)" aria-label="Modelos">📦 MODELOS</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-pinturas', this)" aria-label="Pinturas">🎨 PINTURAS</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-mixer', this)" aria-label="Mixer y Picker">🧪 MIXER</button>
+        <button class="tab-btn" onclick="window.abrirModalCompra(true)" aria-label="Carrito de compra">
+            🛒 <span id="cartCount" class="cart-badge">0</span>
+        </button>
+        <button class="tab-btn" style="flex:0.4;" onclick="window.toggleModal('configModal', true)" aria-label="Configuración">⚙️</button>
     </nav>
 
-    <section id="tab-maquetas" class="content-section active">
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <input id="search" placeholder="Buscar..." oninput="window.renderMaquetas()">
-            <button onclick="window.startScanner('model')" style="background:#4b5563; border:none; padding:0 15px; border-radius:6px; color:white;">📷</button>
-            <button onclick="window.openFormModal()" style="background:var(--accent); border:none; padding:0 15px; border-radius:6px; color:white;">➕</button>
+    <!-- TAB MODELOS -->
+    <section id="tab-maquetas" class="content-section active" role="main">
+        <div class="toolbar">
+            <input id="search" type="search" placeholder="Buscar modelo o fabricante…" oninput="window.renderMaquetas()" aria-label="Buscar maqueta">
+            <button class="icon-btn" onclick="window.startScanner('model')" title="Escanear código QR" aria-label="Escanear QR">📷</button>
+            <button class="icon-btn accent" onclick="window.openFormModal()" title="Añadir modelo" aria-label="Añadir nuevo modelo">➕</button>
         </div>
-        <div id="grid"></div>
+        <div id="grid" role="list"></div>
     </section>
 
+    <!-- TAB PINTURAS -->
     <section id="tab-pinturas" class="content-section">
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <select id="brandFilter" onchange="window.renderPaintCatalog()" style="flex:1"></select>
-            <button onclick="window.startScanner('paint')" style="background:#4b5563; border:none; padding:0 15px; border-radius:6px; color:white;">📷</button>
+        <div class="toolbar">
+            <select id="brandFilter" onchange="window.renderPaintCatalog()" aria-label="Filtrar por marca"></select>
+            <button class="icon-btn" onclick="window.startScanner('paint')" title="Escanear código" aria-label="Escanear código de pintura">📷</button>
         </div>
-        <input id="paintSearch" placeholder="Filtrar pintura..." onkeyup="window.renderPaintCatalog()">
+        <div class="toolbar" style="margin-bottom:16px;">
+            <input id="paintSearch" type="search" placeholder="Filtrar pintura por código o nombre…" onkeyup="window.renderPaintCatalog()" aria-label="Buscar pintura">
+        </div>
         <div id="paintCatalog" class="paint-grid"></div>
     </section>
 
+    <!-- TAB MIXER / PICKER -->
     <section id="tab-mixer" class="content-section">
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4 style="margin:0;">🎯 Picker IA</h4>
-                <button onclick="window.resetPicker()" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:4px; font-size:10px; cursor:pointer; font-weight:bold;">RESET</button>
+
+        <!-- PICKER IA -->
+        <div class="mixer-section">
+            <div class="mixer-header">
+                <h4>🎯 Picker IA</h4>
+                <button class="btn-action" style="background:var(--danger); padding:6px 12px;" onclick="window.resetPicker()">RESET</button>
             </div>
-            <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)">
-            <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:10px; cursor:crosshair;"></canvas>
+            <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)" aria-label="Cargar imagen para picker">
+            <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:12px; cursor:crosshair;" aria-label="Canvas de selección de color"></canvas>
             <div id="pickerResults" class="picker-results-container"></div>
         </div>
 
-        <h4>🧪 Mezclador (6 Colores / 3 Columnas)</h4>
-        <div id="mixerInputs"></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px; background:rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
-            <div id="mixerResultPreview" style="height:100px; border-radius:10px; border:1px solid #444; display:flex; align-items:center; justify-content:center; font-weight:bold;">#---</div>
-            <canvas id="mixerChart" style="max-height:100px;"></canvas>
+        <!-- MEZCLADOR -->
+        <div class="mixer-section">
+            <h4>🧪 Mezclador</h4>
+            <div id="mixerInputs"></div>
+            <div class="mixer-preview-row">
+                <div id="mixerResultPreview">#---</div>
+                <canvas id="mixerChart" style="max-height:100px;" aria-label="Gráfico de mezcla"></canvas>
+            </div>
         </div>
+
     </section>
 </div>
 
-<div id="formModal" class="modal"><div class="modal-content"><h3 id="formTitle">Maqueta</h3><input type="hidden" id="f_id"><input id="f_codigo" placeholder="Código (Referencia)"><input id="f_fabricante" placeholder="Fabricante"><input id="f_modelo" placeholder="Modelo"><input id="f_precio" placeholder="Precio"><input id="f_foto" placeholder="URL Foto"><input id="f_paints" placeholder="Pinturas (IDs)"><button onclick="window.guardarModelo()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; font-weight:bold;">GUARDAR</button><button onclick="window.toggleModal('formModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Cancelar</button></div></div>
+<!-- ======================= MODALES ======================= -->
 
-<div id="infoModal" class="modal">
+<!-- MODAL FORMULARIO MODELO -->
+<div id="formModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+    <div class="modal-content">
+        <h3 id="formTitle">Maqueta</h3>
+        <input type="hidden" id="f_id">
+        <input id="f_codigo"     placeholder="Código / Referencia" aria-label="Código">
+        <input id="f_fabricante" placeholder="Fabricante"          aria-label="Fabricante">
+        <input id="f_modelo"     placeholder="Modelo"              aria-label="Modelo">
+        <input id="f_precio"     placeholder="Precio (€)"          type="number" step="0.01" min="0" aria-label="Precio">
+        <input id="f_foto"       placeholder="URL Foto"            type="url" aria-label="URL Foto">
+        <input id="f_paints"     placeholder="IDs de pinturas separados por comas" aria-label="IDs de pinturas">
+        <button class="btn-modal success" onclick="window.guardarModelo()">GUARDAR</button>
+        <button class="btn-modal ghost" onclick="window.toggleModal('formModal', false)">Cancelar</button>
+    </div>
+</div>
+
+<!-- MODAL INFO MODELO -->
+<div id="infoModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <div class="modal-content">
         <h3 id="infoTitle" style="margin-top:0;"></h3>
-        <div id="infoDetails" style="margin-bottom:10px;"></div>
-        <hr style="border:0; border-top:1px solid #444;">
-        <b style="display:block; margin:10px 0;">Galería</b>
-        <div id="galleryGrid" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; margin-bottom:15px;"></div>
-        <div style="display:flex; gap:5px; margin-bottom:15px;">
-            <input type="text" id="urlPhotoInput" placeholder="Pegar URL foto..." style="margin-bottom:0;">
-            <button onclick="window.añadirUrlsAGaleria()" style="background:var(--success); color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold;">Añadir</button>
+        <div id="infoDetails" style="font-size:13px; color:var(--text-dim); margin-bottom:12px;"></div>
+        <hr class="divider">
+        <b style="display:block; margin-bottom:10px; font-family:var(--font-display); letter-spacing:1px;">GALERÍA</b>
+        <div id="galleryGrid" class="gallery-grid"></div>
+        <div class="url-row">
+            <input type="url" id="urlPhotoInput" placeholder="Pegar URL de foto…" aria-label="URL de foto para galería">
+            <button class="icon-btn accent" onclick="window.añadirUrlsAGaleria()" title="Añadir foto" aria-label="Añadir foto a galería">Añadir</button>
         </div>
-        <button onclick="window.toggleModal('infoModal', false)" style="width:100%; padding:12px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer;">Cerrar</button>
+        <button class="btn-modal ghost" onclick="window.toggleModal('infoModal', false)">Cerrar</button>
     </div>
 </div>
 
-<div id="modelPaintsModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
+<!-- MODAL PINTURAS DE MODELO -->
+<div id="modelPaintsModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content" style="max-width:600px;">
         <h3>Pinturas Necesarias</h3>
         <div id="mPaintsList" class="paint-grid"></div>
-        <button onclick="window.toggleModal('modelPaintsModal', false)" style="width:100%; margin-top:20px; background:var(--accent); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cerrar</button>
+        <button class="btn-modal accent" style="margin-top:20px;" onclick="window.toggleModal('modelPaintsModal', false)">Cerrar</button>
     </div>
 </div>
 
-<div id="scanModal" class="modal"><div class="modal-content"><div id="reader"></div><button onclick="window.stopScanner()" style="width:100%; margin-top:10px; background:var(--danger); color:white; border:none; padding:10px; border-radius:6px;">Cerrar Cámara</button></div></div>
+<!-- MODAL SCANNER -->
+<div id="scanModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+        <h3>📷 Escáner QR</h3>
+        <div id="reader"></div>
+        <button class="btn-modal danger" style="margin-top:12px;" onclick="window.stopScanner()">Cerrar Cámara</button>
+    </div>
+</div>
 
-<div id="cartModal" class="modal"><div class="modal-content"><h3>Lista de Compra</h3><div id="cartListContainer"></div><button onclick="window.exportarListaExcel()" style="width:100%; background:var(--success); color:white; padding:12px; border:none; border-radius:6px; margin-top:10px;">Exportar Excel</button><button onclick="window.toggleModal('cartModal', false)" style="width:100%; margin-top:10px; background:#444; color:white; border:none; padding:10px; border-radius:6px;">Cerrar</button></div></div>
+<!-- MODAL CARRITO -->
+<div id="cartModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+        <h3>🛒 Lista de Compra</h3>
+        <div id="cartListContainer"></div>
+        <button class="btn-modal success" style="margin-top:12px;" onclick="window.exportarListaExcel()">📊 Exportar Excel</button>
+        <button class="btn-modal ghost" onclick="window.toggleModal('cartModal', false)">Cerrar</button>
+    </div>
+</div>
 
-<div id="configModal" class="modal"><div class="modal-content"><h3>Ajustes</h3>
-    <button onclick="window.toggleTheme()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #444; background:none; color:inherit;">🌓 Cambiar Modo Claro/Oscuro</button>
-    <button onclick="window.exportarExcelPrincipal()" style="width:100%; padding:10px; margin-bottom:10px; background:var(--accent); color:white; border:none; border-radius:6px;">📊 Exportar Maquetas (Excel)</button>
-    <button onclick="window.exportarMisPinturasExcel()" style="width:100%; padding:10px; margin-bottom:10px; background:var(--success); color:white; border:none; border-radius:6px;">🎨 Exportar Mis Pinturas (Excel)</button>
-    <button onclick="window.signOutUser()" style="width:100%; padding:10px; background:var(--danger); color:white; border:none; border-radius:6px;">Cerrar Sesión</button>
-    <button onclick="window.toggleModal('configModal', false)" style="width:100%; margin-top:10px; background:transparent; border:none; color:white;">Volver</button>
-</div></div>
+<!-- MODAL CONFIG -->
+<div id="configModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+        <h3>⚙️ Ajustes</h3>
+        <div class="settings-group">
+            <button class="btn-modal ghost" onclick="window.toggleTheme()">🌓 Cambiar Modo Claro / Oscuro</button>
+            <button class="btn-modal accent"   onclick="window.exportarExcelPrincipal()">📊 Exportar Maquetas (Excel)</button>
+            <button class="btn-modal success"  onclick="window.exportarMisPinturasExcel()">🎨 Exportar Mis Pinturas (Excel)</button>
+            <button class="btn-modal danger"   onclick="window.signOutUser()">Cerrar Sesión</button>
+            <button class="btn-modal ghost"    onclick="window.toggleModal('configModal', false)">Volver</button>
+        </div>
+    </div>
+</div>
 
+<!-- ======================= SCRIPTS ======================= -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { initializeApp }                                                                     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }                  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = { apiKey: "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8", authDomain: "maikmanmodelsstock.firebaseapp.com", projectId: "maikmanmodelsstock", storageBucket: "maikmanmodelsstock.appspot.com", messagingSenderId: "871520809912", appId: "1:871520809912:web:4042f15ef200832a95d54d" };
-const app = initializeApp(firebaseConfig);
+// --- CONFIG FIREBASE ---
+const firebaseConfig = {
+    apiKey:            "AIzaSyAtWLxQfVqsEt8fLZkGRN-3zSHuzKMUTk8",
+    authDomain:        "maikmanmodelsstock.firebaseapp.com",
+    projectId:         "maikmanmodelsstock",
+    storageBucket:     "maikmanmodelsstock.appspot.com",
+    messagingSenderId: "871520809912",
+    appId:             "1:871520809912:web:4042f15ef200832a95d54d"
+};
+
+const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db   = getFirestore(app);
 
-let modelos = [], paintCatalogData = {}, html5QrCode = null, mixerChart = null, currentModelId = null;
-let myPaints = { have: [], buy: [] };
+// --- ESTADO ---
+let modelos          = [];
+let paintCatalogData = {};
+let html5QrCode      = null;
+let mixerChart       = null;
+let currentModelId   = null;
+let myPaints         = { have: [], buy: [] };
 
-// --- CORE ---
-window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).catch(()=>alert("Acceso denegado"));
+// --- AUTENTICACIÓN ---
+window.login = () =>
+    signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+    .catch(() => alert("Acceso denegado. Verifica tu email y contraseña."));
+
 window.signOutUser = () => signOut(auth);
-window.toggleModal = (id, show) => document.getElementById(id).style.display = show ? 'flex' : 'none';
+
+onAuthStateChanged(auth, user => {
+    document.getElementById('login').style.display = user ? 'none' : 'block';
+    document.getElementById('app').style.display   = user ? 'block' : 'none';
+    if (user) cargarTodo();
+});
+
+// --- NAVEGACIÓN ---
 window.switchTab = (id, btn) => {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    if(btn) btn.classList.add('active');
+    if (btn) btn.classList.add('active');
 };
+
+window.toggleModal = (id, show) => {
+    document.getElementById(id).style.display = show ? 'flex' : 'none';
+};
+
 window.toggleTheme = () => {
     document.body.classList.toggle('light');
     localStorage.setItem('maikman_theme', document.body.classList.contains('light') ? 'light' : 'dark');
 };
-if(localStorage.getItem('maikman_theme') === 'light') document.body.classList.add('light');
 
-onAuthStateChanged(auth, user => {
-    document.getElementById('login').style.display = user ? 'none' : 'block';
-    document.getElementById('app').style.display = user ? 'block' : 'none';
-    if(user) cargarTodo();
-});
+if (localStorage.getItem('maikman_theme') === 'light') document.body.classList.add('light');
 
+// --- CARGA DATOS ---
 async function cargarTodo() {
+    // Pinturas JSON
     try {
         const resp = await fetch('pinturas.json');
         paintCatalogData = await resp.json();
         const brandSel = document.getElementById('brandFilter');
-        brandSel.innerHTML = Object.keys(paintCatalogData).map(b => `<option value="${b}">${b}</option>`).join('');
+        brandSel.innerHTML = Object.keys(paintCatalogData)
+            .map(b => `<option value="${b}">${b}</option>`).join('');
         initMixer();
-    } catch(e) { console.error("Error JSON:", e); }
+    } catch (e) { console.error("Error cargando pinturas.json:", e); }
 
-    // Sincronización con Firebase
+    // Datos de usuario (Firebase con fallback localStorage)
     try {
         const pDoc = await getDoc(doc(db, "usuarios_datos", auth.currentUser.uid));
-        if(pDoc.exists()) {
+        if (pDoc.exists()) {
             myPaints = pDoc.data();
         } else {
-            const localData = localStorage.getItem('maikman_paints');
-            if(localData) {
-                myPaints = JSON.parse(localData);
+            const local = localStorage.getItem('maikman_paints');
+            if (local) {
+                myPaints = JSON.parse(local);
                 await setDoc(doc(db, "usuarios_datos", auth.currentUser.uid), myPaints);
             }
         }
         window.renderPaintCatalog();
         window.updateCartCount();
-    } catch(e) { console.error("Error Firebase Pinturas:", e); }
+    } catch (e) { console.error("Error Firebase Pinturas:", e); }
 
+    // Modelos
     try {
         const snap = await getDocs(query(collection(db, "modelos"), orderBy("fabricante")));
         modelos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         window.renderMaquetas();
-    } catch(e) { console.error("Error Firebase Modelos:", e); }
+    } catch (e) { console.error("Error Firebase Modelos:", e); }
 }
 
 // --- MODELOS ---
 window.renderMaquetas = () => {
     const grid = document.getElementById("grid");
-    const q = document.getElementById("search").value.toLowerCase();
+    const q    = document.getElementById("search").value.toLowerCase();
     grid.innerHTML = "";
-    modelos.filter(m => (m.modelo||"").toLowerCase().includes(q) || (m.fabricante||"").toLowerCase().includes(q)).forEach(m => {
-        grid.innerHTML += `
-            <div class="card">
-                <img src="${m.foto || 'https://via.placeholder.com/300'}" onclick="window.open('${m.foto}', '_blank')">
-                <div style="font-size:10px; color:var(--accent); font-weight:bold;">${m.codigo || 'S/N'}</div>
-                <b>${m.modelo}</b><small>${m.fabricante}</small>
-                <div class="card-btns">
-                    <button class="btn-action" style="background:#3498db" onclick="window.abrirInfoModelo('${m.id}')">INFO</button>
-                    <button class="btn-action" style="background:#9b59b6" onclick="window.abrirPinturasModelo('${m.id}')">COLOR</button>
-                    <button class="btn-action" style="background:#f39c12" onclick="window.openFormModal('${m.id}')">EDIT</button>
-                    <button class="btn-action" style="background:var(--danger)" onclick="window.borrarModelo('${m.id}')">DEL</button>
-                </div>
-            </div>`;
-    });
+    modelos
+        .filter(m =>
+            (m.modelo    || "").toLowerCase().includes(q) ||
+            (m.fabricante|| "").toLowerCase().includes(q)
+        )
+        .forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.setAttribute('role', 'listitem');
+            div.innerHTML = `
+                <img src="${m.foto || 'https://via.placeholder.com/300x175?text=Sin+Imagen'}"
+                     alt="${m.modelo}"
+                     loading="lazy"
+                     onclick="window.open('${m.foto}', '_blank')">
+                <div class="card-body">
+                    <div class="card-code">${m.codigo || 'S/N'}</div>
+                    <div class="card-name">${m.modelo || '—'}</div>
+                    <div class="card-brand">${m.fabricante || '—'}</div>
+                    <div class="card-btns">
+                        <button class="btn-action" style="background:#3498db" onclick="window.abrirInfoModelo('${m.id}')">INFO</button>
+                        <button class="btn-action" style="background:#9b59b6" onclick="window.abrirPinturasModelo('${m.id}')">COLOR</button>
+                        <button class="btn-action" style="background:var(--warning)" onclick="window.openFormModal('${m.id}')">EDIT</button>
+                        <button class="btn-action" style="background:var(--danger)" onclick="window.borrarModelo('${m.id}')">DEL</button>
+                    </div>
+                </div>`;
+            grid.appendChild(div);
+        });
 };
 
 window.abrirInfoModelo = (id) => {
     currentModelId = id;
     const m = modelos.find(x => x.id === id);
     if (!m) return;
-    document.getElementById("infoTitle").innerText = m.modelo;
-    document.getElementById("infoDetails").innerHTML = `<b>Ref:</b> ${m.codigo || '-'} | <b>Marca:</b> ${m.fabricante} | <b>Precio:</b> ${m.precio || '--'}€`;
+    document.getElementById("infoTitle").textContent = m.modelo;
+    document.getElementById("infoDetails").innerHTML =
+        `<b>Ref:</b> ${m.codigo || '-'} &nbsp;|&nbsp; <b>Marca:</b> ${m.fabricante} &nbsp;|&nbsp; <b>Precio:</b> ${m.precio || '--'}€`;
     const gal = document.getElementById("galleryGrid");
     gal.innerHTML = "";
     (m.galeria || []).forEach((url, idx) => {
-        gal.innerHTML += `<div style="position:relative;"><img src="${url}" style="height:100px; width:100%; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="window.open('${url}', '_blank')"><button onclick="window.borrarFotoGaleria(${idx})" style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:3px; padding:2px 5px; cursor:pointer; font-size:10px;">X</button></div>`;
+        const wrap = document.createElement('div');
+        wrap.className = 'gallery-thumb';
+        wrap.innerHTML = `
+            <img src="${url}" alt="Foto ${idx+1}" loading="lazy" onclick="window.open('${url}', '_blank')">
+            <button class="del-photo" onclick="window.borrarFotoGaleria(${idx})" title="Eliminar foto">✕</button>`;
+        gal.appendChild(wrap);
     });
     window.toggleModal('infoModal', true);
 };
 
 window.añadirUrlsAGaleria = async () => {
     const input = document.getElementById('urlPhotoInput').value.trim();
-    if(!input) return;
+    if (!input) return;
     const m = modelos.find(x => x.id === currentModelId);
-    if(!m.galeria) m.galeria = [];
+    if (!m.galeria) m.galeria = [];
     m.galeria.push(...input.split(/[;,]+/).map(u => u.trim()).filter(u => u !== ""));
     await updateDoc(doc(db, "modelos", currentModelId), { galeria: m.galeria });
     document.getElementById('urlPhotoInput').value = "";
@@ -270,185 +893,274 @@ window.borrarFotoGaleria = async (idx) => {
 };
 
 window.openFormModal = (id = null) => {
-    if(id) {
+    const fields = ['f_id','f_codigo','f_fabricante','f_modelo','f_precio','f_foto','f_paints'];
+    if (id) {
         const m = modelos.find(x => x.id === id);
-        document.getElementById('formTitle').innerText = "Editar Maqueta";
-        document.getElementById('f_id').value = m.id;
-        document.getElementById('f_codigo').value = m.codigo || "";
-        document.getElementById('f_fabricante').value = m.fabricante;
-        document.getElementById('f_modelo').value = m.modelo;
-        document.getElementById('f_precio').value = m.precio || "";
-        document.getElementById('f_foto').value = m.foto || "";
-        document.getElementById('f_paints').value = (m.paints || []).join(', ');
+        document.getElementById('formTitle').textContent = "Editar Maqueta";
+        document.getElementById('f_id').value         = m.id;
+        document.getElementById('f_codigo').value     = m.codigo      || "";
+        document.getElementById('f_fabricante').value = m.fabricante  || "";
+        document.getElementById('f_modelo').value     = m.modelo      || "";
+        document.getElementById('f_precio').value     = m.precio      || "";
+        document.getElementById('f_foto').value       = m.foto        || "";
+        document.getElementById('f_paints').value     = (m.paints || []).join(', ');
     } else {
-        document.getElementById('formTitle').innerText = "Nueva Maqueta";
-        document.getElementById('f_id').value = ""; document.getElementById('f_codigo').value = "";
-        document.getElementById('f_fabricante').value = ""; document.getElementById('f_modelo').value = ""; 
-        document.getElementById('f_precio').value = ""; document.getElementById('f_foto').value = ""; 
-        document.getElementById('f_paints').value = "";
+        document.getElementById('formTitle').textContent = "Nueva Maqueta";
+        fields.forEach(f => document.getElementById(f).value = "");
     }
     window.toggleModal('formModal', true);
 };
 
 window.guardarModelo = async () => {
     const id = document.getElementById('f_id').value;
-    const d = { 
-        codigo: document.getElementById('f_codigo').value,
-        fabricante: document.getElementById('f_fabricante').value, 
-        modelo: document.getElementById('f_modelo').value,
-        precio: document.getElementById('f_precio').value,
-        foto: document.getElementById('f_foto').value,
-        paints: document.getElementById('f_paints').value.split(',').map(s => s.trim()).filter(s => s !== "")
+    const data = {
+        codigo:     document.getElementById('f_codigo').value,
+        fabricante: document.getElementById('f_fabricante').value,
+        modelo:     document.getElementById('f_modelo').value,
+        precio:     document.getElementById('f_precio').value,
+        foto:       document.getElementById('f_foto').value,
+        paints:     document.getElementById('f_paints').value
+                        .split(',').map(s => s.trim()).filter(s => s !== "")
     };
-    if(id) await updateDoc(doc(db, "modelos", id), d);
-    else await addDoc(collection(db, "modelos"), d);
+    if (id) await updateDoc(doc(db, "modelos", id), data);
+    else    await addDoc(collection(db, "modelos"), data);
     window.toggleModal('formModal', false);
     cargarTodo();
 };
 
-window.borrarModelo = async (id) => { if(confirm("¿Seguro?")) { await deleteDoc(doc(db, "modelos", id)); cargarTodo(); } };
+window.borrarModelo = async (id) => {
+    if (confirm("¿Seguro que quieres eliminar este modelo? Esta acción no se puede deshacer.")) {
+        await deleteDoc(doc(db, "modelos", id));
+        cargarTodo();
+    }
+};
 
 window.abrirPinturasModelo = (id) => {
-    const m = modelos.find(x => x.id === id);
-    const cont = document.getElementById('mPaintsList'); cont.innerHTML = "";
+    const m    = modelos.find(x => x.id === id);
+    const cont = document.getElementById('mPaintsList');
+    cont.innerHTML = "";
     (m.paints || []).forEach(pid => {
-        const p = encontrarPintura(pid);
+        const p   = encontrarPintura(pid);
         const has = myPaints.have.includes(p.id);
-        cont.innerHTML += `
-            <div class="paint-item-box" style="border-color: ${has ? 'var(--success)' : 'var(--danger)'}">
-                <div class="color-circle" style="background:${p.hex}"></div>
-                <div style="font-size:11px; font-weight:bold;">${p.id}</div>
-                <div style="font-size:10px; opacity:0.8;">${p.nombre}</div>
-                <div style="margin-top:5px; font-size:10px; font-weight:bold; color:${has?'var(--success)':'var(--danger)'}">
-                    ${has ? 'EN STOCK' : 'FALTA'}
-                </div>
+        const item = document.createElement('div');
+        item.className = 'paint-item-box';
+        item.style.borderColor = has ? 'var(--success)' : 'var(--danger)';
+        item.innerHTML = `
+            <div class="color-circle" style="background:${p.hex}"></div>
+            <div class="paint-id">${p.id}</div>
+            <div class="paint-name">${p.nombre}</div>
+            <div style="margin-top:6px; font-size:10px; font-weight:700; color:${has ? 'var(--success)' : 'var(--danger)'}">
+                ${has ? '✓ EN STOCK' : '✗ FALTA'}
             </div>`;
+        cont.appendChild(item);
     });
     window.toggleModal('modelPaintsModal', true);
 };
 
 // --- PINTURAS ---
 window.renderPaintCatalog = () => {
-    const brand = document.getElementById('brandFilter').value;
-    const search = document.getElementById('paintSearch').value.toLowerCase();
+    const brand     = document.getElementById('brandFilter').value;
+    const search    = document.getElementById('paintSearch').value.toLowerCase();
     const container = document.getElementById('paintCatalog');
     if (!container || !paintCatalogData[brand]) return;
     container.innerHTML = "";
-    paintCatalogData[brand].filter(p => (p.id||"").toLowerCase().includes(search) || (p.nombre||"").toLowerCase().includes(search)).forEach(p => {
-        const have = myPaints.have.includes(p.id); const buy = myPaints.buy.includes(p.id);
-        container.innerHTML += `<div class="paint-item-box">
-            <div class="color-circle" style="background:${p.hex || '#ccc'}"></div>
-            <span style="font-size:11px; font-weight:bold;">${p.id || 'S/N'}</span><br>
-            <span style="font-size:10px;">${p.nombre || ''}</span>
-            <div style="display:flex; gap:5px; margin-top:8px;">
-                <button onclick="window.togglePaint('${p.id}','have')" style="flex:1; background:${have?'var(--success)':'#444'}; border:none; padding:5px; border-radius:4px; color:white; cursor:pointer;">✅</button>
-                <button onclick="window.togglePaint('${p.id}','buy')" style="flex:1; background:${buy?'var(--danger)':'#444'}; border:none; padding:5px; border-radius:4px; color:white; cursor:pointer;">🛒</button>
-            </div>
-        </div>`;
-    });
+    paintCatalogData[brand]
+        .filter(p =>
+            (p.id    || "").toLowerCase().includes(search) ||
+            (p.nombre|| "").toLowerCase().includes(search)
+        )
+        .forEach(p => {
+            const have = myPaints.have.includes(p.id);
+            const buy  = myPaints.buy.includes(p.id);
+            const item = document.createElement('div');
+            item.className = 'paint-item-box';
+            item.innerHTML = `
+                <div class="color-circle" style="background:${p.hex || '#555'}"></div>
+                <div class="paint-id">${p.id || 'S/N'}</div>
+                <div class="paint-name">${p.nombre || ''}</div>
+                <div class="paint-actions">
+                    <button onclick="window.togglePaint('${p.id}','have')"
+                            style="background:${have ? 'var(--success)' : 'rgba(255,255,255,0.05)'};"
+                            title="${have ? 'Quitar de stock' : 'Tengo esta pintura'}"
+                            aria-label="Tengo esta pintura">✅</button>
+                    <button onclick="window.togglePaint('${p.id}','buy')"
+                            style="background:${buy ? 'var(--danger)' : 'rgba(255,255,255,0.05)'};"
+                            title="${buy ? 'Quitar de lista de compra' : 'Añadir a lista de compra'}"
+                            aria-label="Lista de compra">🛒</button>
+                </div>`;
+            container.appendChild(item);
+        });
 };
 
 window.togglePaint = async (id, type) => {
     const idx = myPaints[type].indexOf(id);
-    if(idx > -1) myPaints[type].splice(idx,1); else myPaints[type].push(id);
+    if (idx > -1) myPaints[type].splice(idx, 1);
+    else myPaints[type].push(id);
     try {
         await setDoc(doc(db, "usuarios_datos", auth.currentUser.uid), myPaints);
-        window.renderPaintCatalog(); window.updateCartCount();
-    } catch(e) { console.error("Error Sync:", e); alert("Error de permisos en Firebase."); }
+        window.renderPaintCatalog();
+        window.updateCartCount();
+    } catch (e) {
+        console.error("Error Sync:", e);
+        alert("Error de permisos en Firebase. Revisa las reglas de seguridad.");
+    }
 };
 
-window.abrirModalCompra = (s) => {
-    if(!s) return window.toggleModal('cartModal', false);
+window.abrirModalCompra = (show) => {
+    if (!show) return window.toggleModal('cartModal', false);
     const cont = document.getElementById('cartListContainer');
-    cont.innerHTML = myPaints.buy.map(id => {
-        const p = encontrarPintura(id);
-        return `<div style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #333;"><div class="color-circle" style="width:20px; height:20px; background:${p.hex}; margin:0;"></div><span>${id} - ${p.nombre}</span></div>`;
-    }).join('');
+    cont.innerHTML = myPaints.buy.length === 0
+        ? `<p style="color:var(--text-dim); text-align:center; padding:20px;">La lista de compra está vacía.</p>`
+        : myPaints.buy.map(id => {
+            const p = encontrarPintura(id);
+            return `<div style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid var(--border);">
+                        <div class="color-circle" style="width:22px; height:22px; background:${p.hex}; margin:0;"></div>
+                        <span style="font-size:13px;">${id} — ${p.nombre}</span>
+                    </div>`;
+        }).join('');
     window.toggleModal('cartModal', true);
 };
 
 // --- MIXER & PICKER ---
 function initMixer() {
     const cont = document.getElementById('mixerInputs');
-    let opts = '<option value="">-</option>';
-    for(let b in paintCatalogData) opts += `<optgroup label="${b}">${paintCatalogData[b].map(p => `<option value="${p.hex}">${p.id}</option>`).join('')}</optgroup>`;
-    cont.innerHTML = [1,2,3,4,5,6].map(i => `<div><select id="mc${i}" onchange="window.calcMix()">${opts}</select><input type="range" id="mv${i}" min="0" max="10" step="1" value="0" oninput="window.calcMix()"><div id="ml${i}" style="font-size:10px; text-align:center;">0 gotas</div></div>`).join('');
-    mixerChart = new Chart(document.getElementById('mixerChart'), { type:'pie', data:{labels:[], datasets:[{data:[], backgroundColor:[]}]}, options:{plugins:{legend:{display:false}}, animation:false} });
+    let opts = '<option value="">—</option>';
+    for (let b in paintCatalogData) {
+        opts += `<optgroup label="${b}">${paintCatalogData[b].map(p => `<option value="${p.hex}">${p.id}</option>`).join('')}</optgroup>`;
+    }
+    cont.innerHTML = [1,2,3,4,5,6].map(i => `
+        <div class="mixer-slot">
+            <select id="mc${i}" onchange="window.calcMix()" aria-label="Color ${i}">${opts}</select>
+            <input type="range" id="mv${i}" min="0" max="10" step="1" value="0" oninput="window.calcMix()" aria-label="Gotas color ${i}">
+            <div id="ml${i}" class="drop-label">0 gotas</div>
+        </div>`).join('');
+
+    mixerChart = new Chart(document.getElementById('mixerChart'), {
+        type: 'pie',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+        options: { plugins: { legend: { display: false } }, animation: false }
+    });
 }
 
 window.calcMix = () => {
-    let r=0, g=0, b=0, tot=0; const lbs=[], dts=[], cls=[];
-    for(let i=1; i<=6; i++){
-        const h = document.getElementById(`mc${i}`).value, v = parseInt(document.getElementById(`mv${i}`).value);
-        document.getElementById(`ml${i}`).innerText = v + " gotas";
-        if(h && v > 0){ const c = hexToRgb(h); r+=c.r*v; g+=c.g*v; b+=c.b*v; tot+=v; lbs.push(document.getElementById(`mc${i}`).selectedOptions[0].text); dts.push(v); cls.push(h); }
+    let r = 0, g = 0, b = 0, tot = 0;
+    const lbs = [], dts = [], cls = [];
+    for (let i = 1; i <= 6; i++) {
+        const h = document.getElementById(`mc${i}`).value;
+        const v = parseInt(document.getElementById(`mv${i}`).value);
+        document.getElementById(`ml${i}`).textContent = v + " gotas";
+        if (h && v > 0) {
+            const c = hexToRgb(h);
+            r += c.r * v; g += c.g * v; b += c.b * v; tot += v;
+            lbs.push(document.getElementById(`mc${i}`).selectedOptions[0].text);
+            dts.push(v); cls.push(h);
+        }
     }
     const resDiv = document.getElementById('mixerResultPreview');
-    if(tot>0){
-        const hex = rgbToHex(Math.round(r/tot), Math.round(g/tot), Math.round(b/tot));
-        resDiv.style.backgroundColor = hex; resDiv.innerText = hex;
-    } else { resDiv.style.backgroundColor = 'transparent'; resDiv.innerText = '#---'; }
-    mixerChart.data.labels = lbs; mixerChart.data.datasets[0].data = dts; mixerChart.data.datasets[0].backgroundColor = cls; mixerChart.update();
+    if (tot > 0) {
+        const hex = rgbToHex(Math.round(r / tot), Math.round(g / tot), Math.round(b / tot));
+        resDiv.style.backgroundColor = hex;
+        resDiv.textContent = hex;
+        // Ajustar color de texto según luminosidad
+        const lum = (Math.round(r/tot) * 299 + Math.round(g/tot) * 587 + Math.round(b/tot) * 114) / 1000;
+        resDiv.style.color = lum > 128 ? '#000' : 'rgba(255,255,255,0.85)';
+    } else {
+        resDiv.style.backgroundColor = 'transparent';
+        resDiv.style.color = 'var(--text-dim)';
+        resDiv.textContent = '#---';
+    }
+    mixerChart.data.labels                      = lbs;
+    mixerChart.data.datasets[0].data            = dts;
+    mixerChart.data.datasets[0].backgroundColor = cls;
+    mixerChart.update();
 };
 
 window.loadPickerImage = (e) => {
-    const reader = new FileReader(); reader.onload = (ev) => {
-        const img = new Image(); img.onload = () => {
-            const cvs = document.getElementById('canvasPicker'); const ctx = cvs.getContext('2d');
-            cvs.width = img.width; cvs.height = img.height; ctx.drawImage(img, 0, 0); cvs.style.display = 'block';
-        }; img.src = ev.target.result;
-    }; reader.readAsDataURL(e.target.files[0]);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+            const cvs = document.getElementById('canvasPicker');
+            const ctx = cvs.getContext('2d');
+            cvs.width  = img.width;
+            cvs.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            cvs.style.display = 'block';
+        };
+        img.src = ev.target.result;
+    };
+    reader.readAsDataURL(e.target.files[0]);
 };
 
 window.resetPicker = () => {
     const cvs = document.getElementById('canvasPicker');
-    if(cvs.getContext) cvs.getContext('2d').clearRect(0, 0, cvs.width, cvs.height);
-    cvs.style.display = 'none'; document.getElementById('pickerInput').value = ""; document.getElementById('pickerResults').innerHTML = "";
+    cvs.getContext('2d').clearRect(0, 0, cvs.width, cvs.height);
+    cvs.style.display = 'none';
+    document.getElementById('pickerInput').value = "";
+    document.getElementById('pickerResults').innerHTML = "";
 };
 
-document.getElementById('canvasPicker').addEventListener('mousedown', (e) => {
-    const cvs = document.getElementById('canvasPicker'); const rect = cvs.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (cvs.width / rect.width);
-    const y = (e.clientY - rect.top) * (cvs.height / rect.height);
-    const pix = cvs.getContext('2d').getImageData(x,y,1,1).data;
+// CORRECCIÓN: usar 'click' en lugar de 'mousedown' para mejor compatibilidad táctil
+document.getElementById('canvasPicker').addEventListener('click', (e) => {
+    const cvs  = document.getElementById('canvasPicker');
+    const rect = cvs.getBoundingClientRect();
+    const x    = (e.clientX - rect.left) * (cvs.width  / rect.width);
+    const y    = (e.clientY - rect.top)  * (cvs.height / rect.height);
+    const pix  = cvs.getContext('2d').getImageData(x, y, 1, 1).data;
     analizarColorPicker(pix[0], pix[1], pix[2]);
 });
 
-function analizarColorPicker(r,g,b) {
-    let allPaints = [];
-    for(let brand in paintCatalogData) {
+function analizarColorPicker(r, g, b) {
+    const allPaints = [];
+    for (let brand in paintCatalogData) {
         paintCatalogData[brand].forEach(p => {
-            const t = hexToRgb(p.hex);
-            const dist = Math.sqrt((r-t.r)**2 + (g-t.g)**2 + (b-t.b)**2);
-            let score = Math.max(0, 100 - (dist / 4.41));
-            allPaints.push({...p, brand, score});
+            const t    = hexToRgb(p.hex);
+            const dist = Math.sqrt((r - t.r) ** 2 + (g - t.g) ** 2 + (b - t.b) ** 2);
+            const score = Math.max(0, 100 - (dist / 4.41));
+            allPaints.push({ ...p, brand, score });
         });
     }
-    allPaints.sort((a,b) => b.score - a.score);
+    allPaints.sort((a, b) => b.score - a.score);
     document.getElementById('pickerResults').innerHTML = allPaints.slice(0, 8).map(p => `
         <div class="match-card">
             <div class="match-circle" style="background:${p.hex}"></div>
             <div class="match-info">
-                <div style="font-weight:bold;">${p.brand}</div>
-                <div>${p.id} - ${p.nombre}</div>
+                <div style="font-weight:600; font-size:11px;">${p.brand}</div>
+                <div>${p.id} — ${p.nombre}</div>
                 <div class="match-score">${p.score.toFixed(1)}%</div>
             </div>
-            <button onclick="window.togglePaint('${p.id}','buy')" style="background:none; border:none; cursor:pointer; font-size:16px;">🛒</button>
-        </div>
-    `).join('');
+            <button onclick="window.togglePaint('${p.id}','buy')"
+                    style="background:none; border:none; cursor:pointer; font-size:18px; padding:4px;"
+                    title="Añadir a lista de compra"
+                    aria-label="Añadir ${p.id} a lista de compra">🛒</button>
+        </div>`).join('');
 }
 
 // --- SCANNER ---
 window.startScanner = (target) => {
     window.toggleModal('scanModal', true);
     html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
-        if(target === 'model') { document.getElementById("search").value = t; window.renderMaquetas(); window.switchTab('tab-maquetas'); }
-        else { document.getElementById("paintSearch").value = t; window.renderPaintCatalog(); window.switchTab('tab-pinturas'); }
-        window.stopScanner();
-    }).catch(() => alert("Cámara no encontrada"));
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (text) => {
+            if (target === 'model') {
+                document.getElementById("search").value = text;
+                window.renderMaquetas();
+                window.switchTab('tab-maquetas');
+            } else {
+                document.getElementById("paintSearch").value = text;
+                window.renderPaintCatalog();
+                window.switchTab('tab-pinturas');
+            }
+            window.stopScanner();
+        }
+    ).catch(() => alert("Cámara no encontrada o permiso denegado."));
 };
-window.stopScanner = () => { if(html5QrCode) html5QrCode.stop().then(() => window.toggleModal('scanModal', false)); };
+
+window.stopScanner = () => {
+    if (html5QrCode) html5QrCode.stop().then(() => window.toggleModal('scanModal', false));
+};
 
 // --- EXCEL ---
 window.exportarMisPinturasExcel = () => {
@@ -457,28 +1169,53 @@ window.exportarMisPinturasExcel = () => {
         return { CODIGO: p.id, NOMBRE: p.nombre, MARCA: p.marca || "Desconocida" };
     });
     const ws = XLSX.utils.json_to_sheet(listado);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Mis Pinturas"); XLSX.writeFile(wb, "Mis_Pinturas_Stock.xlsx");
-};
-window.exportarExcelPrincipal = () => {
-    const ws = XLSX.utils.json_to_sheet(modelos.map(m => ({ CODIGO: m.codigo, MARCA: m.fabricante, MODELO: m.modelo, PRECIO: m.precio })));
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stock"); XLSX.writeFile(wb, "Stock_Maikman.xlsx");
-};
-window.exportarListaExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(myPaints.buy.map(id => ({ CODIGO: id, NOMBRE: encontrarPintura(id).nombre })));
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Compra"); XLSX.writeFile(wb, "Compra_Maikman.xlsx");
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Mis Pinturas");
+    XLSX.writeFile(wb, "Mis_Pinturas_Stock.xlsx");
 };
 
-// --- UTILS ---
-window.updateCartCount = () => document.getElementById('cartCount').innerText = myPaints.buy.length;
-function encontrarPintura(id) { 
-    for(let b in paintCatalogData) { 
-        let p = paintCatalogData[b].find(x => x.id === id); 
-        if(p) { p.marca = b; return p; } 
-    } 
-    return { nombre: id, hex: "#333", id: id, marca: "---" }; 
+window.exportarExcelPrincipal = () => {
+    const ws = XLSX.utils.json_to_sheet(modelos.map(m => ({
+        CODIGO: m.codigo, MARCA: m.fabricante, MODELO: m.modelo, PRECIO: m.precio
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Stock");
+    XLSX.writeFile(wb, "Stock_Maikman.xlsx");
+};
+
+window.exportarListaExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(myPaints.buy.map(id => ({
+        CODIGO: id, NOMBRE: encontrarPintura(id).nombre
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Compra");
+    XLSX.writeFile(wb, "Compra_Maikman.xlsx");
+};
+
+// --- UTILIDADES ---
+window.updateCartCount = () => {
+    document.getElementById('cartCount').textContent = myPaints.buy.length;
+};
+
+function encontrarPintura(id) {
+    for (let b in paintCatalogData) {
+        const p = paintCatalogData[b].find(x => x.id === id);
+        if (p) { p.marca = b; return p; }
+    }
+    return { nombre: id, hex: "#334155", id, marca: "—" };
 }
-function hexToRgb(h) { return { r: parseInt(h.slice(1,3),16), g: parseInt(h.slice(3,5),16), b: parseInt(h.slice(5,7),16) }; }
-function rgbToHex(r, g, b) { return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase(); }
+
+function hexToRgb(h) {
+    return {
+        r: parseInt(h.slice(1, 3), 16),
+        g: parseInt(h.slice(3, 5), 16),
+        b: parseInt(h.slice(5, 7), 16)
+    };
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+}
 
 </script>
 </body>
