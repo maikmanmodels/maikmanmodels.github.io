@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v8.5</title>
+<title>Maikman Models — Pro Stock v8.6</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1019,6 +1019,403 @@ body {
 .btn-modal.import { background: #7c3aed; color: white; }
 
 /* =========================================================
+   ESTADOS DE MODELO
+   ========================================================= */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.status-sin-empezar { background: rgba(107,114,128,0.2);  color: #9ca3af; border:1px solid rgba(107,114,128,0.3); }
+.status-en-proceso  { background: rgba(245,158,11,0.15);  color: var(--warning); border:1px solid rgba(245,158,11,0.3); }
+.status-terminado   { background: rgba(16,185,129,0.15);  color: var(--success); border:1px solid rgba(16,185,129,0.3); }
+.status-vitrina     { background: rgba(129,140,248,0.15); color: var(--accent2); border:1px solid rgba(129,140,248,0.3); }
+
+/* Borde lateral de la card según estado */
+.card.estado-en-proceso  { border-left: 3px solid var(--warning); }
+.card.estado-terminado   { border-left: 3px solid var(--success); }
+.card.estado-vitrina     { border-left: 3px solid var(--accent2); }
+
+/* Filtro de estados en toolbar */
+.estado-filter-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.estado-chip {
+    padding: 4px 11px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.estado-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(56,189,248,0.08); }
+
+/* Contador de cantidad */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+.qty-btn {
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+.qty-btn:hover { background: var(--card-hover); border-color: var(--border-bright); }
+.qty-display {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    min-width: 20px;
+    text-align: center;
+}
+.qty-label { font-size: 10px; color: var(--text-dim); }
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.dash-kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+.dash-kpi:hover { border-color: var(--border-bright); }
+.dash-kpi-value {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+.dash-kpi-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.dash-chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+}
+.dash-chart-card h4 {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+.status-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.status-bar-label { font-size: 11px; color: var(--text-dim); width: 90px; flex-shrink: 0; }
+.status-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--bg2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.status-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+.status-bar-count { font-size: 11px; font-weight: 700; color: var(--text); width: 24px; text-align: right; flex-shrink: 0; }
+
+/* =========================================================
+   SLIDESHOW / LIGHTBOX
+   ========================================================= */
+#lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.94);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    touch-action: pan-y;
+}
+#lightbox.open { display: flex; animation: fadeIn .2s ease; }
+#lightbox img {
+    max-width: 94vw;
+    max-height: 78vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+.lb-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 16px;
+}
+.lb-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+}
+.lb-btn:hover { background: rgba(255,255,255,0.2); }
+.lb-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(255,255,255,0.1);
+    border: none; color: white;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+}
+.lb-close:hover { background: rgba(255,255,255,0.2); }
+.lb-counter {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    min-width: 60px;
+    text-align: center;
+}
+.lb-dots { display: flex; gap: 6px; margin-top: 12px; }
+.lb-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.lb-dot.active { background: white; }
+
+/* =========================================================
+   PESTAÑA UTILIDADES
+   ========================================================= */
+.util-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+.util-section h4 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Temporizador */
+.timer-presets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.timer-preset-btn {
+    padding: 10px 6px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+.timer-preset-btn:hover { border-color: var(--border-bright); background: var(--card-hover); }
+.timer-display {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 4px;
+    color: var(--accent);
+    margin: 16px 0;
+    line-height: 1;
+    transition: color 0.3s;
+}
+.timer-display.warning { color: var(--warning); }
+.timer-display.danger  { color: var(--danger);  animation: pulse 0.5s ease infinite alternate; }
+@keyframes pulse { from { opacity:1; } to { opacity:0.4; } }
+.timer-label-input {
+    width: 100%;
+    padding: 9px 13px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+}
+.timer-label-input:focus { border-color: var(--accent); }
+.timer-btns { display: flex; gap: 8px; }
+.timer-btns button {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.timer-btns button:hover { opacity: 0.85; }
+.timer-history {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 140px;
+    overflow-y: auto;
+}
+.timer-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.timer-history-item:hover { background: var(--card-hover); color: var(--text); }
+.timer-history-item span { font-weight: 700; color: var(--accent); }
+
+/* Calculadora dilución */
+.dilution-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.dilution-row select,
+.dilution-row input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+.dilution-row select:focus,
+.dilution-row input:focus { border-color: var(--accent); }
+.dilution-result {
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 4px;
+}
+.dilution-ratio {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+.dilution-bars {
+    display: flex;
+    height: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 10px 0 6px;
+    border: 1px solid var(--border);
+}
+.dilution-bar-paint    { background: var(--accent);  transition: width 0.4s; }
+.dilution-bar-thinner  { background: var(--accent2); transition: width 0.4s; }
+.dilution-bar-retarder { background: var(--success); transition: width 0.4s; }
+.dilution-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 10px;
+    color: var(--text-dim);
+}
+.dilution-legend span { display: flex; align-items: center; gap: 4px; }
+.dilution-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dilution-tip {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    line-height: 1.5;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+}
+
+@media (max-width: 480px) {
+    .dash-grid { grid-template-columns: repeat(2, 1fr); }
+    .timer-presets { grid-template-columns: repeat(3, 1fr); }
+    .dilution-row { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
    SCROLLBAR
    ========================================================= */
 ::-webkit-scrollbar { width: 6px; }
@@ -1053,10 +1450,12 @@ body {
 
     <!-- NAVEGACIÓN -->
     <nav class="nav-tabs" role="navigation" aria-label="Navegación principal">
-        <button class="tab-btn active" onclick="window.switchTab('tab-maquetas', this)" aria-label="Modelos">📦 MODELOS</button>
-        <button class="tab-btn" onclick="window.switchTab('tab-pinturas', this)" aria-label="Pinturas">🎨 PINTURAS</button>
-        <button class="tab-btn" onclick="window.switchTab('tab-mixer', this)" aria-label="Mixer y Picker">🧪 MIXER</button>
-        <button class="tab-btn" onclick="window.abrirModalCompra(true)" aria-label="Carrito de compra">
+        <button class="tab-btn active" onclick="window.switchTab('tab-maquetas', this)" aria-label="Modelos">📦 MOD</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-pinturas', this)" aria-label="Pinturas">🎨 PINT</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-mixer', this)" aria-label="Mixer">🧪 MIX</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-dashboard', this); window.renderDashboard();" aria-label="Dashboard">📊</button>
+        <button class="tab-btn" onclick="window.switchTab('tab-utilidades', this)" aria-label="Utilidades">🔧</button>
+        <button class="tab-btn" onclick="window.abrirModalCompra(true)" aria-label="Carrito">
             🛒 <span id="cartCount" class="cart-badge">0</span>
         </button>
         <button class="tab-btn" style="flex:0.4;" onclick="window.toggleModal('configModal', true)" aria-label="Configuración">⚙️</button>
@@ -1068,6 +1467,13 @@ body {
             <input id="search" type="search" placeholder="Buscar modelo o fabricante…" oninput="window.renderMaquetas()" aria-label="Buscar maqueta">
             <button class="icon-btn" onclick="window.startScanner('model')" title="Escanear código QR" aria-label="Escanear QR">📷</button>
             <button class="icon-btn accent" onclick="window.openFormModal()" title="Añadir modelo" aria-label="Añadir nuevo modelo">➕</button>
+        </div>
+        <div class="estado-filter-row" id="estadoFilters">
+            <button class="estado-chip active" data-estado="todos" onclick="window.setEstadoFiltro('todos', this)">Todos</button>
+            <button class="estado-chip" data-estado="sin-empezar" onclick="window.setEstadoFiltro('sin-empezar', this)">📦 Sin empezar</button>
+            <button class="estado-chip" data-estado="en-proceso"  onclick="window.setEstadoFiltro('en-proceso', this)">🔧 En proceso</button>
+            <button class="estado-chip" data-estado="terminado"   onclick="window.setEstadoFiltro('terminado', this)">✅ Terminado</button>
+            <button class="estado-chip" data-estado="vitrina"     onclick="window.setEstadoFiltro('vitrina', this)">🏆 Vitrina</button>
         </div>
         <div id="grid" role="list"></div>
     </section>
@@ -1205,7 +1611,114 @@ body {
             <div id="recipeList" class="recipe-grid"></div>
         </div>
 
+    <!-- TAB DASHBOARD -->
+    <section id="tab-dashboard" class="content-section">
+        <div class="dash-grid" id="dashKpis"></div>
+        <div class="dash-chart-card">
+            <h4>📊 Modelos por estado</h4>
+            <div id="dashStatusBars"></div>
+        </div>
+        <div class="dash-chart-card">
+            <h4>🏭 Top marcas</h4>
+            <canvas id="dashBrandChart" style="max-height:220px;"></canvas>
+        </div>
+        <div class="dash-chart-card">
+            <h4>🎨 Stock de pinturas</h4>
+            <canvas id="dashPaintChart" style="max-height:200px;"></canvas>
+        </div>
     </section>
+
+    <!-- TAB UTILIDADES -->
+    <section id="tab-utilidades" class="content-section">
+        <div class="sub-tabs" role="tablist">
+            <button class="sub-tab-btn active" onclick="window.switchSubTab('sub-timer', this)" role="tab">⏱️ Temporizador</button>
+            <button class="sub-tab-btn" onclick="window.switchSubTab('sub-dilucion', this)" role="tab">💧 Dilución</button>
+        </div>
+
+        <!-- TEMPORIZADOR -->
+        <div id="sub-timer" class="sub-section active">
+            <div class="util-section">
+                <h4>⏱️ Temporizador de Secado</h4>
+                <input class="timer-label-input" id="timerLabel" placeholder='Nombre (ej: "Capa barniz mate")' maxlength="50">
+                <div class="timer-presets">
+                    <button class="timer-preset-btn" onclick="window.setTimer(5,  this)">5 min<br><span style="font-size:9px;color:var(--text-dim)">Touch-up</span></button>
+                    <button class="timer-preset-btn" onclick="window.setTimer(10, this)">10 min<br><span style="font-size:9px;color:var(--text-dim)">Acrílico</span></button>
+                    <button class="timer-preset-btn" onclick="window.setTimer(20, this)">20 min<br><span style="font-size:9px;color:var(--text-dim)">Esmalte</span></button>
+                    <button class="timer-preset-btn" onclick="window.setTimer(30, this)">30 min<br><span style="font-size:9px;color:var(--text-dim)">Lavado</span></button>
+                    <button class="timer-preset-btn" onclick="window.setTimer(60, this)">1 h<br><span style="font-size:9px;color:var(--text-dim)">Laca</span></button>
+                    <button class="timer-preset-btn" onclick="window.setTimer(0,  this, true)">Manual<br><span style="font-size:9px;color:var(--text-dim)">Personalizar</span></button>
+                </div>
+                <div id="timerCustomRow" style="display:none; margin-bottom:10px;">
+                    <input id="timerCustomMin" type="number" min="1" max="999" placeholder="Minutos"
+                           style="width:100%; padding:9px 13px; border-radius:7px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:13px; outline:none;"
+                           oninput="window.setTimerCustom()">
+                </div>
+                <div class="timer-display" id="timerDisplay">00:00</div>
+                <div class="timer-btns">
+                    <button id="btnTimerStart" onclick="window.startTimer()"  style="background:var(--success); color:white;">▶ Iniciar</button>
+                    <button id="btnTimerPause" onclick="window.pauseTimer()"  style="background:var(--warning); color:white;" disabled>⏸ Pausar</button>
+                    <button                    onclick="window.resetTimer()"  style="background:var(--danger);  color:white;">↺ Reset</button>
+                </div>
+                <div id="timerHistory" class="timer-history"></div>
+            </div>
+        </div>
+
+        <!-- CALCULADORA DILUCIÓN -->
+        <div id="sub-dilucion" class="sub-section">
+            <div class="util-section">
+                <h4>💧 Calculadora de Dilución</h4>
+                <div class="dilution-row">
+                    <select id="dilPaintType" onchange="window.calcDilution()" aria-label="Tipo de pintura">
+                        <optgroup label="Acrílico al agua">
+                            <option value="acril-tamiya">Tamiya Acrílico</option>
+                            <option value="acril-mr">Mr. Color Acrílico (Aqueous)</option>
+                            <option value="acril-vallejo">Vallejo Model Color</option>
+                            <option value="acril-ak">AK Interactive Acrílico</option>
+                        </optgroup>
+                        <optgroup label="Laca / Nitro">
+                            <option value="laca-mr">Mr. Color Laca</option>
+                            <option value="laca-gaia">Gaianotes Laca</option>
+                        </optgroup>
+                        <optgroup label="Esmalte">
+                            <option value="esmalte-humbrol">Humbrol Esmalte</option>
+                            <option value="esmalte-ak">AK Interactive Esmalte</option>
+                        </optgroup>
+                    </select>
+                    <select id="dilMethod" onchange="window.calcDilution()" aria-label="Método de aplicación">
+                        <option value="aerografo">✈ Aerógrafo (0.3mm)</option>
+                        <option value="aerografo-fino">✈ Aerógrafo (0.2mm)</option>
+                        <option value="aerografo-grueso">✈ Aerógrafo (0.5mm)</option>
+                        <option value="pincel">🖌 Pincel</option>
+                        <option value="bote">💨 Bote spray</option>
+                    </select>
+                </div>
+                <div class="dilution-row">
+                    <div>
+                        <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:4px;">Cantidad de pintura (ml)</label>
+                        <input id="dilAmount" type="number" value="10" min="1" max="100" oninput="window.calcDilution()" style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:4px;">Temperatura ambiente (°C)</label>
+                        <input id="dilTemp" type="number" value="20" min="10" max="40" oninput="window.calcDilution()">
+                    </div>
+                </div>
+                <div class="dilution-result" id="dilResult"></div>
+            </div>
+        </div>
+    </section>
+
+</div><!-- fin #app -->
+
+<!-- LIGHTBOX -->
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Galería de imágenes">
+    <button class="lb-close" onclick="window.closeLightbox()" aria-label="Cerrar">✕</button>
+    <img id="lbImg" src="" alt="Imagen ampliada">
+    <div class="lb-controls">
+        <button class="lb-btn" onclick="window.lbNav(-1)" aria-label="Anterior">‹</button>
+        <span class="lb-counter" id="lbCounter">1 / 1</span>
+        <button class="lb-btn" onclick="window.lbNav(1)" aria-label="Siguiente">›</button>
+    </div>
+    <div id="lbDots" class="lb-dots"></div>
 </div>
 
 <!-- ======================= MODALES ======================= -->
@@ -1221,6 +1734,13 @@ body {
         <input id="f_precio"     placeholder="Precio (€)"          type="number" step="0.01" min="0" aria-label="Precio">
         <input id="f_foto"       placeholder="URL Foto"            type="url" aria-label="URL Foto">
         <input id="f_paints"     placeholder="IDs de pinturas separados por comas" aria-label="IDs de pinturas">
+        <select id="f_estado" aria-label="Estado del modelo" style="margin-bottom:10px;">
+            <option value="sin-empezar">📦 Sin empezar</option>
+            <option value="en-proceso">🔧 En proceso</option>
+            <option value="terminado">✅ Terminado</option>
+            <option value="vitrina">🏆 Vitrina</option>
+        </select>
+        <input id="f_cantidad" placeholder="Cantidad en stock" type="number" min="1" value="1" aria-label="Cantidad">
         <button class="btn-modal success" onclick="window.guardarModelo()">GUARDAR</button>
         <button class="btn-modal ghost" onclick="window.toggleModal('formModal', false)">Cancelar</button>
     </div>
@@ -1476,29 +1996,59 @@ async function cargarTodo() {
 }
 
 // --- MODELOS ---
+let estadoFiltroActivo = 'todos';
+
+window.setEstadoFiltro = (estado, btn) => {
+    estadoFiltroActivo = estado;
+    document.querySelectorAll('.estado-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    window.renderMaquetas();
+};
+
+const ESTADO_INFO = {
+    'sin-empezar': { label: '📦 Sin empezar', cls: 'status-sin-empezar', border: '' },
+    'en-proceso':  { label: '🔧 En proceso',  cls: 'status-en-proceso',  border: 'estado-en-proceso' },
+    'terminado':   { label: '✅ Terminado',   cls: 'status-terminado',   border: 'estado-terminado' },
+    'vitrina':     { label: '🏆 Vitrina',     cls: 'status-vitrina',     border: 'estado-vitrina' },
+};
+
 window.renderMaquetas = () => {
     const grid = document.getElementById("grid");
     const q    = document.getElementById("search").value.toLowerCase();
     grid.innerHTML = "";
     modelos
-        .filter(m =>
-            (m.modelo    || "").toLowerCase().includes(q) ||
-            (m.fabricante|| "").toLowerCase().includes(q)
-        )
+        .filter(m => {
+            const matchQ = (m.modelo||"").toLowerCase().includes(q) || (m.fabricante||"").toLowerCase().includes(q);
+            const estado = m.estado || 'sin-empezar';
+            const matchE = estadoFiltroActivo === 'todos' || estado === estadoFiltroActivo;
+            return matchQ && matchE;
+        })
         .forEach(m => {
+            const estado   = m.estado || 'sin-empezar';
+            const eInfo    = ESTADO_INFO[estado] || ESTADO_INFO['sin-empezar'];
+            const cantidad = m.cantidad || 1;
             const div = document.createElement('div');
-            div.className = 'card';
+            div.className = `card ${eInfo.border}`;
             div.setAttribute('role', 'listitem');
             div.innerHTML = `
                 <img src="${m.foto || 'https://via.placeholder.com/300x175?text=Sin+Imagen'}"
                      alt="${m.modelo}"
                      loading="lazy"
-                     onclick="window.open('${m.foto}', '_blank')">
+                     onclick="window.abrirLightboxGaleria('${m.id}', 0)">
                 <div class="card-body">
-                    <div class="card-code">${m.codigo || 'S/N'}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px; margin-bottom:4px;">
+                        <div class="card-code">${m.codigo || 'S/N'}</div>
+                        <span class="status-badge ${eInfo.cls}">${eInfo.label}</span>
+                    </div>
                     <div class="card-name">${m.modelo || '—'}</div>
                     <div class="card-brand">${m.fabricante || '—'}</div>
-                    <div class="card-btns">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="window.cambiarCantidad('${m.id}', -1)" aria-label="Reducir cantidad">−</button>
+                        <span class="qty-display">${cantidad}</span>
+                        <button class="qty-btn" onclick="window.cambiarCantidad('${m.id}', +1)" aria-label="Aumentar cantidad">+</button>
+                        <span class="qty-label">${cantidad === 1 ? 'unidad' : 'unidades'}</span>
+                    </div>
+                    <div class="card-btns" style="margin-top:8px;">
                         <button class="btn-action" style="background:#3498db" onclick="window.abrirInfoModelo('${m.id}')">INFO</button>
                         <button class="btn-action" style="background:#9b59b6" onclick="window.abrirPinturasModelo('${m.id}')">COLOR</button>
                         <button class="btn-action" style="background:var(--warning)" onclick="window.openFormModal('${m.id}')">EDIT</button>
@@ -1507,6 +2057,15 @@ window.renderMaquetas = () => {
                 </div>`;
             grid.appendChild(div);
         });
+};
+
+window.cambiarCantidad = async (id, delta) => {
+    const m = modelos.find(x => x.id === id);
+    if (!m) return;
+    const nueva = Math.max(1, (m.cantidad || 1) + delta);
+    m.cantidad = nueva;
+    await updateDoc(doc(db, "modelos", id), { cantidad: nueva });
+    window.renderMaquetas();
 };
 
 window.abrirInfoModelo = (id) => {
@@ -1548,20 +2107,23 @@ window.borrarFotoGaleria = async (idx) => {
 };
 
 window.openFormModal = (id = null) => {
-    const fields = ['f_id','f_codigo','f_fabricante','f_modelo','f_precio','f_foto','f_paints'];
     if (id) {
         const m = modelos.find(x => x.id === id);
-        document.getElementById('formTitle').textContent = "Editar Maqueta";
-        document.getElementById('f_id').value         = m.id;
-        document.getElementById('f_codigo').value     = m.codigo      || "";
-        document.getElementById('f_fabricante').value = m.fabricante  || "";
-        document.getElementById('f_modelo').value     = m.modelo      || "";
-        document.getElementById('f_precio').value     = m.precio      || "";
-        document.getElementById('f_foto').value       = m.foto        || "";
-        document.getElementById('f_paints').value     = (m.paints || []).join(', ');
+        document.getElementById('formTitle').textContent  = "Editar Maqueta";
+        document.getElementById('f_id').value             = m.id;
+        document.getElementById('f_codigo').value         = m.codigo      || "";
+        document.getElementById('f_fabricante').value     = m.fabricante  || "";
+        document.getElementById('f_modelo').value         = m.modelo      || "";
+        document.getElementById('f_precio').value         = m.precio      || "";
+        document.getElementById('f_foto').value           = m.foto        || "";
+        document.getElementById('f_paints').value         = (m.paints || []).join(', ');
+        document.getElementById('f_estado').value         = m.estado      || 'sin-empezar';
+        document.getElementById('f_cantidad').value       = m.cantidad    || 1;
     } else {
-        document.getElementById('formTitle').textContent = "Nueva Maqueta";
-        fields.forEach(f => document.getElementById(f).value = "");
+        document.getElementById('formTitle').textContent  = "Nueva Maqueta";
+        ['f_id','f_codigo','f_fabricante','f_modelo','f_precio','f_foto','f_paints'].forEach(f => document.getElementById(f).value = "");
+        document.getElementById('f_estado').value   = 'sin-empezar';
+        document.getElementById('f_cantidad').value = 1;
     }
     window.toggleModal('formModal', true);
 };
@@ -1574,8 +2136,9 @@ window.guardarModelo = async () => {
         modelo:     document.getElementById('f_modelo').value,
         precio:     document.getElementById('f_precio').value,
         foto:       document.getElementById('f_foto').value,
-        paints:     document.getElementById('f_paints').value
-                        .split(',').map(s => s.trim()).filter(s => s !== "")
+        paints:     document.getElementById('f_paints').value.split(',').map(s => s.trim()).filter(s => s !== ""),
+        estado:     document.getElementById('f_estado').value,
+        cantidad:   parseInt(document.getElementById('f_cantidad').value) || 1,
     };
     if (id) await updateDoc(doc(db, "modelos", id), data);
     else    await addDoc(collection(db, "modelos"), data);
@@ -2289,6 +2852,306 @@ window.calcConversiones = () => {
             </div>`;
     }
 };
+
+// --- LIGHTBOX ---
+let lbImages = [], lbIndex = 0;
+
+window.abrirLightboxGaleria = (modelId, startIdx) => {
+    const m = modelos.find(x => x.id === modelId);
+    if (!m) return;
+    const imgs = [m.foto, ...(m.galeria || [])].filter(Boolean);
+    if (!imgs.length) return;
+    lbImages = imgs;
+    lbIndex  = startIdx;
+    window.lbRender();
+    document.getElementById('lightbox').classList.add('open');
+};
+
+window.lbRender = () => {
+    document.getElementById('lbImg').src         = lbImages[lbIndex];
+    document.getElementById('lbCounter').textContent = `${lbIndex + 1} / ${lbImages.length}`;
+    const dots = document.getElementById('lbDots');
+    dots.innerHTML = lbImages.map((_, i) =>
+        `<div class="lb-dot ${i === lbIndex ? 'active' : ''}" onclick="window.lbGoto(${i})"></div>`
+    ).join('');
+};
+
+window.lbNav = (dir) => {
+    lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length;
+    window.lbRender();
+};
+
+window.lbGoto = (i) => { lbIndex = i; window.lbRender(); };
+
+window.closeLightbox = () => document.getElementById('lightbox').classList.remove('open');
+
+// Swipe táctil en el lightbox
+(()=>{
+    let tsX = 0;
+    const lb = document.getElementById('lightbox');
+    lb.addEventListener('touchstart', e => { tsX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend',   e => {
+        const dx = e.changedTouches[0].clientX - tsX;
+        if (Math.abs(dx) > 50) window.lbNav(dx < 0 ? 1 : -1);
+    }, { passive: true });
+    lb.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') window.lbNav(1);
+        if (e.key === 'ArrowLeft')  window.lbNav(-1);
+        if (e.key === 'Escape')     window.closeLightbox();
+    });
+})();
+
+// También abrir lightbox desde galería del modal info
+window.abrirInfoModelo = (id) => {
+    currentModelId = id;
+    const m = modelos.find(x => x.id === id);
+    if (!m) return;
+    document.getElementById("infoTitle").textContent = m.modelo;
+    document.getElementById("infoDetails").innerHTML =
+        `<b>Ref:</b> ${m.codigo || '-'} &nbsp;|&nbsp; <b>Marca:</b> ${m.fabricante} &nbsp;|&nbsp; <b>Precio:</b> ${m.precio || '--'}€`;
+    const gal = document.getElementById("galleryGrid");
+    gal.innerHTML = "";
+    (m.galeria || []).forEach((url, idx) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'gallery-thumb';
+        wrap.innerHTML = `
+            <img src="${url}" alt="Foto ${idx+1}" loading="lazy"
+                 onclick="window.abrirLightboxGaleria('${id}', ${idx+1})">
+            <button class="del-photo" onclick="window.borrarFotoGaleria(${idx})" title="Eliminar foto">✕</button>`;
+        gal.appendChild(wrap);
+    });
+    window.toggleModal('infoModal', true);
+};
+
+// --- DASHBOARD ---
+let dashBrandChart = null, dashPaintChart = null;
+
+window.renderDashboard = () => {
+    // KPIs
+    const totalModelos  = modelos.length;
+    const totalStock    = modelos.reduce((s, m) => s + (m.cantidad || 1), 0);
+    const valorTotal    = modelos.reduce((s, m) => s + (parseFloat(m.precio) || 0) * (m.cantidad || 1), 0);
+    const pintStockPct  = Object.keys(paintCatalogData).length
+        ? Math.round(myPaints.have.length / Object.values(paintCatalogData).flat().length * 100)
+        : 0;
+
+    document.getElementById('dashKpis').innerHTML = `
+        <div class="dash-kpi"><div class="dash-kpi-value">${totalModelos}</div><div class="dash-kpi-label">Modelos únicos</div></div>
+        <div class="dash-kpi"><div class="dash-kpi-value">${totalStock}</div><div class="dash-kpi-label">Unidades en stock</div></div>
+        <div class="dash-kpi"><div class="dash-kpi-value">${valorTotal.toFixed(0)}€</div><div class="dash-kpi-label">Valor inventario</div></div>
+        <div class="dash-kpi"><div class="dash-kpi-value">${pintStockPct}%</div><div class="dash-kpi-label">Pinturas en stock</div></div>
+    `;
+
+    // Barras de estado
+    const counts = { 'sin-empezar': 0, 'en-proceso': 0, 'terminado': 0, 'vitrina': 0 };
+    modelos.forEach(m => { const e = m.estado || 'sin-empezar'; counts[e] = (counts[e] || 0) + 1; });
+    const maxCount = Math.max(...Object.values(counts), 1);
+    const colors = { 'sin-empezar': '#6b7280', 'en-proceso': '#f59e0b', 'terminado': '#10b981', 'vitrina': '#818cf8' };
+    document.getElementById('dashStatusBars').innerHTML = Object.entries(ESTADO_INFO).map(([key, info]) => `
+        <div class="status-bar-row">
+            <div class="status-bar-label">${info.label}</div>
+            <div class="status-bar-track">
+                <div class="status-bar-fill" style="width:${(counts[key]/maxCount*100)}%; background:${colors[key]};"></div>
+            </div>
+            <div class="status-bar-count">${counts[key]}</div>
+        </div>`).join('');
+
+    // Gráfico marcas
+    const brandCounts = {};
+    modelos.forEach(m => { const b = m.fabricante || 'Otros'; brandCounts[b] = (brandCounts[b] || 0) + 1; });
+    const sortedBrands = Object.entries(brandCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    if (dashBrandChart) dashBrandChart.destroy();
+    dashBrandChart = new Chart(document.getElementById('dashBrandChart'), {
+        type: 'bar',
+        data: {
+            labels: sortedBrands.map(x => x[0]),
+            datasets: [{ data: sortedBrands.map(x => x[1]),
+                backgroundColor: 'rgba(56,189,248,0.6)', borderColor: 'rgba(56,189,248,1)',
+                borderWidth: 1, borderRadius: 4 }]
+        },
+        options: { plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#6a84a8' } } }, responsive: true }
+    });
+
+    // Gráfico pinturas
+    const totalPaints = Object.values(paintCatalogData).flat().length;
+    if (dashPaintChart) dashPaintChart.destroy();
+    dashPaintChart = new Chart(document.getElementById('dashPaintChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['En stock', 'Lista compra', 'Sin catalogar'],
+            datasets: [{ data: [myPaints.have.length, myPaints.buy.length, totalPaints - myPaints.have.length - myPaints.buy.length],
+                backgroundColor: ['rgba(16,185,129,0.8)', 'rgba(244,63,94,0.8)', 'rgba(107,114,128,0.4)'],
+                borderWidth: 0 }]
+        },
+        options: { plugins:{ legend:{ position:'bottom', labels:{ color:'#6a84a8', padding:16, font:{ size:11 } } } }, cutout:'65%', responsive: true }
+    });
+};
+
+// --- TEMPORIZADOR ---
+let timerInterval = null, timerSeconds = 0, timerTotal = 0, timerRunning = false;
+let timerHistoryList = JSON.parse(localStorage.getItem('maikman_timer_history') || '[]');
+
+window.setTimer = (mins, btn, manual = false) => {
+    document.querySelectorAll('.timer-preset-btn').forEach(b => b.style.borderColor = '');
+    btn.style.borderColor = 'var(--accent)';
+    document.getElementById('timerCustomRow').style.display = manual ? 'block' : 'none';
+    if (!manual) {
+        timerSeconds = timerTotal = mins * 60;
+        window.updateTimerDisplay();
+    }
+};
+
+window.setTimerCustom = () => {
+    const mins = parseInt(document.getElementById('timerCustomMin').value) || 0;
+    timerSeconds = timerTotal = mins * 60;
+    window.updateTimerDisplay();
+};
+
+window.updateTimerDisplay = () => {
+    const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+    const s = (timerSeconds % 60).toString().padStart(2, '0');
+    const el = document.getElementById('timerDisplay');
+    el.textContent = `${m}:${s}`;
+    const pct = timerTotal > 0 ? timerSeconds / timerTotal : 1;
+    el.classList.toggle('warning', pct <= 0.25 && pct > 0.1);
+    el.classList.toggle('danger',  pct <= 0.1 && timerSeconds > 0);
+    if (timerSeconds === 0 && timerRunning) {
+        el.classList.add('danger');
+        el.textContent = '¡LISTO!';
+    }
+};
+
+window.startTimer = () => {
+    if (timerSeconds <= 0 || timerRunning) return;
+    timerRunning = true;
+    document.getElementById('btnTimerStart').disabled = true;
+    document.getElementById('btnTimerPause').disabled = false;
+    timerInterval = setInterval(() => {
+        timerSeconds--;
+        window.updateTimerDisplay();
+        if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            // Guardar en historial
+            const label = document.getElementById('timerLabel').value.trim() || 'Temporizador';
+            const mins  = Math.round(timerTotal / 60);
+            const entry = { label, mins, ts: new Date().toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' }) };
+            timerHistoryList.unshift(entry);
+            if (timerHistoryList.length > 10) timerHistoryList.pop();
+            localStorage.setItem('maikman_timer_history', JSON.stringify(timerHistoryList));
+            window.renderTimerHistory();
+            showToast(`⏱️ ¡${label} listo!`);
+            // Notificación del navegador
+            if (Notification.permission === 'granted') {
+                new Notification(`⏱️ Maikman Models`, { body: `${label} — ¡ha terminado el secado!` });
+            }
+            document.getElementById('btnTimerStart').disabled = false;
+            document.getElementById('btnTimerPause').disabled = true;
+        }
+    }, 1000);
+    // Pedir permiso de notificación la primera vez
+    if (Notification.permission === 'default') Notification.requestPermission();
+};
+
+window.pauseTimer = () => {
+    if (!timerRunning) return;
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('btnTimerStart').disabled = false;
+    document.getElementById('btnTimerPause').disabled = true;
+};
+
+window.resetTimer = () => {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerSeconds = timerTotal;
+    document.getElementById('timerDisplay').className = 'timer-display';
+    window.updateTimerDisplay();
+    document.getElementById('btnTimerStart').disabled = false;
+    document.getElementById('btnTimerPause').disabled = true;
+};
+
+window.renderTimerHistory = () => {
+    const cont = document.getElementById('timerHistory');
+    if (!cont) return;
+    cont.innerHTML = timerHistoryList.length === 0 ? '' :
+        `<div style="font-size:10px; color:var(--text-dim); margin-bottom:4px; text-transform:uppercase; letter-spacing:1px;">Historial reciente</div>` +
+        timerHistoryList.map(e =>
+            `<div class="timer-history-item" onclick="window.setTimerFromHistory(${e.mins})">
+                <span>${e.label}</span>
+                <span>${e.mins} min &nbsp;·&nbsp; ${e.ts}</span>
+            </div>`
+        ).join('');
+};
+
+window.setTimerFromHistory = (mins) => {
+    timerSeconds = timerTotal = mins * 60;
+    window.updateTimerDisplay();
+    showToast(`↩ ${mins} minutos cargados`);
+};
+
+window.renderTimerHistory();
+
+// --- CALCULADORA DE DILUCIÓN ---
+const DILUTION_DB = {
+    // [pintura, diluyente, retardante?], tip
+    'acril-tamiya':   { aerografo:      [2, 1, 0],    aerografo_fino: [1.5, 1, 0],   aerografo_grueso: [2.5, 1, 0], pincel: [1, 0.3, 0], bote: [1, 0, 0], diluyente:'Tamiya X-20A', tip:'Para aerógrafo, busca consistencia de leche desnatada. Agita bien antes de mezclar.' },
+    'acril-mr':       { aerografo:      [2, 1, 0],    aerografo_fino: [1.5, 1, 0],   aerografo_grueso: [2.5, 1, 0], pincel: [1, 0.2, 0], bote: [1, 0, 0], diluyente:'Mr. Aqueous Hobby Color Thinner', tip:'Compatible con agua destilada como diluyente alternativo.' },
+    'acril-vallejo':  { aerografo:      [2, 1, 0.2],  aerografo_fino: [1.5, 1, 0.2], aerografo_grueso: [3, 1, 0.2], pincel: [1, 0.1, 0], bote: [1, 0, 0], diluyente:'Vallejo Airbrush Thinner', tip:'Añade retardante para mejorar el nivel en pinceles. Usa agua destilada, no del grifo.' },
+    'acril-ak':       { aerografo:      [2, 1, 0],    aerografo_fino: [1.5, 1, 0],   aerografo_grueso: [2.5, 1, 0], pincel: [1, 0.2, 0], bote: [1, 0, 0], diluyente:'AK Interactive Thinner', tip:'Las pinturas AK son bastante densas de fábrica, no escatimes en dilución.' },
+    'laca-mr':        { aerografo:      [1, 1.5, 0],  aerografo_fino: [1, 2, 0],     aerografo_grueso: [1, 1, 0],   pincel: [1, 0.5, 0], bote: [1, 0, 0], diluyente:'Mr. Color Leveling Thinner', tip:'⚠️ Laca: usa en zona ventilada con mascarilla. Leveling Thinner ayuda a nivelar y evita marcas.' },
+    'laca-gaia':      { aerografo:      [1, 1.5, 0],  aerografo_fino: [1, 2, 0],     aerografo_grueso: [1, 1, 0],   pincel: [1, 0.5, 0], bote: [1, 0, 0], diluyente:'Gaianotes T-01 Thinner', tip:'⚠️ Muy agresiva con plástico. Aplica capas muy finas para evitar dañar el kit.' },
+    'esmalte-humbrol': { aerografo:     [1, 1, 0],    aerografo_fino: [1, 1.5, 0],   aerografo_grueso: [1, 0.7, 0], pincel: [1, 0.3, 0], bote: [1, 0, 0], diluyente:'White Spirit / Humbrol Enamel Thinner', tip:'⚠️ Esmalte: disuelve algunos plásticos directamente. Aplica siempre sobre capa acrílica base.' },
+    'esmalte-ak':     { aerografo:      [1, 1, 0],    aerografo_fino: [1, 1.5, 0],   aerografo_grueso: [1, 0.7, 0], pincel: [1, 0.3, 0], bote: [1, 0, 0], diluyente:'AK Enamel Thinner / White Spirit', tip:'Ideal para lavados y filtros. Siempre aplica sobre barniz protector para facilitar la limpieza.' },
+};
+
+window.calcDilution = () => {
+    const type   = document.getElementById('dilPaintType').value;
+    const method = document.getElementById('dilMethod').value.replace('-', '_');
+    const amount = parseFloat(document.getElementById('dilAmount').value) || 10;
+    const temp   = parseInt(document.getElementById('dilTemp').value) || 20;
+    const data   = DILUTION_DB[type];
+    if (!data) return;
+    const ratio  = data[method] || data['aerografo'];
+
+    // Ajuste por temperatura: más calor → más diluyente
+    const tempMult = temp > 25 ? 1 + (temp - 25) * 0.02 : 1;
+    const paint    = amount;
+    const thinner  = +(ratio[1] * amount * tempMult).toFixed(1);
+    const retarder = +(ratio[2] * amount).toFixed(1);
+
+    const total   = paint + thinner + retarder;
+    const pPaint  = (paint   / total * 100).toFixed(0);
+    const pThin   = (thinner / total * 100).toFixed(0);
+    const pRet    = retarder > 0 ? (retarder / total * 100).toFixed(0) : 0;
+
+    const ratioStr = retarder > 0
+        ? `${paint}ml : ${thinner}ml : ${retarder}ml`
+        : `${paint}ml : ${thinner}ml`;
+
+    const ratioLabel = retarder > 0
+        ? `Pintura : Diluyente : Retardante`
+        : `Pintura : Diluyente`;
+
+    const tempNote = temp > 25 ? `<br>🌡️ +${((tempMult-1)*100).toFixed(0)}% diluyente extra por temperatura alta.` : '';
+
+    document.getElementById('dilResult').innerHTML = `
+        <div class="dilution-ratio">${ratioStr}</div>
+        <div style="font-size:10px; color:var(--text-dim); margin-bottom:8px;">${ratioLabel}</div>
+        <div class="dilution-bars">
+            <div class="dilution-bar-paint"   style="width:${pPaint}%"></div>
+            <div class="dilution-bar-thinner" style="width:${pThin}%"></div>
+            <div class="dilution-bar-retarder" style="width:${pRet}%"></div>
+        </div>
+        <div class="dilution-legend">
+            <span><div class="dilution-legend-dot" style="background:var(--accent)"></div> Pintura ${pPaint}%</span>
+            <span><div class="dilution-legend-dot" style="background:var(--accent2)"></div> Diluyente ${pThin}%</span>
+            ${retarder > 0 ? `<span><div class="dilution-legend-dot" style="background:var(--success)"></div> Retardante ${pRet}%</span>` : ''}
+        </div>
+        <div class="dilution-tip">💡 Diluyente recomendado: <b>${data.diluyente}</b>${tempNote}<br>${data.tip}</div>`;
+};
+
+window.calcDilution(); // render inicial
 
 // --- UTILIDADES ---
 window.updateCartCount = () => {
