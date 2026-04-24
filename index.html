@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v8.4</title>
+<title>Maikman Models — Pro Stock v8.1.1</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -51,6 +51,45 @@ body.light {
     --danger: #dc2626;
     --warning: #d97706;
     --glow: rgba(37, 99, 235, 0.08);
+    --glow-color: rgba(37,99,235,0.05);
+}
+
+/* Tema Acero — grises oscuros neutros basados en #727272 */
+body.grey {
+    --bg: #1c1c1c;
+    --bg2: #242424;
+    --card: #2d2d2d;
+    --card-hover: #353535;
+    --border: rgba(114, 114, 114, 0.18);
+    --border-bright: rgba(114, 114, 114, 0.45);
+    --text: #d4d4d4;
+    --text-dim: #727272;
+    --accent: #a3a3a3;
+    --accent2: #8a8a8a;
+    --success: #4caf50;
+    --danger: #e05252;
+    --warning: #c9973a;
+    --glow: rgba(114, 114, 114, 0.1);
+    --glow-color: rgba(114,114,114,0.04);
+}
+
+/* Tema Racing — rojo fuego + carbono */
+body.racing {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --card: #161616;
+    --card-hover: #1e1e1e;
+    --border: rgba(220, 38, 38, 0.18);
+    --border-bright: rgba(220, 38, 38, 0.5);
+    --text: #f0e6e6;
+    --text-dim: #8a6060;
+    --accent: #dc2626;
+    --accent2: #f97316;
+    --success: #16a34a;
+    --danger: #f97316;
+    --warning: #facc15;
+    --glow: rgba(220, 38, 38, 0.18);
+    --glow-color: rgba(220,38,38,0.07);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -912,6 +951,73 @@ body {
 .conv-empty .conv-empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.35; }
 .conv-empty p { font-size: 13px; }
 
+/* Botones fuente del picker */
+.picker-source-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px;
+    border-radius: 8px;
+    border: 1px dashed var(--border-bright);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--text-dim);
+    background: var(--bg2);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.picker-source-btn:hover  { background: var(--card-hover); color: var(--text); }
+.picker-source-btn.active { background: var(--accent); border-color: var(--accent); color: white; border-style: solid; }
+
+/* =========================================================
+   SELECTOR DE TEMAS
+   ========================================================= */
+.theme-picker {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.theme-swatch {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px 6px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.15s;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.theme-swatch:hover { transform: translateY(-2px); }
+.theme-swatch.active { border-color: var(--accent); }
+.theme-swatch .ts-preview {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+.theme-swatch .ts-label {
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+.theme-swatch.active .ts-label { color: var(--accent); }
+
+/* Import button */
+.btn-modal.import { background: #7c3aed; color: white; }
+
 /* =========================================================
    SCROLLBAR
    ========================================================= */
@@ -1063,8 +1169,33 @@ body {
                     <h4>🎯 Picker IA</h4>
                     <button class="btn-action" style="background:var(--danger); padding:6px 12px;" onclick="window.resetPicker()">RESET</button>
                 </div>
-                <input type="file" id="pickerInput" accept="image/*" onchange="window.loadPickerImage(event)" aria-label="Cargar imagen para picker">
-                <canvas id="canvasPicker" style="display:none; width:100%; border-radius:8px; margin-top:12px; cursor:crosshair;" aria-label="Canvas de selección de color"></canvas>
+
+                <!-- Botones de fuente -->
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <label class="picker-source-btn" title="Cargar imagen desde galería">
+                        🖼️ Galería
+                        <input id="pickerFileInput" type="file" accept="image/*"
+                               onchange="window.loadPickerImage(event)"
+                               style="display:none;" aria-label="Cargar imagen desde galería">
+                    </label>
+                    <label class="picker-source-btn" title="Hacer foto con la cámara">
+                        📷 Cámara
+                        <input type="file" accept="image/*" capture="environment"
+                               onchange="window.loadPickerImage(event)"
+                               style="display:none;" aria-label="Hacer foto con cámara trasera">
+                    </label>
+                </div>
+
+                <!-- Instrucción contextual -->
+                <p id="pickerHint" style="font-size:11px; color:var(--text-dim); margin-bottom:6px; display:none;">
+                    Toca el color en la imagen para identificarlo.
+                </p>
+
+                <!-- Canvas imagen -->
+                <canvas id="canvasPicker"
+                        style="display:none; width:100%; border-radius:8px; margin-bottom:10px; cursor:crosshair;"
+                        aria-label="Canvas de selección de color"></canvas>
+
                 <div id="pickerResults" class="picker-results-container"></div>
             </div>
         </div>
@@ -1164,10 +1295,50 @@ body {
 <div id="configModal" class="modal" role="dialog" aria-modal="true">
     <div class="modal-content">
         <h3>⚙️ Ajustes</h3>
-        <div class="settings-group">
-            <button class="btn-modal ghost" onclick="window.toggleTheme()">🌓 Cambiar Modo Claro / Oscuro</button>
+
+        <!-- Selector de temas -->
+        <div style="font-size:11px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">Tema</div>
+        <div class="theme-picker">
+            <button class="theme-swatch active" id="ts-dark"   onclick="window.setTheme('dark')"   title="Oscuro">
+                <div class="ts-preview" style="background:#0f1d35;">🌑</div>
+                <span class="ts-label">Oscuro</span>
+            </button>
+            <button class="theme-swatch" id="ts-light"  onclick="window.setTheme('light')"  title="Claro">
+                <div class="ts-preview" style="background:#eef2f9;">☀️</div>
+                <span class="ts-label">Claro</span>
+            </button>
+            <button class="theme-swatch" id="ts-grey"   onclick="window.setTheme('grey')"   title="Acero">
+                <div class="ts-preview" style="background:#2d2d2d;">🔩</div>
+                <span class="ts-label">Acero</span>
+            </button>
+            <button class="theme-swatch" id="ts-racing" onclick="window.setTheme('racing')" title="Racing">
+                <div class="ts-preview" style="background:#161616; border:1px solid rgba(220,38,38,0.6);">🏁</div>
+                <span class="ts-label">Racing</span>
+            </button>
+        </div>
+
+        <hr class="divider">
+
+        <div style="font-size:11px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">Exportar</div>
+        <div class="settings-group" style="margin-bottom:14px;">
             <button class="btn-modal accent"   onclick="window.exportarExcelPrincipal()">📊 Exportar Maquetas (Excel)</button>
             <button class="btn-modal success"  onclick="window.exportarMisPinturasExcel()">🎨 Exportar Mis Pinturas (Excel)</button>
+        </div>
+
+        <div style="font-size:11px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">Importar</div>
+        <div class="settings-group" style="margin-bottom:14px;">
+            <label class="btn-modal import" style="display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;margin-bottom:8px;border-radius:8px;padding:13px;">
+                📥 Importar Maquetas (Excel)
+                <input type="file" accept=".xlsx,.xls" onchange="window.importarMaquetasExcel(event)" style="display:none;">
+            </label>
+            <label class="btn-modal import" style="display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border-radius:8px;padding:13px;">
+                🎨 Importar Mis Pinturas (Excel)
+                <input type="file" accept=".xlsx,.xls" onchange="window.importarPinturasExcel(event)" style="display:none;">
+            </label>
+        </div>
+
+        <hr class="divider">
+        <div class="settings-group">
             <button class="btn-modal danger"   onclick="window.signOutUser()">Cerrar Sesión</button>
             <button class="btn-modal ghost"    onclick="window.toggleModal('configModal', false)">Volver</button>
         </div>
@@ -1241,12 +1412,24 @@ window.toggleModal = (id, show) => {
     document.getElementById(id).style.display = show ? 'flex' : 'none';
 };
 
-window.toggleTheme = () => {
-    document.body.classList.toggle('light');
-    localStorage.setItem('maikman_theme', document.body.classList.contains('light') ? 'light' : 'dark');
+const THEMES = ['dark','light','grey','racing'];
+
+window.setTheme = (theme) => {
+    document.body.classList.remove(...THEMES);
+    if (theme !== 'dark') document.body.classList.add(theme);
+    localStorage.setItem('maikman_theme', theme);
+    // Actualizar swatches activos
+    THEMES.forEach(t => {
+        const el = document.getElementById(`ts-${t}`);
+        if (el) el.classList.toggle('active', t === theme);
+    });
 };
 
-if (localStorage.getItem('maikman_theme') === 'light') document.body.classList.add('light');
+// Aplicar tema guardado al cargar
+(()=>{
+    const saved = localStorage.getItem('maikman_theme') || 'dark';
+    window.setTheme(saved);
+})();
 
 // --- CARGA DATOS ---
 async function cargarTodo() {
@@ -1684,7 +1867,10 @@ window.calcMix = () => {
     if (btn) btn.disabled = (tot === 0);
 };
 
+// --- PICKER ---
+
 window.loadPickerImage = (e) => {
+    if (!e.target.files[0]) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
         const img = new Image();
@@ -1695,6 +1881,8 @@ window.loadPickerImage = (e) => {
             cvs.height = img.height;
             ctx.drawImage(img, 0, 0);
             cvs.style.display = 'block';
+            document.getElementById('pickerHint').style.display = 'block';
+            document.getElementById('pickerResults').innerHTML  = '';
         };
         img.src = ev.target.result;
     };
@@ -1705,11 +1893,12 @@ window.resetPicker = () => {
     const cvs = document.getElementById('canvasPicker');
     cvs.getContext('2d').clearRect(0, 0, cvs.width, cvs.height);
     cvs.style.display = 'none';
-    document.getElementById('pickerInput').value = "";
-    document.getElementById('pickerResults').innerHTML = "";
+    const fi = document.getElementById('pickerFileInput');
+    if (fi) fi.value = '';
+    document.getElementById('pickerResults').innerHTML     = '';
+    document.getElementById('pickerHint').style.display   = 'none';
 };
 
-// CORRECCIÓN: usar 'click' en lugar de 'mousedown' para mejor compatibilidad táctil
 document.getElementById('canvasPicker').addEventListener('click', (e) => {
     const cvs  = document.getElementById('canvasPicker');
     const rect = cvs.getBoundingClientRect();
@@ -1859,6 +2048,81 @@ window.exportarListaExcel = () => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Compra");
     XLSX.writeFile(wb, "Compra_Maikman.xlsx");
+};
+
+// --- IMPORTACIÓN ---
+window.importarMaquetasExcel = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+        const buf  = await file.arrayBuffer();
+        const wb   = XLSX.read(buf, { type: 'array' });
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws);
+
+        if (rows.length === 0) { showToast('El archivo está vacío', 'danger'); return; }
+
+        // Mapeo flexible de columnas (acepta mayúsculas/minúsculas)
+        const normalizar = (row) => ({
+            codigo:     row.CODIGO     || row.codigo     || row.Codigo     || '',
+            fabricante: row.MARCA      || row.marca      || row.Marca      || row.FABRICANTE || row.fabricante || '',
+            modelo:     row.MODELO     || row.modelo     || row.Modelo     || '',
+            precio:     row.PRECIO     || row.precio     || row.Precio     || '',
+            foto:       row.FOTO       || row.foto       || '',
+            paints:     [],
+            galeria:    []
+        });
+
+        let importados = 0;
+        for (const row of rows) {
+            const data = normalizar(row);
+            if (!data.modelo && !data.codigo) continue; // fila vacía
+            await addDoc(collection(db, "modelos"), data);
+            importados++;
+        }
+        window.toggleModal('configModal', false);
+        await cargarTodo();
+        showToast(`✓ ${importados} maqueta${importados !== 1 ? 's' : ''} importada${importados !== 1 ? 's' : ''}`);
+    } catch (err) {
+        console.error('Error importando maquetas:', err);
+        showToast('Error al leer el archivo Excel', 'danger');
+    }
+    e.target.value = '';
+};
+
+window.importarPinturasExcel = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+        const buf  = await file.arrayBuffer();
+        const wb   = XLSX.read(buf, { type: 'array' });
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws);
+
+        if (rows.length === 0) { showToast('El archivo está vacío', 'danger'); return; }
+
+        let addedHave = 0, addedBuy = 0;
+        rows.forEach(row => {
+            const id   = (row.CODIGO || row.codigo || row.Codigo || '').toString().trim();
+            const tipo = (row.TIPO   || row.tipo   || row.Tipo   || 'have').toString().toLowerCase();
+            if (!id) return;
+            if (tipo === 'compra' || tipo === 'buy') {
+                if (!myPaints.buy.includes(id))  { myPaints.buy.push(id);  addedBuy++; }
+            } else {
+                if (!myPaints.have.includes(id)) { myPaints.have.push(id); addedHave++; }
+            }
+        });
+
+        await setDoc(doc(db, "usuarios_datos", auth.currentUser.uid), myPaints);
+        window.renderPaintCatalog();
+        window.updateCartCount();
+        window.toggleModal('configModal', false);
+        showToast(`✓ ${addedHave} al stock · ${addedBuy} a lista de compra`);
+    } catch (err) {
+        console.error('Error importando pinturas:', err);
+        showToast('Error al leer el archivo Excel', 'danger');
+    }
+    e.target.value = '';
 };
 
 // --- CONVERSOR DE PINTURAS ---
