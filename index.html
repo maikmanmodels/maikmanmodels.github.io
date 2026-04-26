@@ -866,7 +866,7 @@ window.renderModelos = () => {
       const card = document.createElement('div');
       card.className = `mod-card ${ei.card}`;
       card.innerHTML = `
-        <img src="${m.foto||'https://placehold.co/300x160/0e1e36/00d2ff?text=Sin+Foto'}"
+        <img src="${m.foto||'https://via.placeholder.com/300x160/091422/00dcff?text=+'}"
              alt="${m.modelo||''}" loading="lazy"
              onclick="openLightbox('${m.id}',0)">
         <div class="mod-body">
@@ -995,9 +995,13 @@ window.openPaintsModal = id => {
     const box = document.createElement('div');
     box.className = 'paint-box';
     box.style.borderColor = has ? 'var(--ok)' : 'var(--danger)';
-    box.innerHTML = `<div class="p-circle" style="background:${p.hex}"></div>
-                     <div class="p-id">${p.id}</div><div class="p-name">${p.nombre}</div>
-                     <div style="margin-top:5px;font-size:10px;font-weight:700;color:${has?'var(--ok)':'var(--danger)'}">${has?'✓ STOCK':'✗ FALTA'}</div>`;
+    box.innerHTML = `
+      <div class="p-swatch" style="background:${p.hex}"></div>
+      <div class="p-info">
+        <div class="p-id">${p.id}</div>
+        <div class="p-name">${p.nombre}</div>
+        <div style="margin-top:5px;font-size:10px;font-weight:700;color:${has?'var(--ok)':'var(--danger)'}">${has?'✓ STOCK':'✗ FALTA'}</div>
+      </div>`;
     cont.appendChild(box);
   });
   openModal('modelPaintsModal');
@@ -1018,12 +1022,16 @@ window.renderCatalog = () => {
       const buy  = myPaints.buy.includes(p.id);
       const box  = document.createElement('div');
       box.className = 'paint-box';
-      box.innerHTML = `<div class="p-circle" style="background:${p.hex||'#555'}"></div>
-                       <div class="p-id">${p.id||'S/N'}</div><div class="p-name">${p.nombre||''}</div>
-                       <div class="p-btns">
-                         <button onclick="togglePaint('${p.id}','have')" style="background:${have?'var(--ok)':'rgba(255,255,255,.05)'}" title="Stock">✅</button>
-                         <button onclick="togglePaint('${p.id}','buy')"  style="background:${buy?'var(--danger)':'rgba(255,255,255,.05)'}" title="Compra">🛒</button>
-                       </div>`;
+      box.innerHTML = `
+        <div class="p-swatch" style="background:${p.hex||'#555'}"></div>
+        <div class="p-info">
+          <div class="p-id">${p.id||'S/N'}</div>
+          <div class="p-name">${p.nombre||''}</div>
+          <div class="p-btns">
+            <button onclick="togglePaint('${p.id}','have')" style="background:${have?'var(--ok)':'rgba(0,220,255,.05)'};color:${have?'#000':'var(--text2)'}" title="Stock">✅</button>
+            <button onclick="togglePaint('${p.id}','buy')"  style="background:${buy?'var(--danger)':'rgba(0,220,255,.05)'}" title="Compra">🛒</button>
+          </div>
+        </div>`;
       cont.appendChild(box);
     });
 };
@@ -1214,7 +1222,8 @@ window.loadPickerImg = e => {
     img.onload=()=>{
       const cvs=document.getElementById('canvasPicker');
       cvs.width=img.width; cvs.height=img.height;
-      cvs.getContext('2d').drawImage(img,0,0);
+      const ctx2d = cvs.getContext('2d',{willReadFrequently:true});
+      ctx2d.drawImage(img,0,0);
       cvs.style.display='block';
       document.getElementById('pickerHint').style.display='block';
       document.getElementById('pickerResults').innerHTML='';
@@ -1226,7 +1235,7 @@ window.loadPickerImg = e => {
 
 window.resetPicker = () => {
   const cvs=document.getElementById('canvasPicker');
-  cvs.getContext('2d').clearRect(0,0,cvs.width,cvs.height);
+  cvs.getContext('2d',{willReadFrequently:true}).clearRect(0,0,cvs.width,cvs.height);
   cvs.style.display='none';
   document.getElementById('pickerFileIn').value='';
   document.getElementById('pickerResults').innerHTML='';
@@ -1238,7 +1247,7 @@ document.getElementById('canvasPicker').addEventListener('click', e => {
   const r=cvs.getBoundingClientRect();
   const x=(e.clientX-r.left)*(cvs.width/r.width);
   const y=(e.clientY-r.top)*(cvs.height/r.height);
-  const px=cvs.getContext('2d').getImageData(x,y,1,1).data;
+  const px=cvs.getContext('2d',{willReadFrequently:true}).getImageData(x,y,1,1).data;
   analyzePicker(px[0],px[1],px[2]);
 });
 
