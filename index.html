@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v10.2</title>
+<title>Maikman Models — Pro Stock v10.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -129,11 +129,19 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 .st-p{background:rgba(255,170,0,.1);color:var(--warn);border:1px solid rgba(255,170,0,.22)}
 .st-t{background:rgba(0,229,160,.1);color:var(--ok);border:1px solid rgba(0,229,160,.22)}
 .st-v{background:rgba(123,95,255,.1);color:var(--accent2);border:1px solid rgba(123,95,255,.22)}
-.qty-ctrl{display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.qty-btn:hover{background:var(--hover);border-color:var(--borderB)}
-.qty-num{font-family:var(--fd);font-size:14px;font-weight:700;min-width:20px;text-align:center}
-.qty-lbl{font-size:10px;color:var(--dim)}
+.qty-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#0099cc);
+  color:#000;font-family:var(--fd);font-size:13px;font-weight:700;
+  box-shadow:0 0 10px rgba(0,220,255,.35);
+  flex-shrink:0;line-height:1;
+}
+.qty-badge.multi{
+  background:linear-gradient(135deg,var(--accent2),#5540cc);
+  box-shadow:0 0 10px rgba(123,95,255,.35);
+  color:#fff;
+}
 .mod-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:auto}
 .act-btn{padding:8px 3px;font-size:10px;font-family:var(--fd);font-weight:700;letter-spacing:.5px;border-radius:7px;border:none;cursor:pointer;color:#fff;text-align:center;transition:all .15s;text-transform:uppercase}
 .act-btn:hover{filter:brightness(1.2);transform:scale(1.04)}
@@ -373,7 +381,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Maikman</div>
-    <div class="login-sub">Models — Pro Stock v10.2</div>
+    <div class="login-sub">Models — Pro Stock v10.6</div>
     <input id="loginEmail"    type="email"    placeholder="Email"      autocomplete="email">
     <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">ENTRAR</button>
@@ -387,7 +395,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Maikman</div>
-      <div class="ver">Pro Stock v10</div>
+      <div class="ver">Pro Stock v10.6</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="navTo('pg-modelos','Modelos',this)">
@@ -944,17 +952,16 @@ window.renderModelos = () => {
              alt="${m.modelo||''}" loading="lazy"
              onclick="openLightbox('${m.id}',0)">
         <div class="mod-body">
-          <div class="mod-row">
-            <span class="mod-code">${m.codigo||'S/N'}</span>
-            <span class="st-badge ${ei.cls}">${ei.lbl}</span>
+          <div class="mod-code">${m.codigo||'S/N'}</div>
+          <div class="mod-row" style="margin-bottom:6px">
+            <div>
+              <div class="mod-name">${m.modelo||'—'}</div>
+              <div class="mod-brand">${m.fabricante||'—'}</div>
+            </div>
+            <span class="qty-badge ${qty>1?'multi':''}" title="${qty} ${qty===1?'unidad':'unidades'}">${qty}</span>
           </div>
-          <div class="mod-name">${m.modelo||'—'}</div>
-          <div class="mod-brand">${m.fabricante||'—'}</div>
-          <div class="qty-ctrl" style="margin-bottom:7px">
-            <button class="qty-btn" onclick="changeQty('${m.id}',-1)">−</button>
-            <span class="qty-num">${qty}</span>
-            <button class="qty-btn" onclick="changeQty('${m.id}',+1)">+</button>
-            <span class="qty-lbl">${qty===1?'unidad':'unidades'}</span>
+          <div style="margin-bottom:8px">
+            <span class="st-badge ${ei.cls}">${ei.lbl}</span>
           </div>
           <div class="mod-btns">
             <button class="act-btn" style="background:#3498db" onclick="openInfoModal('${m.id}')">INFO</button>
@@ -1544,13 +1551,8 @@ window.renderConvList = () => {
   const q=(document.getElementById('convSearchIn').value||'').toLowerCase().trim();
   const lista=document.getElementById('convSearchList');
 
-  // Sin búsqueda y sin marca seleccionada: mostrar hint
-  if(!q) {
-    lista.style.display='none';
-    return;
-  }
-
   const filtradas=(paints[marca]||[]).filter(p=>
+    !q ||
     (p.id||'').toLowerCase().includes(q) ||
     (p.nombre||'').toLowerCase().includes(q)
   );
