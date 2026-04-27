@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v10.6</title>
+<title>Maikman Models — Pro Stock v10.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -177,13 +177,61 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   transition:all .15s;
 }
 .p-btns button:hover{background:var(--hover);border-color:var(--borderB)}
-.mixer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.mx-slot select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;margin-bottom:6px;outline:none;transition:border-color .2s}
-.mx-slot select:focus{border-color:var(--accent)}
-.mx-slot input[type=range]{width:100%;accent-color:var(--accent);margin-bottom:3px}
-.mx-slot .drop-lbl{font-size:10px;text-align:center;color:var(--dim)}
-.mix-preview-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;background:rgba(0,0,0,.3);padding:16px;border-radius:12px;border:1px solid var(--border)}
-#mixPreview{height:100px;border-radius:10px;border:1px solid var(--borderB);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:20px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.8);transition:background-color .4s;box-shadow:inset 0 0 20px rgba(0,0,0,.3)}
+/* ---- MIXER NUEVO ---- */
+.mixer-layout{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:start}
+.mixer-sliders{display:flex;flex-direction:column;gap:14px}
+.mx-slot{display:flex;flex-direction:column;gap:5px}
+.mx-slot-header{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.mx-slot-header select{
+  flex:1;padding:6px 10px;border-radius:8px;
+  border:1px solid var(--border);background:rgba(0,0,0,.35);
+  color:var(--text);font-family:var(--fd);font-size:12px;font-weight:600;
+  outline:none;transition:border-color .2s;letter-spacing:.5px;
+}
+.mx-slot-header select:focus{border-color:var(--accent)}
+.mx-color-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:1px solid rgba(255,255,255,.15);box-shadow:0 0 6px rgba(0,0,0,.4);transition:background .3s}
+.mx-slider-row{display:flex;align-items:center;gap:8px}
+.mx-slider-wrap{flex:1;position:relative;height:20px;display:flex;align-items:center}
+.mx-slider-wrap input[type=range]{
+  width:100%;height:6px;border-radius:3px;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background:var(--track-bg, linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.08) 100%));
+  transition:background .3s;
+}
+.mx-slider-wrap input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--thumb-color, #fff);cursor:pointer;
+  box-shadow:0 0 8px rgba(0,0,0,.6), 0 0 12px var(--thumb-glow, rgba(255,255,255,.3));
+  border:2px solid rgba(255,255,255,.8);transition:transform .15s,box-shadow .15s;
+}
+.mx-slider-wrap input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.mx-slider-wrap input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--thumb-color,#fff);cursor:pointer;border:2px solid rgba(255,255,255,.8)}
+.mx-drop-val{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);min-width:36px;text-align:right;letter-spacing:.5px}
+.mx-drop-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;text-align:right;min-width:36px}
+
+/* Preview central */
+.mixer-center{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:140px}
+#mixPreview{
+  width:130px;height:130px;border-radius:16px;
+  border:1px solid var(--borderB);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:2px;
+  color:rgba(255,255,255,.8);transition:background-color .4s;
+  box-shadow:inset 0 0 30px rgba(0,0,0,.4), 0 0 30px rgba(0,0,0,.3);
+  text-align:center;line-height:1.3;padding:8px;
+}
+.mixer-center-label{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+
+/* 3D Preview */
+.mixer-3d{display:flex;flex-direction:column;align-items:center;gap:8px}
+.mixer-3d-label{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+#mix3dCanvas{border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.3)}
+
+@media(max-width:760px){
+  .mixer-layout{grid-template-columns:1fr;gap:16px}
+  .mixer-center{flex-direction:row;justify-content:center}
+  #mix3dCanvas{width:100%!important}
+}
 .save-mix-row{display:flex;gap:8px;margin-top:14px;align-items:center}
 .save-mix-row input{flex:1;padding:10px 14px;border-radius:9px;border:1px solid var(--border);background:rgba(0,220,255,.03);color:var(--text);font-family:var(--fb);font-size:13px;outline:none;transition:all .2s}
 .save-mix-row input::placeholder{color:var(--dim)}
@@ -374,6 +422,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 @media(max-width:640px){.sidebar{width:58px}.sidebar .brand,.sidebar .ver,.nav-item .ni-lbl{display:none}.nav-item{justify-content:center;padding:12px 0}.mixer-grid{grid-template-columns:1fr 1fr}.kpi-grid{grid-template-columns:1fr 1fr}.dil-row{grid-template-columns:1fr}#modGrid{grid-template-columns:1fr}.picker-results{grid-template-columns:1fr}}
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
@@ -381,7 +430,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Maikman</div>
-    <div class="login-sub">Models — Pro Stock v10.6</div>
+    <div class="login-sub">Models — Pro Stock v10.7</div>
     <input id="loginEmail"    type="email"    placeholder="Email"      autocomplete="email">
     <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">ENTRAR</button>
@@ -395,7 +444,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Maikman</div>
-      <div class="ver">Pro Stock v10.6</div>
+      <div class="ver">Pro Stock v10.7</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="navTo('pg-modelos','Modelos',this)">
@@ -500,12 +549,22 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div class="sub-page active" id="sp-mezclador">
         <div class="section-card">
           <h4>🧪 Mezclador de Colores</h4>
-          <div class="mixer-grid" id="mixerInputs"></div>
-          <div class="mix-preview-row">
-            <div id="mixPreview">#---</div>
-            <canvas id="mixChart" style="max-height:90px"></canvas>
+          <div class="mixer-layout">
+            <!-- SLIDERS -->
+            <div class="mixer-sliders" id="mixerInputs"></div>
+            <!-- PREVIEW CENTRAL -->
+            <div class="mixer-center">
+              <div class="mixer-center-label">Resultado</div>
+              <div id="mixPreview">#---</div>
+              <div id="mixHexLabel" style="font-family:var(--fd);font-size:11px;color:var(--dim);letter-spacing:1px"></div>
+            </div>
+            <!-- 3D PREVIEW -->
+            <div class="mixer-3d">
+              <div class="mixer-3d-label">3D Preview</div>
+              <canvas id="mix3dCanvas" width="200" height="200"></canvas>
+            </div>
           </div>
-          <div class="save-mix-row">
+          <div class="save-mix-row" style="margin-top:16px">
             <input type="text" id="mixName" placeholder='Nombre (ej: "Verde Panzer IV")' maxlength="60">
             <button id="btnSaveMix" onclick="guardarReceta()" disabled>💾 Guardar</button>
           </div>
@@ -1341,44 +1400,191 @@ function lbClampPan() {
 /* ============================================================
    MIXER
    ============================================================ */
+/* ============================================================
+   MIXER — sliders con gradiente + preview 3D
+   ============================================================ */
+let mix3dScene=null, mix3dRenderer=null, mix3dCamera=null;
+let mix3dPyramids=[], mix3dAnimId=null;
+
 function initMixer() {
   const cont = document.getElementById('mixerInputs');
-  let opts = '<option value="">—</option>';
-  for (let b in paints) opts += `<optgroup label="${b}">${paints[b].map(p=>`<option value="${p.hex}">${p.id}</option>`).join('')}</optgroup>`;
+  let opts = '<option value="">— Sin color —</option>';
+  for (let b in paints)
+    opts += `<optgroup label="${b}">${paints[b].map(p=>`<option value="${p.hex}">${p.id} — ${p.nombre}</option>`).join('')}</optgroup>`;
+
   cont.innerHTML = [1,2,3,4,5,6].map(i=>`
     <div class="mx-slot">
-      <select id="mc${i}" onchange="calcMix()">${opts}</select>
-      <input type="range" id="mv${i}" min="0" max="10" value="0" oninput="calcMix()">
-      <div id="ml${i}" class="drop-lbl">0 gotas</div>
+      <div class="mx-slot-header">
+        <div class="mx-color-dot" id="mdot${i}"></div>
+        <select id="mc${i}" onchange="calcMix()">${opts}</select>
+      </div>
+      <div class="mx-slider-row">
+        <div class="mx-slider-wrap">
+          <input type="range" id="mv${i}" min="0" max="10" value="0" oninput="calcMix()">
+        </div>
+        <div>
+          <div class="mx-drop-val" id="ml${i}">0</div>
+          <div class="mx-drop-label">gotas</div>
+        </div>
+      </div>
     </div>`).join('');
-  mixChart = new Chart(document.getElementById('mixChart'),{
-    type:'pie', data:{labels:[],datasets:[{data:[],backgroundColor:[]}]},
-    options:{plugins:{legend:{display:false}},animation:false}
-  });
+
+  init3DPreview();
+}
+
+/* Gradiente del slider según color seleccionado */
+function updateSliderStyle(i, hex, gotas) {
+  const slider = document.getElementById(`mv${i}`);
+  const dot    = document.getElementById(`mdot${i}`);
+  if (hex) {
+    const c = hexRgb(hex);
+    const dark = `rgb(${Math.round(c.r*.15)},${Math.round(c.g*.15)},${Math.round(c.b*.15)})`;
+    const pct  = (gotas / 10) * 100;
+    slider.style.setProperty('--track-bg',
+      `linear-gradient(90deg, ${hex} 0%, ${hex} ${pct}%, ${dark} ${pct}%, ${dark} 100%)`);
+    slider.style.setProperty('--thumb-color', hex);
+    slider.style.setProperty('--thumb-glow', `rgba(${c.r},${c.g},${c.b},.5)`);
+    dot.style.background = hex;
+    dot.style.boxShadow  = `0 0 8px rgba(${c.r},${c.g},${c.b},.6)`;
+  } else {
+    slider.style.setProperty('--track-bg', 'linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.08))');
+    slider.style.setProperty('--thumb-color', '#555');
+    slider.style.setProperty('--thumb-glow', 'rgba(0,0,0,0)');
+    dot.style.background = 'transparent';
+    dot.style.boxShadow  = 'none';
+  }
 }
 
 window.calcMix = () => {
-  let r=0,g=0,b=0,tot=0; const lbs=[],dts=[],cls=[];
+  let r=0,g=0,b=0,tot=0;
+  const active = [];
+
   for(let i=1;i<=6;i++){
-    const h=document.getElementById(`mc${i}`).value;
-    const v=parseInt(document.getElementById(`mv${i}`).value);
-    document.getElementById(`ml${i}`).textContent=v+' gotas';
-    if(h&&v>0){
-      const c=hexRgb(h); r+=c.r*v;g+=c.g*v;b+=c.b*v;tot+=v;
-      lbs.push(document.getElementById(`mc${i}`).selectedOptions[0].text);
-      dts.push(v);cls.push(h);
+    const h = document.getElementById(`mc${i}`).value;
+    const v = parseInt(document.getElementById(`mv${i}`).value);
+    document.getElementById(`ml${i}`).textContent = v;
+    updateSliderStyle(i, h, v);
+    if(h && v>0){
+      const c = hexRgb(h);
+      r+=c.r*v; g+=c.g*v; b+=c.b*v; tot+=v;
+      active.push({ hex:h, gotas:v, r:c.r, g:c.g, b:c.b });
     }
   }
-  const prev=document.getElementById('mixPreview');
+
+  const prev = document.getElementById('mixPreview');
   if(tot>0){
-    const hex=rgbHex(Math.round(r/tot),Math.round(g/tot),Math.round(b/tot));
-    prev.style.backgroundColor=hex; prev.textContent=hex;
-    const lum=(Math.round(r/tot)*299+Math.round(g/tot)*587+Math.round(b/tot)*114)/1000;
-    prev.style.color=lum>128?'#000':'rgba(255,255,255,.85)';
-  } else { prev.style.backgroundColor='transparent';prev.style.color='var(--dim)';prev.textContent='#---'; }
-  mixChart.data.labels=lbs; mixChart.data.datasets[0].data=dts; mixChart.data.datasets[0].backgroundColor=cls; mixChart.update();
-  document.getElementById('btnSaveMix').disabled=(tot===0);
+    const hex = rgbHex(Math.round(r/tot),Math.round(g/tot),Math.round(b/tot));
+    prev.style.backgroundColor = hex;
+    prev.textContent = hex;
+    const lum = (Math.round(r/tot)*299+Math.round(g/tot)*587+Math.round(b/tot)*114)/1000;
+    prev.style.color = lum>128 ? '#000' : 'rgba(255,255,255,.85)';
+    prev.style.boxShadow = `inset 0 0 30px rgba(0,0,0,.4), 0 0 30px rgba(${Math.round(r/tot)},${Math.round(g/tot)},${Math.round(b/tot)},.25)`;
+  } else {
+    prev.style.backgroundColor='transparent';
+    prev.style.color='var(--dim)';
+    prev.textContent='#---';
+    prev.style.boxShadow='inset 0 0 30px rgba(0,0,0,.4)';
+  }
+
+  update3DPreview(active, tot);
+  document.getElementById('btnSaveMix').disabled = (tot===0);
 };
+
+/* ---- 3D PREVIEW con Three.js ---- */
+function init3DPreview() {
+  const canvas = document.getElementById('mix3dCanvas');
+  if (!canvas || !window.THREE) return;
+
+  mix3dScene    = new THREE.Scene();
+  mix3dCamera   = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  mix3dCamera.position.set(0, 3.5, 5.5);
+  mix3dCamera.lookAt(0, 0, 0);
+
+  mix3dRenderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  mix3dRenderer.setSize(200, 200);
+  mix3dRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  mix3dRenderer.setClearColor(0x000000, 0);
+
+  // Cubo de alambre de fondo (cage)
+  const cage = new THREE.BoxHelper(
+    new THREE.Mesh(new THREE.BoxGeometry(4.5,4.5,4.5)),
+    0x00dcff
+  );
+  cage.material.opacity = 0.18;
+  cage.material.transparent = true;
+  mix3dScene.add(cage);
+
+  // Luz
+  mix3dScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.9);
+  dl.position.set(3,5,3);
+  mix3dScene.add(dl);
+
+  // Animación de rotación
+  function animate() {
+    mix3dAnimId = requestAnimationFrame(animate);
+    if(mix3dScene) mix3dScene.rotation.y += 0.008;
+    mix3dRenderer.render(mix3dScene, mix3dCamera);
+  }
+  animate();
+}
+
+function update3DPreview(active, total) {
+  if (!mix3dScene || !window.THREE) return;
+
+  // Limpiar pirámides anteriores
+  mix3dPyramids.forEach(m => mix3dScene.remove(m));
+  mix3dPyramids = [];
+
+  if (!active.length) return;
+
+  // Posiciones en círculo para hasta 6 pirámides
+  const positions = [
+    [ 0,    0,  0  ],
+    [-1.3,  0,  0  ],
+    [ 1.3,  0,  0  ],
+    [ 0,    0, -1.3],
+    [-0.9,  0, -1.1],
+    [ 0.9,  0, -1.1],
+  ];
+
+  active.forEach((col, idx) => {
+    // Altura proporcional a las gotas (base 10 = altura máxima 3)
+    const h  = (col.gotas / 10) * 3.2;
+    const geo = new THREE.ConeGeometry(0.55, h, 4);
+    const mat = new THREE.MeshPhongMaterial({
+      color: parseInt(col.hex.replace('#',''), 16),
+      emissive: parseInt(col.hex.replace('#',''), 16),
+      emissiveIntensity: 0.25,
+      shininess: 80,
+      transparent: true,
+      opacity: 0.88,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    const pos  = positions[idx] || [Math.random()*2-1, 0, Math.random()*2-1];
+    mesh.position.set(pos[0], h/2 - 1.8, pos[2]);
+    mix3dScene.add(mesh);
+    mix3dPyramids.push(mesh);
+
+    // Etiqueta de gotas como sprite (plano con canvas 2D)
+    const spriteCanvas = document.createElement('canvas');
+    spriteCanvas.width = 64; spriteCanvas.height = 32;
+    const ctx = spriteCanvas.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0,0,64,32);
+    ctx.font = 'bold 18px Rajdhani, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(col.gotas + 'gt', 32, 22);
+    const tex = new THREE.CanvasTexture(spriteCanvas);
+    const spriteMat = new THREE.SpriteMaterial({ map:tex, transparent:true });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.position.set(pos[0], h - 1.2, pos[2]);
+    sprite.scale.set(0.9, 0.45, 1);
+    mix3dScene.add(sprite);
+    mix3dPyramids.push(sprite);
+  });
+}
 
 window.guardarReceta = async () => {
   const nombre = document.getElementById('mixName').value.trim();
@@ -1440,8 +1646,8 @@ window.loadReceta = id => {
     const sel=document.getElementById(`mc${i}`);
     const opt=Array.from(sel.options).find(o=>o.text===ing.colorId||o.value===ing.hex);
     if(opt) sel.value=opt.value;
-    document.getElementById(`mv${i}`).value=ing.gotas;
-    document.getElementById(`ml${i}`).textContent=ing.gotas+' gotas';
+    document.getElementById(`mv${i}`).value = ing.gotas;
+    document.getElementById(`ml${i}`).textContent = ing.gotas;
   });
   calcMix();
   // Ir a mezclador
