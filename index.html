@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v10.1</title>
+<title>Maikman Models — Pro Stock v10.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -287,16 +287,65 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 .gal-thumb:hover .gal-del{opacity:1}
 .url-row{display:flex;gap:8px;margin-bottom:14px;align-items:center}
 .url-row input{margin-bottom:0}
-#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:2000;display:none;align-items:center;justify-content:center;flex-direction:column;touch-action:pan-y}
+#lightbox{
+  position:fixed;inset:0;background:rgba(0,0,0,.96);
+  z-index:2000;display:none;align-items:center;justify-content:center;
+  flex-direction:column;
+  touch-action:none; /* gestionamos nosotros todos los gestos */
+  overflow:hidden;
+}
 #lightbox.open{display:flex;animation:fadeIn .2s ease}
-#lightbox img{max-width:92vw;max-height:74vh;object-fit:contain;border-radius:12px;box-shadow:0 0 60px rgba(0,220,255,.15),0 16px 60px rgba(0,0,0,.9);user-select:none}
-.lb-ctrl{display:flex;align-items:center;gap:20px;margin-top:16px}
+
+/* Contenedor que aplica transform de zoom+pan */
+#lbImgWrap{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  cursor:grab;
+  user-select:none;
+  /* el tamaño máximo inicial */
+  max-width:92vw;
+  max-height:74vh;
+}
+#lbImgWrap.grabbing{cursor:grabbing}
+#lbImgWrap.zoomed{cursor:grab}
+
+#lbImg{
+  max-width:92vw;max-height:74vh;
+  object-fit:contain;border-radius:12px;
+  box-shadow:0 0 60px rgba(0,220,255,.15),0 16px 60px rgba(0,0,0,.9);
+  user-select:none;pointer-events:none;
+  display:block;
+  transition:border-radius .2s;
+}
+
+/* Indicador de zoom */
+#lbZoomBadge{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.6);border:1px solid var(--borderB);
+  color:var(--accent);font-family:var(--fd);font-size:12px;font-weight:700;
+  padding:4px 14px;border-radius:20px;letter-spacing:1px;
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+#lbZoomBadge.show{opacity:1}
+
+/* Botón reset zoom */
+#lbResetZoom{
+  background:rgba(0,220,255,.08);border:1px solid var(--borderB);
+  color:var(--accent);padding:6px 14px;border-radius:20px;
+  font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:1px;
+  cursor:pointer;transition:all .18s;opacity:0;pointer-events:none;
+  text-transform:uppercase;
+}
+#lbResetZoom.visible{opacity:1;pointer-events:all}
+#lbResetZoom:hover{background:rgba(0,220,255,.18);box-shadow:0 0 14px var(--glow)}
+
+.lb-ctrl{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap;justify-content:center}
 .lb-btn{background:rgba(0,220,255,.08);border:1px solid var(--borderB);color:var(--accent);width:46px;height:46px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
 .lb-btn:hover{background:rgba(0,220,255,.15);box-shadow:0 0 20px rgba(0,220,255,.2)}
-.lb-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.lb-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;z-index:10}
 .lb-close:hover{background:rgba(255,255,255,.18)}
 .lb-cnt{font-family:var(--fd);font-size:14px;color:rgba(0,220,255,.5);letter-spacing:3px;min-width:60px;text-align:center}
-.lb-dots{display:flex;gap:7px;margin-top:12px}
+.lb-dots{display:flex;gap:7px;margin-top:10px}
 .lb-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .15s}
 .lb-dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent)}
 .scan-paint-preview{display:flex;align-items:center;gap:16px;margin-bottom:20px}
@@ -419,7 +468,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
           </div>
           <div id="convSearchRow" class="toolbar" style="margin-bottom:10px">
             <select class="tb-select" id="convBrandSel" onchange="renderConvList()" style="flex:.5"></select>
-            <input  class="tb-input"  id="convSearchIn" type="search" placeholder="Buscar pintura origen…" oninput="renderConvList()">
+            <input  class="tb-input"  id="convSearchIn" type="search" placeholder="Escribe código o nombre para buscar…" oninput="renderConvList()">
           </div>
           <div id="convSearchList" style="max-height:170px;overflow-y:auto;border-radius:8px;border:1px solid var(--border);display:none"></div>
           <div id="convBrandRow" style="display:none;margin-top:13px">
@@ -703,11 +752,15 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <!-- LIGHTBOX -->
 <div id="lightbox">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
-  <img id="lbImg" src="" alt="">
+  <div id="lbZoomBadge">100%</div>
+  <div id="lbImgWrap">
+    <img id="lbImg" src="" alt="">
+  </div>
   <div class="lb-ctrl">
     <button class="lb-btn" onclick="lbNav(-1)">‹</button>
     <span class="lb-cnt" id="lbCnt">1 / 1</span>
     <button class="lb-btn" onclick="lbNav(1)">›</button>
+    <button id="lbResetZoom" onclick="lbResetZoom()">🔍 Reset zoom</button>
   </div>
   <div id="lbDots" class="lb-dots"></div>
 </div>
@@ -1086,30 +1139,196 @@ window.updateCartBadge = () => {
 /* ============================================================
    LIGHTBOX
    ============================================================ */
+/* ============================================================
+   LIGHTBOX con ZOOM
+   ============================================================ */
 window.openLightbox = (modelId, startIdx) => {
   const m = modelos.find(x=>x.id===modelId);
   if (!m) return;
   lbImages = [m.foto,...(m.galeria||[])].filter(Boolean);
   if (!lbImages.length) return;
   lbIdx = startIdx;
+  lbResetZoomState();
   lbRender();
   document.getElementById('lightbox').classList.add('open');
+  document.getElementById('lightbox').focus?.();
 };
+
 function lbRender() {
   document.getElementById('lbImg').src = lbImages[lbIdx];
   document.getElementById('lbCnt').textContent = `${lbIdx+1} / ${lbImages.length}`;
   document.getElementById('lbDots').innerHTML = lbImages.map((_,i)=>
     `<div class="lb-dot ${i===lbIdx?'active':''}" onclick="lbGoto(${i})"></div>`).join('');
+  lbResetZoomState();
 }
-window.lbNav   = d => { lbIdx=(lbIdx+d+lbImages.length)%lbImages.length; lbRender(); };
-window.lbGoto  = i => { lbIdx=i; lbRender(); };
-window.closeLightbox = () => document.getElementById('lightbox').classList.remove('open');
+
+window.lbNav = d => {
+  if (lbScale > 1) return; // no cambiar foto si hay zoom activo
+  lbIdx = (lbIdx+d+lbImages.length) % lbImages.length;
+  lbRender();
+};
+window.lbGoto = i => { lbIdx=i; lbRender(); };
+window.closeLightbox = () => {
+  document.getElementById('lightbox').classList.remove('open');
+  lbResetZoomState();
+};
+
+// ---- ZOOM STATE ----
+let lbScale = 1, lbPanX = 0, lbPanY = 0;
+const LB_MIN = 1, LB_MAX = 5;
+
+function lbApplyTransform(animate=false) {
+  const wrap = document.getElementById('lbImgWrap');
+  wrap.style.transition = animate ? 'transform .25s cubic-bezier(.22,1,.36,1)' : 'none';
+  wrap.style.transform  = `translate(${lbPanX}px,${lbPanY}px) scale(${lbScale})`;
+  // Badge
+  const badge = document.getElementById('lbZoomBadge');
+  badge.textContent = Math.round(lbScale*100) + '%';
+  badge.classList.toggle('show', lbScale !== 1);
+  // Botón reset
+  document.getElementById('lbResetZoom').classList.toggle('visible', lbScale !== 1);
+  // Cursor
+  wrap.classList.toggle('zoomed', lbScale > 1);
+}
+
+function lbResetZoomState() {
+  lbScale=1; lbPanX=0; lbPanY=0;
+  lbApplyTransform(true);
+}
+window.lbResetZoom = lbResetZoomState;
+
+function lbClampPan() {
+  const img = document.getElementById('lbImg');
+  const maxPanX = (img.offsetWidth  * (lbScale-1)) / 2;
+  const maxPanY = (img.offsetHeight * (lbScale-1)) / 2;
+  lbPanX = Math.max(-maxPanX, Math.min(maxPanX, lbPanX));
+  lbPanY = Math.max(-maxPanY, Math.min(maxPanY, lbPanY));
+}
+
+// ---- RUEDA DEL RATÓN ----
 (()=>{
-  let tx=0;
   const lb = document.getElementById('lightbox');
-  lb.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
-  lb.addEventListener('touchend',e=>{if(Math.abs(e.changedTouches[0].clientX-tx)>50)lbNav(e.changedTouches[0].clientX-tx<0?1:-1)},{passive:true});
-  lb.addEventListener('keydown',e=>{if(e.key==='ArrowRight')lbNav(1);if(e.key==='ArrowLeft')lbNav(-1);if(e.key==='Escape')closeLightbox()});
+
+  lb.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.85 : 1.18;
+    lbScale = Math.max(LB_MIN, Math.min(LB_MAX, lbScale * delta));
+    if (lbScale === LB_MIN) { lbPanX=0; lbPanY=0; }
+    else lbClampPan();
+    lbApplyTransform();
+  }, { passive:false });
+
+  // ---- DOBLE CLIC — zoom rápido ----
+  lb.addEventListener('dblclick', e => {
+    if (e.target.closest('button')) return;
+    if (lbScale > 1) {
+      lbResetZoomState();
+    } else {
+      // Zoom 2.5x centrado en el punto clicado
+      const img  = document.getElementById('lbImg');
+      const rect = img.getBoundingClientRect();
+      const cx   = e.clientX - (rect.left + rect.width  / 2);
+      const cy   = e.clientY - (rect.top  + rect.height / 2);
+      lbScale = 2.5;
+      lbPanX  = -cx * (lbScale - 1) / lbScale;
+      lbPanY  = -cy * (lbScale - 1) / lbScale;
+      lbClampPan();
+      lbApplyTransform(true);
+    }
+  });
+
+  // ---- ARRASTRAR (pan) ----
+  let isDragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
+
+  lb.addEventListener('mousedown', e => {
+    if (e.target.closest('button') || lbScale <= 1) return;
+    isDragging = true;
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    panStartX = lbPanX; panStartY = lbPanY;
+    document.getElementById('lbImgWrap').classList.add('grabbing');
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    lbPanX = panStartX + (e.clientX - dragStartX);
+    lbPanY = panStartY + (e.clientY - dragStartY);
+    lbClampPan();
+    lbApplyTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    document.getElementById('lbImgWrap').classList.remove('grabbing');
+  });
+
+  // ---- TÁCTIL: pinch zoom + pan ----
+  let touches = [], pinchStartDist = 0, pinchStartScale = 1;
+  let touchPanStartX = 0, touchPanStartY = 0, touchPanOriginX = 0, touchPanOriginY = 0;
+
+  lb.addEventListener('touchstart', e => {
+    touches = Array.from(e.touches);
+    if (touches.length === 2) {
+      // Pinch inicio
+      pinchStartDist  = Math.hypot(
+        touches[1].clientX - touches[0].clientX,
+        touches[1].clientY - touches[0].clientY
+      );
+      pinchStartScale = lbScale;
+    } else if (touches.length === 1) {
+      touchPanStartX  = touches[0].clientX;
+      touchPanStartY  = touches[0].clientY;
+      touchPanOriginX = lbPanX;
+      touchPanOriginY = lbPanY;
+    }
+  }, { passive:true });
+
+  lb.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const tc = Array.from(e.touches);
+    if (tc.length === 2) {
+      // Pinch zoom
+      const dist = Math.hypot(
+        tc[1].clientX - tc[0].clientX,
+        tc[1].clientY - tc[0].clientY
+      );
+      lbScale = Math.max(LB_MIN, Math.min(LB_MAX, pinchStartScale * dist / pinchStartDist));
+      if (lbScale === LB_MIN) { lbPanX=0; lbPanY=0; }
+      else lbClampPan();
+      lbApplyTransform();
+    } else if (tc.length === 1 && lbScale > 1) {
+      // Pan táctil
+      lbPanX = touchPanOriginX + (tc[0].clientX - touchPanStartX);
+      lbPanY = touchPanOriginY + (tc[0].clientY - touchPanStartY);
+      lbClampPan();
+      lbApplyTransform();
+    }
+  }, { passive:false });
+
+  // Doble toque
+  let lastTap = 0;
+  lb.addEventListener('touchend', e => {
+    const tc = Array.from(e.changedTouches);
+    const now = Date.now();
+    if (now - lastTap < 280 && tc.length === 1) {
+      // Doble toque — toggle zoom
+      lbScale > 1 ? lbResetZoomState() : (()=>{lbScale=2.5;lbApplyTransform(true);})();
+    } else if (lbScale <= 1 && tc.length === 1 && Array.from(e.touches).length === 0) {
+      // Swipe horizontal solo si no hay zoom
+      const dx = tc[0].clientX - touchPanStartX;
+      if (Math.abs(dx) > 50) lbNav(dx < 0 ? 1 : -1);
+    }
+    lastTap = now;
+  }, { passive:true });
+
+  // Teclado
+  lb.setAttribute('tabindex','0');
+  lb.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight') lbNav(1);
+    if (e.key==='ArrowLeft')  lbNav(-1);
+    if (e.key==='Escape')     closeLightbox();
+    if (e.key==='+' || e.key==='=') { lbScale=Math.min(LB_MAX,lbScale*1.25); lbClampPan(); lbApplyTransform(true); }
+    if (e.key==='-')                { lbScale=Math.max(LB_MIN,lbScale*0.8);  lbClampPan(); lbApplyTransform(true); }
+    if (e.key==='0')                lbResetZoomState();
+  });
 })();
 
 /* ============================================================
@@ -1324,17 +1543,35 @@ window.renderConvList = () => {
   const marca=document.getElementById('convBrandSel').value;
   const q=(document.getElementById('convSearchIn').value||'').toLowerCase().trim();
   const lista=document.getElementById('convSearchList');
-  const filtradas=(paints[marca]||[]).filter(p=>(p.id||'').toLowerCase().includes(q)||(p.nombre||'').toLowerCase().includes(q)).slice(0,30);
-  if(!filtradas.length){lista.style.display='none';return;}
-  lista.style.display='block'; lista.innerHTML='';
+
+  // Sin búsqueda y sin marca seleccionada: mostrar hint
+  if(!q) {
+    lista.style.display='none';
+    return;
+  }
+
+  const filtradas=(paints[marca]||[]).filter(p=>
+    (p.id||'').toLowerCase().includes(q) ||
+    (p.nombre||'').toLowerCase().includes(q)
+  );
+
+  if(!filtradas.length){
+    lista.style.display='block';
+    lista.innerHTML=`<div style="padding:14px;text-align:center;font-size:12px;color:var(--dim)">Sin resultados en ${marca}</div>`;
+    return;
+  }
+
+  lista.style.display='block';
+  lista.innerHTML='';
   filtradas.forEach(p=>{
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;gap:9px;padding:8px 11px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s';
     row.onmouseenter=()=>row.style.background='var(--hover)';
     row.onmouseleave=()=>row.style.background='';
-    row.innerHTML=`<div style="width:22px;height:22px;border-radius:4px;background:${p.hex};flex-shrink:0;border:1px solid rgba(255,255,255,.1)"></div>
-                   <span style="font-family:var(--fd);font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0">${p.id}</span>
-                   <span style="font-size:12px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nombre}</span>`;
+    row.innerHTML=`
+      <div style="width:22px;height:22px;border-radius:4px;background:${p.hex||'#555'};flex-shrink:0;border:1px solid rgba(255,255,255,.1)"></div>
+      <span style="font-family:var(--fd);font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0">${p.id}</span>
+      <span style="font-size:12px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nombre}</span>`;
     row.onclick=()=>selectConvOrigen(p,marca);
     lista.appendChild(row);
   });
