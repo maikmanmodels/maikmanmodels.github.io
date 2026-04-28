@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v10.7.1</title>
+<title>Maikman Models — Pro Stock v10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -225,7 +225,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 /* 3D Preview */
 .mixer-3d{display:flex;flex-direction:column;align-items:center;gap:8px}
 .mixer-3d-label{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
-#mix3dCanvas{border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.3)}
+#mix3dCanvas{border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.3);max-width:100%}
 
 @media(max-width:760px){
   .mixer-layout{grid-template-columns:1fr;gap:16px}
@@ -430,7 +430,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Maikman</div>
-    <div class="login-sub">Models — Pro Stock v10.7</div>
+    <div class="login-sub">Models — Pro Stock v10</div>
     <input id="loginEmail"    type="email"    placeholder="Email"      autocomplete="email">
     <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">ENTRAR</button>
@@ -444,7 +444,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Maikman</div>
-      <div class="ver">Pro Stock v10.7</div>
+      <div class="ver">Pro Stock v10</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="navTo('pg-modelos','Modelos',this)">
@@ -1492,97 +1492,177 @@ window.calcMix = () => {
 
 /* ---- 3D PREVIEW con Three.js ---- */
 function init3DPreview() {
-  const canvas = document.getElementById('mix3dCanvas');
-  if (!canvas || !window.THREE) return;
-
-  mix3dScene    = new THREE.Scene();
-  mix3dCamera   = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-  mix3dCamera.position.set(0, 3.5, 5.5);
-  mix3dCamera.lookAt(0, 0, 0);
-
-  mix3dRenderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
-  mix3dRenderer.setSize(400, 400);
-  mix3dRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  mix3dRenderer.setClearColor(0x000000, 0);
-
-  // Cubo de alambre de fondo (cage)
-  const cage = new THREE.BoxHelper(
-    new THREE.Mesh(new THREE.BoxGeometry(4.5,4.5,4.5)),
-    0x00dcff
-  );
-  cage.material.opacity = 0.18;
-  cage.material.transparent = true;
-  mix3dScene.add(cage);
-
-  // Luz
-  mix3dScene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const dl = new THREE.DirectionalLight(0xffffff, 0.9);
-  dl.position.set(3,5,3);
-  mix3dScene.add(dl);
-
-  // Animación de rotación
-  function animate() {
-    mix3dAnimId = requestAnimationFrame(animate);
-    if(mix3dScene) mix3dScene.rotation.y += 0.008;
-    mix3dRenderer.render(mix3dScene, mix3dCamera);
-  }
-  animate();
+  drawColorWheel([]);
 }
 
 function update3DPreview(active, total) {
-  if (!mix3dScene || !window.THREE) return;
+  drawColorWheel(active);
+}
 
-  // Limpiar pirámides anteriores
-  mix3dPyramids.forEach(m => mix3dScene.remove(m));
-  mix3dPyramids = [];
+function drawColorWheel(active) {
+  const canvas = document.getElementById('mix3dCanvas');
+  if (!canvas) return;
+  const W = 400, H = 400;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const cx = W/2, cy = H/2;
+  const R = 155;   // radio rueda
+  const rInner = 62; // radio interior (donut)
 
-  if (!active.length) return;
+  ctx.clearRect(0,0,W,H);
 
-  // Posiciones en círculo para hasta 6 pirámides
-  const positions = [
-    [ 0,    0,  0  ],
-    [-1.3,  0,  0  ],
-    [ 1.3,  0,  0  ],
-    [ 0,    0, -1.3],
-    [-0.9,  0, -1.1],
-    [ 0.9,  0, -1.1],
-  ];
+  // Fondo oscuro con viñeta
+  const bg = ctx.createRadialGradient(cx,cy,0,cx,cy,W*.7);
+  bg.addColorStop(0,'rgba(10,22,38,.95)');
+  bg.addColorStop(1,'rgba(3,8,15,1)');
+  ctx.fillStyle = bg;
+  ctx.beginPath(); ctx.arc(cx,cy,R+30,0,Math.PI*2); ctx.fill();
 
+  // Rueda de color: sectores HSL
+  const steps = 360;
+  for(let i=0;i<steps;i++){
+    const a1 = (i/steps)*Math.PI*2 - Math.PI/2;
+    const a2 = ((i+1)/steps)*Math.PI*2 - Math.PI/2;
+    // Gradiente de saturación: borde exterior = saturado, interior = blanco
+    const grad = ctx.createRadialGradient(cx,cy,rInner,cx,cy,R);
+    grad.addColorStop(0, `hsla(${i},0%,100%,.7)`);
+    grad.addColorStop(1, `hsla(${i},100%,50%,1)`);
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,R,a1,a2);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  // Hueco interior (donut) con color resultado o neutro
+  let resultHex = null;
+  if(active.length>0){
+    let rr=0,gg=0,bb=0,tt=0;
+    active.forEach(c=>{rr+=c.r*c.gotas;gg+=c.g*c.gotas;bb+=c.b*c.gotas;tt+=c.gotas;});
+    resultHex = rgbHex(Math.round(rr/tt),Math.round(gg/tt),Math.round(bb/tt));
+  }
+
+  // Aro borde exterior
+  ctx.beginPath(); ctx.arc(cx,cy,R+2,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,220,255,.25)'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Hueco interior
+  const innerGrad = ctx.createRadialGradient(cx,cy,0,cx,cy,rInner);
+  if(resultHex){
+    const rc = hexRgb(resultHex);
+    innerGrad.addColorStop(0,`rgba(${rc.r},${rc.g},${rc.b},1)`);
+    innerGrad.addColorStop(0.7,`rgba(${rc.r},${rc.g},${rc.b},.85)`);
+    innerGrad.addColorStop(1,`rgba(${rc.r},${rc.g},${rc.b},.6)`);
+  } else {
+    innerGrad.addColorStop(0,'rgba(9,20,34,1)');
+    innerGrad.addColorStop(1,'rgba(6,14,26,1)');
+  }
+  ctx.beginPath(); ctx.arc(cx,cy,rInner,0,Math.PI*2);
+  ctx.fillStyle = innerGrad; ctx.fill();
+
+  // Borde interior
+  ctx.beginPath(); ctx.arc(cx,cy,rInner,0,Math.PI*2);
+  ctx.strokeStyle = resultHex
+    ? `rgba(255,255,255,.35)`
+    : 'rgba(0,220,255,.2)';
+  ctx.lineWidth=1.5; ctx.stroke();
+
+  // Texto HEX en el centro
+  if(resultHex){
+    const lc = hexRgb(resultHex);
+    const lum = (lc.r*299+lc.g*587+lc.b*114)/1000;
+    ctx.fillStyle = lum>128?'rgba(0,0,0,.9)':'rgba(255,255,255,.92)';
+    ctx.font = 'bold 13px Rajdhani,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(resultHex, cx, cy-8);
+    ctx.font = '10px Inter,sans-serif';
+    ctx.fillStyle = lum>128?'rgba(0,0,0,.6)':'rgba(255,255,255,.55)';
+    ctx.fillText('RESULTADO', cx, cy+8);
+  } else {
+    ctx.fillStyle='rgba(0,220,255,.3)';
+    ctx.font='11px Rajdhani,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('RUEDA CROMÁTICA', cx, cy);
+  }
+
+  if(!active.length) return;
+
+  // Para cada color activo: calcular ángulo en la rueda + dibujar marcador y línea
   active.forEach((col, idx) => {
-    // Altura proporcional a las gotas (base 10 = altura máxima 3)
-    const h  = (col.gotas / 10) * 3.2;
-    const geo = new THREE.ConeGeometry(0.55, h, 4);
-    const mat = new THREE.MeshPhongMaterial({
-      color: parseInt(col.hex.replace('#',''), 16),
-      emissive: parseInt(col.hex.replace('#',''), 16),
-      emissiveIntensity: 0.25,
-      shininess: 80,
-      transparent: true,
-      opacity: 0.88,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    const pos  = positions[idx] || [Math.random()*2-1, 0, Math.random()*2-1];
-    mesh.position.set(pos[0], h/2 - 1.8, pos[2]);
-    mix3dScene.add(mesh);
-    mix3dPyramids.push(mesh);
+    // Convertir RGB → Hue
+    const r1=col.r/255, g1=col.g/255, b1=col.b/255;
+    const max=Math.max(r1,g1,b1), min=Math.min(r1,g1,b1), d=max-min;
+    let hue=0;
+    if(d>0){
+      if(max===r1) hue=((g1-b1)/d+6)%6;
+      else if(max===g1) hue=(b1-r1)/d+2;
+      else hue=(r1-g1)/d+4;
+      hue*=60;
+    }
+    const sat = max===0?0:d/max;
 
-    // Etiqueta de gotas como sprite (plano con canvas 2D)
-    const spriteCanvas = document.createElement('canvas');
-    spriteCanvas.width = 64; spriteCanvas.height = 32;
-    const ctx = spriteCanvas.getContext('2d');
-    ctx.fillStyle = 'rgba(0,0,0,0)';
-    ctx.fillRect(0,0,64,32);
-    ctx.font = 'bold 18px Rajdhani, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText(col.gotas + 'gt', 32, 22);
-    const tex = new THREE.CanvasTexture(spriteCanvas);
-    const spriteMat = new THREE.SpriteMaterial({ map:tex, transparent:true });
-    const sprite = new THREE.Sprite(spriteMat);
-    sprite.position.set(pos[0], h - 1.2, pos[2]);
-    sprite.scale.set(0.9, 0.45, 1);
-    mix3dScene.add(sprite);
-    mix3dPyramids.push(sprite);
+    // Ángulo en el canvas: hue 0=rojo=arriba(-PI/2)
+    const angle = (hue/360)*Math.PI*2 - Math.PI/2;
+
+    // Radio proporcional a la saturación (colores grises van al centro)
+    const markerR = rInner + (R-rInner) * Math.max(sat, 0.15);
+
+    const mx = cx + Math.cos(angle)*markerR;
+    const my = cy + Math.sin(angle)*markerR;
+
+    // Línea desde centro al marcador
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(mx, my);
+    ctx.strokeStyle = col.hex;
+    ctx.lineWidth = 1.5 + (col.gotas/10)*2;
+    ctx.setLineDash([4,4]);
+    ctx.globalAlpha = 0.55;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+
+    // Marcador circular — tamaño proporcional a gotas
+    const dotR = 10 + (col.gotas/10)*12;
+    ctx.beginPath(); ctx.arc(mx,my,dotR,0,Math.PI*2);
+    const dotGrad = ctx.createRadialGradient(mx-dotR*.3,my-dotR*.3,0,mx,my,dotR);
+    dotGrad.addColorStop(0,'rgba(255,255,255,.6)');
+    dotGrad.addColorStop(1,col.hex);
+    ctx.fillStyle=dotGrad;
+    ctx.shadowColor=col.hex; ctx.shadowBlur=14;
+    ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Borde blanco del marcador
+    ctx.beginPath(); ctx.arc(mx,my,dotR,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=1.5; ctx.stroke();
+
+    // Etiqueta: ID de la pintura + gotas
+    const labelDist = dotR+12;
+    const lx = cx + Math.cos(angle)*(markerR + labelDist);
+    const ly = cy + Math.sin(angle)*(markerR + labelDist);
+    const paintId = document.getElementById(`mc${idx+1}`)?.selectedOptions[0]?.text?.split(' —')[0] || '';
+    ctx.font='bold 11px Rajdhani,sans-serif';
+    ctx.textAlign = lx>cx?'left':'right';
+    ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(255,255,255,.9)';
+    ctx.fillText(`${paintId}`, lx, ly-6);
+    ctx.font='10px Inter,sans-serif';
+    ctx.fillStyle='rgba(0,220,255,.8)';
+    ctx.fillText(`${col.gotas} gt`, lx, ly+7);
+  });
+
+  // Leyenda de hue en los bordes cardinales
+  const labels=[{a:0,t:'R'},{a:60,t:'Y'},{a:120,t:'G'},{a:180,t:'C'},{a:240,t:'B'},{a:300,t:'M'}];
+  labels.forEach(l=>{
+    const a=(l.a/360)*Math.PI*2-Math.PI/2;
+    const lx=cx+Math.cos(a)*(R+16);
+    const ly=cy+Math.sin(a)*(R+16);
+    ctx.font='bold 10px Rajdhani,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle=`hsl(${l.a},80%,65%)`;
+    ctx.fillText(l.t,lx,ly);
   });
 }
 
