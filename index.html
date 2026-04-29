@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v10</title>
+<title>Maikman Models — Pro Stock v10.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -104,47 +104,182 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 .modal-box h3{font-family:var(--fd);font-size:24px;font-weight:700;letter-spacing:2px;margin-bottom:20px;color:var(--text);text-transform:uppercase}
 #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--ok);color:#000;padding:11px 26px;border-radius:40px;font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:1px;z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;box-shadow:0 4px 30px rgba(0,0,0,.4);pointer-events:none;text-transform:uppercase}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-.estado-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
-.e-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--dim);font-family:var(--fd);font-size:11px;font-weight:600;cursor:pointer;transition:all .18s;text-transform:uppercase;letter-spacing:.8px}
-.e-chip:hover{border-color:var(--borderB);color:var(--text2)}
-.e-chip.active{border-color:var(--accent);color:var(--accent);background:rgba(0,220,255,.07);box-shadow:0 0 12px rgba(0,220,255,.1)}
-#modGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
-.mod-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all .25s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;position:relative}
-.mod-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .25s}
-.mod-card:hover{transform:translateY(-5px);border-color:var(--borderB);box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 30px var(--glow)}
+/* ============ MODELOS MODO COMBATE ============ */
+.estado-filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:20px}
+.e-chip{
+  padding:5px 14px;border:none;background:rgba(0,0,0,.5);color:var(--dim);
+  font-family:var(--fd);font-size:11px;font-weight:700;cursor:pointer;
+  transition:all .15s;text-transform:uppercase;letter-spacing:2px;
+  clip-path:polygon(10px 0%,100% 0%,100% 60%,calc(100% - 10px) 100%,0% 100%,0% 40%);
+  border-left:2px solid var(--dim);
+}
+.e-chip:hover{background:rgba(0,220,255,.08);color:var(--text);border-left-color:var(--accent)}
+.e-chip.active{background:rgba(0,220,255,.12);color:var(--accent);border-left-color:var(--accent);text-shadow:0 0 10px rgba(0,220,255,.6)}
+
+#modGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px}
+
+/* ---- CARD COMBATE ---- */
+.mod-card{
+  position:relative;display:flex;flex-direction:column;
+  background:#020810;
+  border:none;border-radius:0;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+  /* Marco metálico con bordes angulares múltiples */
+  outline:1px solid rgba(0,220,255,.15);
+  outline-offset:3px;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,220,255,.08),
+    0 0 0 1px rgba(0,0,0,.8),
+    4px 4px 0 rgba(0,220,255,.06),
+    -4px -4px 0 rgba(0,0,0,.6);
+}
+/* Esquina superior izquierda — marcador diagonal doble */
+.mod-card::before{
+  content:'';position:absolute;top:0;left:0;z-index:10;pointer-events:none;
+  width:0;height:0;
+  border-top:28px solid var(--accent);
+  border-right:28px solid transparent;
+  filter:drop-shadow(2px 2px 4px var(--accent));
+}
+/* Línea inferior de energía */
+.mod-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;z-index:10;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent));
+  box-shadow:0 0 12px var(--accent),0 0 24px var(--accent2);
+  opacity:.7;transition:opacity .2s;
+}
+.mod-card:hover{
+  transform:translateY(-8px) skewX(-1deg);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,220,255,.3),
+    0 0 0 1px rgba(0,220,255,.15),
+    6px 6px 0 rgba(0,220,255,.1),
+    -6px -6px 0 rgba(0,0,0,.8),
+    0 30px 60px rgba(0,0,0,.8),
+    0 0 60px rgba(0,220,255,.2);
+}
 .mod-card:hover::after{opacity:1}
-.mod-card.ep{border-left:2px solid var(--warn)}
-.mod-card.et{border-left:2px solid var(--ok)}
-.mod-card.ev{border-left:2px solid var(--accent2)}
-.mod-card-img-wrap{position:relative;overflow:hidden}
-.mod-card img{width:100%;height:170px;object-fit:cover;cursor:pointer;display:block;transition:transform .4s}
-.mod-card:hover img{transform:scale(1.06)}
-.mod-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:4px}
-.mod-code{font-size:10px;color:var(--accent);font-weight:700;letter-spacing:2px;text-transform:uppercase}
-.mod-name{font-family:var(--fd);font-size:17px;font-weight:700;line-height:1.2;color:var(--text)}
-.mod-brand{font-size:11px;color:var(--dim);margin-bottom:8px}
-.mod-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.st-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;letter-spacing:.8px;padding:3px 9px;border-radius:20px;text-transform:uppercase;white-space:nowrap}
-.st-s{background:rgba(107,114,128,.15);color:#9ca3af;border:1px solid rgba(107,114,128,.2)}
-.st-p{background:rgba(255,170,0,.1);color:var(--warn);border:1px solid rgba(255,170,0,.22)}
-.st-t{background:rgba(0,229,160,.1);color:var(--ok);border:1px solid rgba(0,229,160,.22)}
-.st-v{background:rgba(123,95,255,.1);color:var(--accent2);border:1px solid rgba(123,95,255,.22)}
+
+/* Estado = color del corner + línea inferior */
+.mod-card.ep::before{border-top-color:var(--warn);filter:drop-shadow(2px 2px 4px var(--warn))}
+.mod-card.ep::after{background:linear-gradient(90deg,var(--warn),#ff6600,var(--warn));box-shadow:0 0 12px var(--warn)}
+.mod-card.et::before{border-top-color:var(--ok);filter:drop-shadow(2px 2px 4px var(--ok))}
+.mod-card.et::after{background:linear-gradient(90deg,var(--ok),#00ffaa,var(--ok));box-shadow:0 0 12px var(--ok)}
+.mod-card.ev::before{border-top-color:var(--accent2);filter:drop-shadow(2px 2px 4px var(--accent2))}
+.mod-card.ev::after{background:linear-gradient(90deg,var(--accent2),#aa44ff,var(--accent2));box-shadow:0 0 12px var(--accent2)}
+
+/* Imagen */
+.mod-card-img-wrap{position:relative;overflow:hidden;flex-shrink:0}
+.mod-card img{
+  width:100%;height:180px;object-fit:cover;cursor:pointer;
+  display:block;transition:transform .4s,filter .4s;
+  filter:saturate(1.2) contrast(1.1) brightness(.95);
+}
+.mod-card:hover img{transform:scale(1.1);filter:saturate(1.5) contrast(1.15) brightness(1.05)}
+/* Overlay degradado agresivo sobre imagen */
+.mod-card-img-wrap::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.0) 40%,rgba(2,8,16,.98) 100%),
+    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,220,255,.02) 2px,rgba(0,220,255,.02) 3px);
+}
+/* Número de kit sobreimpreso en imagen */
+.mod-card-img-wrap::before{
+  content:attr(data-code);
+  position:absolute;top:8px;right:10px;z-index:3;
+  font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:2px;
+  color:rgba(255,255,255,.7);text-transform:uppercase;
+  background:rgba(0,0,0,.55);padding:2px 7px;
+  border-left:2px solid var(--accent);
+}
+
+/* Body */
+.mod-body{
+  padding:0;flex:1;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(2,8,16,1) 0%,rgba(5,12,22,1) 100%);
+  position:relative;overflow:hidden;
+}
+/* Grid de puntos de fondo */
+.mod-body::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(0,220,255,.06) 1px,transparent 1px);
+  background-size:18px 18px;
+}
+/* Franja de título */
+.mod-title-bar{
+  padding:10px 14px 7px;
+  border-bottom:1px solid rgba(0,220,255,.1);
+  position:relative;
+}
+.mod-code{
+  font-size:9px;color:var(--accent);font-weight:700;letter-spacing:3px;
+  text-transform:uppercase;font-family:var(--fd);margin-bottom:3px;
+  display:flex;align-items:center;gap:4px;
+}
+.mod-code::before{content:'//';opacity:.5;font-size:10px}
+.mod-name{
+  font-family:var(--fd);font-size:20px;font-weight:700;line-height:1.1;
+  color:#fff;text-transform:uppercase;letter-spacing:1px;
+  text-shadow:0 0 30px rgba(0,220,255,.3),0 2px 4px rgba(0,0,0,.8);
+}
+.mod-brand{
+  font-size:9px;color:var(--dim);text-transform:uppercase;
+  letter-spacing:2px;font-family:var(--fd);margin-top:3px;
+}
+
+/* Franja de stats */
+.mod-stats-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 14px;border-bottom:1px solid rgba(0,220,255,.08);
+}
+.mod-row{display:flex;align-items:center;gap:6px}
+
+/* Badges estado — barra lateral */
+.st-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:8px;font-weight:700;letter-spacing:1.5px;padding:3px 8px 3px 6px;
+  text-transform:uppercase;white-space:nowrap;border-radius:0;
+  border-left:2px solid currentColor;background:rgba(0,0,0,.4);
+}
+.st-s{color:#6b7280}
+.st-p{color:var(--warn);text-shadow:0 0 8px rgba(255,170,0,.5)}
+.st-t{color:var(--ok);text-shadow:0 0 8px rgba(0,229,160,.5)}
+.st-v{color:var(--accent2);text-shadow:0 0 8px rgba(123,95,255,.5)}
+
+/* Badge cantidad — visor digital */
 .qty-badge{
   display:inline-flex;align-items:center;justify-content:center;
-  width:28px;height:28px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),#0099cc);
-  color:#000;font-family:var(--fd);font-size:13px;font-weight:700;
-  box-shadow:0 0 10px rgba(0,220,255,.35);
-  flex-shrink:0;line-height:1;
+  min-width:32px;height:22px;padding:0 6px;
+  background:rgba(0,0,0,.7);border:1px solid var(--accent);
+  color:var(--accent);font-family:var(--fd);font-size:14px;font-weight:700;
+  box-shadow:0 0 8px rgba(0,220,255,.3),inset 0 0 6px rgba(0,220,255,.05);
+  flex-shrink:0;letter-spacing:1px;
+  text-shadow:0 0 8px var(--accent);
+  border-radius:0;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
 }
 .qty-badge.multi{
-  background:linear-gradient(135deg,var(--accent2),#5540cc);
-  box-shadow:0 0 10px rgba(123,95,255,.35);
-  color:#fff;
+  border-color:var(--accent2);color:var(--accent2);
+  box-shadow:0 0 8px rgba(123,95,255,.3),inset 0 0 6px rgba(123,95,255,.05);
+  text-shadow:0 0 8px var(--accent2);
 }
-.mod-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:auto}
-.act-btn{padding:8px 3px;font-size:10px;font-family:var(--fd);font-weight:700;letter-spacing:.5px;border-radius:7px;border:none;cursor:pointer;color:#fff;text-align:center;transition:all .15s;text-transform:uppercase}
-.act-btn:hover{filter:brightness(1.2);transform:scale(1.04)}
+.qty-lbl-sm{font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;font-family:var(--fd)}
+
+/* Botones de acción — estilo teclas militares */
+.mod-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:auto}
+.act-btn{
+  padding:10px 3px;font-size:10px;font-family:var(--fd);font-weight:700;
+  letter-spacing:1px;border:none;cursor:pointer;color:#fff;
+  text-align:center;text-transform:uppercase;border-radius:0;
+  position:relative;overflow:hidden;transition:all .12s;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.act-btn::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
+}
+.act-btn:hover{filter:brightness(1.4);letter-spacing:2px;transform:scaleY(1.08)}
+.act-btn:active{filter:brightness(.8);transform:scaleY(.96)}
 .paint-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px}
 .paint-box{
   background:var(--card2);
@@ -430,7 +565,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Maikman</div>
-    <div class="login-sub">Models — Pro Stock v10</div>
+    <div class="login-sub">Models — Pro Stock v10.8</div>
     <input id="loginEmail"    type="email"    placeholder="Email"      autocomplete="email">
     <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">ENTRAR</button>
@@ -444,7 +579,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Maikman</div>
-      <div class="ver">Pro Stock v10</div>
+      <div class="ver">Pro Stock v10.8</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="navTo('pg-modelos','Modelos',this)">
@@ -1007,26 +1142,31 @@ window.renderModelos = () => {
       const card = document.createElement('div');
       card.className = `mod-card ${ei.card}`;
       card.innerHTML = `
-        <img src="${m.foto||'https://via.placeholder.com/300x160/091422/00dcff?text=+'}"
-             alt="${m.modelo||''}" loading="lazy"
-             onclick="openLightbox('${m.id}',0)">
+        <div class="mod-card-img-wrap" data-code="${m.codigo||'S/N'}">
+          <img src="${m.foto||'https://via.placeholder.com/300x180/020810/00dcff?text=+'}"
+               alt="${m.modelo||''}" loading="lazy"
+               onclick="openLightbox('${m.id}',0)">
+        </div>
         <div class="mod-body">
-          <div class="mod-code">${m.codigo||'S/N'}</div>
-          <div class="mod-row" style="margin-bottom:6px">
-            <div>
-              <div class="mod-name">${m.modelo||'—'}</div>
-              <div class="mod-brand">${m.fabricante||'—'}</div>
-            </div>
-            <span class="qty-badge ${qty>1?'multi':''}" title="${qty} ${qty===1?'unidad':'unidades'}">${qty}</span>
+          <div class="mod-title-bar">
+            <div class="mod-code">${m.codigo||'S/N'}</div>
+            <div class="mod-name">${m.modelo||'—'}</div>
+            <div class="mod-brand">${m.fabricante||'—'}</div>
           </div>
-          <div style="margin-bottom:8px">
-            <span class="st-badge ${ei.cls}">${ei.lbl}</span>
+          <div class="mod-stats-bar">
+            <div class="mod-row">
+              <span class="st-badge ${ei.cls}">${ei.lbl}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+              <span class="qty-badge ${qty>1?'multi':''}">${qty}</span>
+              <span class="qty-lbl-sm">${qty===1?'unidad':'uds'}</span>
+            </div>
           </div>
           <div class="mod-btns">
-            <button class="act-btn" style="background:#3498db" onclick="openInfoModal('${m.id}')">INFO</button>
-            <button class="act-btn" style="background:#9b59b6" onclick="openPaintsModal('${m.id}')">COLOR</button>
-            <button class="act-btn" style="background:var(--warn)"   onclick="openFormModal('${m.id}')">EDIT</button>
-            <button class="act-btn" style="background:var(--danger)" onclick="deleteModelo('${m.id}')">DEL</button>
+            <button class="act-btn" style="background:#071828" onclick="openInfoModal('${m.id}')">INFO</button>
+            <button class="act-btn" style="background:#0e0520" onclick="openPaintsModal('${m.id}')">COLOR</button>
+            <button class="act-btn" style="background:#1c1000" onclick="openFormModal('${m.id}')">EDIT</button>
+            <button class="act-btn" style="background:#1e0008" onclick="deleteModelo('${m.id}')">DEL</button>
           </div>
         </div>`;
       grid.appendChild(card);
