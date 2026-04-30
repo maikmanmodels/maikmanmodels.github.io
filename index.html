@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v10.8</title>
+<title>Maikman Models — Pro Stock v11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -420,6 +420,147 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--borderB);border-radius:2px}
 @media(max-width:640px){.sidebar{width:58px}.sidebar .brand,.sidebar .ver,.nav-item .ni-lbl{display:none}.nav-item{justify-content:center;padding:12px 0}.mixer-grid{grid-template-columns:1fr 1fr}.kpi-grid{grid-template-columns:1fr 1fr}.dil-row{grid-template-columns:1fr}#modGrid{grid-template-columns:1fr}.picker-results{grid-template-columns:1fr}}
+
+/* ═══════════════════════════════════════════════
+   MODAL DETALLE — v11
+   90 vh × 90 vw, dos columnas fijas
+═══════════════════════════════════════════════ */
+#detailModal{align-items:center;justify-content:center}
+#detailModal .modal-box{
+  width:90vw;max-width:1100px;
+  height:90vh;max-height:90vh;
+  padding:0;border-radius:16px;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+/* Header */
+.dm-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;flex-shrink:0;
+  background:rgba(0,0,0,.45);
+  border-bottom:1px solid var(--border);
+}
+.dm-header-text{display:flex;flex-direction:column;gap:2px}
+.dm-breadcrumb{font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;font-family:var(--fd)}
+.dm-title{font-family:var(--fd);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);line-height:1}
+.dm-title em{color:var(--accent);font-style:normal}
+.dm-close{
+  width:34px;height:34px;border-radius:50%;border:1px solid var(--border);
+  background:rgba(255,255,255,.05);color:var(--text2);font-size:17px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.dm-close:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+
+/* Cuerpo: dos columnas */
+.dm-body{
+  flex:1;display:grid;
+  grid-template-columns:1fr 340px;
+  min-height:0;overflow:hidden;
+}
+
+/* ── COLUMNA IZQUIERDA ── */
+.dm-left{
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--border);
+  min-height:0;overflow:hidden;
+}
+/* Visor imagen */
+.dm-viewer{
+  flex:1;position:relative;overflow:hidden;
+  background:#000;cursor:zoom-in;min-height:0;
+}
+.dm-viewer.zoomed{cursor:grab}
+.dm-viewer.grabbing{cursor:grabbing}
+#dmImgWrap{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  will-change:transform;
+}
+#dmImgWrap img{
+  max-width:100%;max-height:100%;
+  object-fit:contain;display:block;
+  user-select:none;pointer-events:none;
+}
+#dmZoomBadge{
+  position:absolute;top:10px;right:10px;z-index:5;
+  background:rgba(0,0,0,.65);border:1px solid var(--borderB);
+  color:var(--accent);font-family:var(--fd);font-size:11px;font-weight:700;
+  padding:3px 11px;border-radius:20px;letter-spacing:1px;
+  opacity:0;transition:opacity .25s;pointer-events:none;
+}
+#dmZoomBadge.show{opacity:1}
+.dm-zoom-hint{
+  position:absolute;bottom:8px;left:0;right:0;text-align:center;
+  font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px;
+  font-family:var(--fd);pointer-events:none;
+}
+/* Info del modelo */
+.dm-info{
+  flex-shrink:0;padding:14px 18px;
+  background:rgba(0,0,0,.3);
+  border-top:1px solid var(--border);
+}
+.dm-info-name{
+  font-family:var(--fd);font-size:17px;font-weight:700;
+  color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;
+}
+.dm-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dm-meta-item{display:flex;flex-direction:column;gap:1px}
+.dm-meta-lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--fd)}
+.dm-meta-val{font-size:13px;color:var(--text2);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dm-meta-val.hl{color:var(--accent);font-family:var(--fd);font-size:15px;font-weight:700}
+
+/* ── COLUMNA DERECHA ── */
+.dm-right{
+  display:flex;flex-direction:column;
+  min-height:0;overflow:hidden;
+}
+.dm-gal-header{
+  padding:12px 14px 8px;flex-shrink:0;
+  font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:2px;
+  color:var(--dim);text-transform:uppercase;
+  border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,.2);
+}
+/* Scroll solo en la galería */
+.dm-gal-scroll{
+  flex:1;overflow-y:auto;padding:10px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;align-content:start;
+}
+.dm-gal-scroll::-webkit-scrollbar{width:3px}
+.dm-gal-scroll::-webkit-scrollbar-thumb{background:var(--borderB);border-radius:2px}
+.dm-thumb{
+  position:relative;border-radius:7px;overflow:hidden;cursor:pointer;
+  border:2px solid transparent;transition:all .18s;
+  aspect-ratio:16/10;
+}
+.dm-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.dm-thumb:hover{border-color:var(--borderB);transform:scale(1.03)}
+.dm-thumb:hover img{transform:scale(1.05)}
+.dm-thumb.active{border-color:var(--accent);box-shadow:0 0 10px rgba(0,220,255,.3)}
+.dm-del{
+  position:absolute;top:4px;right:4px;
+  background:rgba(255,51,85,.85);color:#fff;border:none;
+  border-radius:4px;padding:2px 6px;cursor:pointer;
+  font-size:10px;font-weight:700;
+  opacity:0;transition:opacity .15s;
+}
+.dm-thumb:hover .dm-del{opacity:1}
+/* Añadir foto — fijo en la parte inferior */
+.dm-add{
+  flex-shrink:0;padding:10px 12px;
+  background:rgba(0,0,0,.3);border-top:1px solid var(--border);
+}
+.dm-add .url-row{margin-bottom:0}
+.dm-add .fi{padding:9px 12px;font-size:12px;margin-bottom:0}
+
+@media(max-width:680px){
+  .dm-body{grid-template-columns:1fr}
+  .dm-right{border-top:1px solid var(--border);max-height:280px}
+  .dm-meta{grid-template-columns:1fr 1fr}
+}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -430,7 +571,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Maikman</div>
-    <div class="login-sub">Models — Pro Stock v10.8</div>
+    <div class="login-sub">Models — Pro Stock v11</div>
     <input id="loginEmail"    type="email"    placeholder="Email"      autocomplete="email">
     <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">ENTRAR</button>
@@ -444,7 +585,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Maikman</div>
-      <div class="ver">Pro Stock v10.8</div>
+      <div class="ver">Pro Stock v11</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="navTo('pg-modelos','Modelos',this)">
@@ -728,19 +869,63 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   </div>
 </div>
 
-<!-- INFO MODELO -->
-<div class="modal" id="infoModal">
-  <div class="modal-box" style="max-width:520px">
-    <h3 id="infoTitle"></h3>
-    <div id="infoDetails" style="font-size:13px;color:var(--dim);margin-bottom:12px"></div>
-    <hr class="div">
-    <b style="display:block;margin-bottom:9px;font-family:var(--fd);letter-spacing:1px;font-size:14px">GALERÍA</b>
-    <div id="galleryGrid" class="gal-grid"></div>
-    <div class="url-row">
-      <input class="fi" id="urlPhotoIn" placeholder="Pegar URL de foto…" style="margin-bottom:0">
-      <button class="tb-btn primary" onclick="addPhotoUrl()">Añadir</button>
+<!-- MODAL DETALLE MODELO v11 -->
+<div class="modal" id="detailModal">
+  <div class="modal-box">
+
+    <div class="dm-header">
+      <div class="dm-header-text">
+        <div class="dm-breadcrumb">Maikman Models · Pro Stock v11</div>
+        <div class="dm-title">MODEL KIT DETAIL: <em id="dmTitleName"></em></div>
+      </div>
+      <button class="dm-close" onclick="closeModal('detailModal')">✕</button>
     </div>
-    <button class="btn ghost" onclick="closeModal('infoModal')">Cerrar</button>
+
+    <div class="dm-body">
+
+      <!-- IZQUIERDA: visor + info -->
+      <div class="dm-left">
+        <div class="dm-viewer" id="dmViewer">
+          <div id="dmImgWrap"><img id="dmMainImg" src="" alt=""></div>
+          <div id="dmZoomBadge">100%</div>
+          <div class="dm-zoom-hint">🖱 Rueda · Doble clic para zoom</div>
+        </div>
+        <div class="dm-info">
+          <div class="dm-info-name" id="dmInfoName"></div>
+          <div class="dm-meta">
+            <div class="dm-meta-item">
+              <span class="dm-meta-lbl">Referencia</span>
+              <span class="dm-meta-val hl" id="dmInfoRef"></span>
+            </div>
+            <div class="dm-meta-item">
+              <span class="dm-meta-lbl">Marca</span>
+              <span class="dm-meta-val" id="dmInfoMarca"></span>
+            </div>
+            <div class="dm-meta-item">
+              <span class="dm-meta-lbl">Precio</span>
+              <span class="dm-meta-val" id="dmInfoPrecio"></span>
+            </div>
+            <div class="dm-meta-item">
+              <span class="dm-meta-lbl">Estado</span>
+              <span class="dm-meta-val" id="dmInfoEstado"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DERECHA: galería con scroll + añadir -->
+      <div class="dm-right">
+        <div class="dm-gal-header">📸 Galería</div>
+        <div class="dm-gal-scroll" id="dmGalGrid"></div>
+        <div class="dm-add">
+          <div class="url-row">
+            <input class="fi" id="dmUrlInput" placeholder="URL de foto para añadir…">
+            <button class="tb-btn primary" onclick="dmAddPhoto()">Añadir</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -1009,7 +1194,7 @@ window.renderModelos = () => {
       card.innerHTML = `
         <img src="${m.foto||'https://via.placeholder.com/300x160/091422/00dcff?text=+'}"
              alt="${m.modelo||''}" loading="lazy"
-             onclick="openLightbox('${m.id}',0)">
+             onclick="openDetailModal('${m.id}')">
         <div class="mod-body">
           <div class="mod-code">${m.codigo||'S/N'}</div>
           <div class="mod-row" style="margin-bottom:6px">
@@ -1022,8 +1207,7 @@ window.renderModelos = () => {
           <div style="margin-bottom:8px">
             <span class="st-badge ${ei.cls}">${ei.lbl}</span>
           </div>
-          <div class="mod-btns">
-            <button class="act-btn" style="background:#3498db" onclick="openInfoModal('${m.id}')">INFO</button>
+          <div class="mod-btns" style="grid-template-columns:repeat(3,1fr)">
             <button class="act-btn" style="background:#9b59b6" onclick="openPaintsModal('${m.id}')">COLOR</button>
             <button class="act-btn" style="background:var(--warn)"   onclick="openFormModal('${m.id}')">EDIT</button>
             <button class="act-btn" style="background:var(--danger)" onclick="deleteModelo('${m.id}')">DEL</button>
@@ -1088,42 +1272,173 @@ window.deleteModelo = async id => {
   await loadAll();
 };
 
-window.openInfoModal = id => {
+/* ═══════════════════════════════════════════════
+   MODAL DETALLE v11
+═══════════════════════════════════════════════ */
+let dmScale=1, dmPanX=0, dmPanY=0;
+let dmImgs=[], dmActiveIdx=0;
+
+window.openDetailModal = id => {
   currentModelId = id;
   const m = modelos.find(x=>x.id===id);
   if (!m) return;
-  document.getElementById('infoTitle').textContent = m.modelo||'';
-  document.getElementById('infoDetails').innerHTML =
-    `<b>Ref:</b> ${m.codigo||'–'} &nbsp;|&nbsp; <b>Marca:</b> ${m.fabricante||'–'} &nbsp;|&nbsp; <b>Precio:</b> ${m.precio||'–'}€`;
-  const gal = document.getElementById('galleryGrid');
-  gal.innerHTML = '';
-  (m.galeria||[]).forEach((url,i)=>{
-    const w = document.createElement('div');
-    w.className = 'gal-thumb';
-    w.innerHTML = `<img src="${url}" alt="" loading="lazy" onclick="openLightbox('${id}',${i+1})">
-                   <button class="gal-del" onclick="delPhoto(${i})">✕</button>`;
-    gal.appendChild(w);
-  });
-  openModal('infoModal');
+
+  // Header
+  document.getElementById('dmTitleName').textContent = (m.modelo||'').toUpperCase();
+
+  // Info
+  document.getElementById('dmInfoName').textContent   = m.modelo||'—';
+  document.getElementById('dmInfoRef').textContent    = m.codigo||'—';
+  document.getElementById('dmInfoMarca').textContent  = m.fabricante||'—';
+  document.getElementById('dmInfoPrecio').textContent = m.precio ? m.precio+'€' : '—';
+  const ei = ESTADO[m.estado||'sin-empezar']||ESTADO['sin-empezar'];
+  document.getElementById('dmInfoEstado').textContent = ei.lbl;
+
+  // Imágenes: [foto principal, ...galeria]
+  dmImgs = [m.foto,...(m.galeria||[])].filter(Boolean);
+  dmActiveIdx = 0;
+  dmResetZoom();
+  dmSetImg(0);
+  dmRenderGallery();
+
+  openModal('detailModal');
 };
 
-window.addPhotoUrl = async () => {
-  const val = document.getElementById('urlPhotoIn').value.trim();
+function dmSetImg(idx) {
+  dmActiveIdx = idx;
+  document.getElementById('dmMainImg').src = dmImgs[idx]||'';
+  dmResetZoom();
+  document.querySelectorAll('.dm-thumb').forEach((t,i) =>
+    t.classList.toggle('active', i===idx)
+  );
+}
+
+function dmRenderGallery() {
+  const grid = document.getElementById('dmGalGrid');
+  grid.innerHTML = '';
+  if (!dmImgs.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--dim);font-size:12px">Sin imágenes</div>';
+    return;
+  }
+  dmImgs.forEach((url, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'dm-thumb' + (i===dmActiveIdx?' active':'');
+    wrap.onclick = () => dmSetImg(i);
+    // Solo fotos de galería (i>0) son borrables
+    const del = i > 0
+      ? `<button class="dm-del" onclick="event.stopPropagation();dmDelPhoto(${i-1})">✕</button>`
+      : '';
+    wrap.innerHTML = `<img src="${url}" alt="" loading="lazy">${del}`;
+    grid.appendChild(wrap);
+  });
+}
+
+window.dmAddPhoto = async () => {
+  const val = document.getElementById('dmUrlInput').value.trim();
   if (!val) return;
   const m = modelos.find(x=>x.id===currentModelId);
   if (!m.galeria) m.galeria = [];
   m.galeria.push(...val.split(/[;,]+/).map(u=>u.trim()).filter(Boolean));
   await updateDoc(doc(db,'modelos',currentModelId),{galeria:m.galeria});
-  document.getElementById('urlPhotoIn').value = '';
-  openInfoModal(currentModelId);
+  document.getElementById('dmUrlInput').value = '';
+  dmImgs = [m.foto,...m.galeria].filter(Boolean);
+  dmRenderGallery();
 };
 
-window.delPhoto = async idx => {
+window.dmDelPhoto = async idx => {
   const m = modelos.find(x=>x.id===currentModelId);
   m.galeria.splice(idx,1);
   await updateDoc(doc(db,'modelos',currentModelId),{galeria:m.galeria});
-  openInfoModal(currentModelId);
+  dmImgs = [m.foto,...(m.galeria||[])].filter(Boolean);
+  const nextIdx = Math.min(dmActiveIdx, dmImgs.length-1);
+  dmRenderGallery();
+  dmSetImg(nextIdx);
 };
+
+/* ─── ZOOM ─────────────────────────────────── */
+function dmApply(animate=false) {
+  const wrap = document.getElementById('dmImgWrap');
+  if (!wrap) return;
+  wrap.style.transition = animate?'transform .25s cubic-bezier(.22,1,.36,1)':'none';
+  wrap.style.transform  = `translate(${dmPanX}px,${dmPanY}px) scale(${dmScale})`;
+  const badge = document.getElementById('dmZoomBadge');
+  badge.textContent = Math.round(dmScale*100)+'%';
+  badge.classList.toggle('show', dmScale!==1);
+  document.getElementById('dmViewer').classList.toggle('zoomed', dmScale>1);
+}
+function dmResetZoom() { dmScale=1;dmPanX=0;dmPanY=0;dmApply(true); }
+function dmClamp() {
+  const img = document.getElementById('dmMainImg');
+  if (!img) return;
+  const mx=(img.offsetWidth*(dmScale-1))/2;
+  const my=(img.offsetHeight*(dmScale-1))/2;
+  dmPanX=Math.max(-mx,Math.min(mx,dmPanX));
+  dmPanY=Math.max(-my,Math.min(my,dmPanY));
+}
+
+(()=>{
+  let dragging=false,dsx=0,dsy=0,dpx=0,dpy=0;
+  let touches=[],pinchD=0,pinchS=1,tpx=0,tpy=0,tox=0,toy=0,lastTap=0;
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const v = document.getElementById('dmViewer');
+    if (!v) return;
+
+    v.addEventListener('wheel',e=>{
+      e.preventDefault();
+      dmScale=Math.max(1,Math.min(5,dmScale*(e.deltaY>0?.82:1.22)));
+      if(dmScale===1){dmPanX=0;dmPanY=0;}else dmClamp();
+      dmApply();
+    },{passive:false});
+
+    v.addEventListener('dblclick',e=>{
+      if(dmScale>1){dmResetZoom();}
+      else{
+        const r=v.getBoundingClientRect();
+        const cx=e.clientX-(r.left+r.width/2);
+        const cy=e.clientY-(r.top+r.height/2);
+        dmScale=2.5;
+        dmPanX=-cx*(dmScale-1)/dmScale;
+        dmPanY=-cy*(dmScale-1)/dmScale;
+        dmClamp();dmApply(true);
+      }
+    });
+
+    v.addEventListener('mousedown',e=>{
+      if(dmScale<=1)return;
+      dragging=true;dsx=e.clientX;dsy=e.clientY;dpx=dmPanX;dpy=dmPanY;
+      v.classList.add('grabbing');e.preventDefault();
+    });
+    window.addEventListener('mousemove',e=>{
+      if(!dragging)return;
+      dmPanX=dpx+(e.clientX-dsx);dmPanY=dpy+(e.clientY-dsy);
+      dmClamp();dmApply();
+    });
+    window.addEventListener('mouseup',()=>{ dragging=false; document.getElementById('dmViewer')?.classList.remove('grabbing'); });
+
+    v.addEventListener('touchstart',e=>{
+      touches=Array.from(e.touches);
+      if(touches.length===2){pinchD=Math.hypot(touches[1].clientX-touches[0].clientX,touches[1].clientY-touches[0].clientY);pinchS=dmScale;}
+      else{tpx=touches[0].clientX;tpy=touches[0].clientY;tox=dmPanX;toy=dmPanY;}
+    },{passive:true});
+    v.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      const tc=Array.from(e.touches);
+      if(tc.length===2){
+        const d=Math.hypot(tc[1].clientX-tc[0].clientX,tc[1].clientY-tc[0].clientY);
+        dmScale=Math.max(1,Math.min(5,pinchS*d/pinchD));
+        if(dmScale===1){dmPanX=0;dmPanY=0;}else dmClamp();dmApply();
+      } else if(tc.length===1&&dmScale>1){
+        dmPanX=tox+(tc[0].clientX-tpx);dmPanY=toy+(tc[0].clientY-tpy);dmClamp();dmApply();
+      }
+    },{passive:false});
+    v.addEventListener('touchend',e=>{
+      const now=Date.now();
+      if(now-lastTap<280)dmScale>1?dmResetZoom():(()=>{dmScale=2.5;dmApply(true);})();
+      lastTap=now;
+    },{passive:true});
+  });
+})();
 
 window.openPaintsModal = id => {
   const m = modelos.find(x=>x.id===id);
