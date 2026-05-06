@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v11</title>
+<title>Maikman Models — Pro Stock v11.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -422,11 +422,11 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 @media(max-width:640px){.sidebar{width:58px}.sidebar .brand,.sidebar .ver,.nav-item .ni-lbl{display:none}.nav-item{justify-content:center;padding:12px 0}.mixer-grid{grid-template-columns:1fr 1fr}.kpi-grid{grid-template-columns:1fr 1fr}.dil-row{grid-template-columns:1fr}#modGrid{grid-template-columns:1fr}.picker-results{grid-template-columns:1fr}}
 
 /* ═══════════════════════════════════════════════
-   MODAL DETALLE — v11
+   MODAL DETALLE — v11.1
    90 vh × 90 vw, dos columnas fijas
 ═══════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════
-   MODAL DETALLE v11 — 90vw × 90vh fijo, scroll correcto
+   MODAL DETALLE v11.1 — 90vw × 90vh fijo, scroll correcto
 ═══════════════════════════════════════════════ */
 
 /* El modal ocupa exactamente el 90% de la pantalla */
@@ -682,7 +682,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Maikman</div>
-    <div class="login-sub">Models — Pro Stock v11</div>
+    <div class="login-sub">Models — Pro Stock v11.1</div>
     <input id="loginEmail"    type="email"    placeholder="Email"      autocomplete="email">
     <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">ENTRAR</button>
@@ -696,7 +696,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Maikman</div>
-      <div class="ver">Pro Stock v11</div>
+      <div class="ver">Pro Stock v11.1</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="navTo('pg-modelos','Modelos',this)">
@@ -980,13 +980,13 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   </div>
 </div>
 
-<!-- MODAL DETALLE MODELO v11 -->
+<!-- MODAL DETALLE MODELO v11.1 -->
 <div class="modal" id="detailModal">
   <div class="modal-box">
 
     <div class="dm-header">
       <div class="dm-header-text">
-        <div class="dm-breadcrumb">Maikman Models · Pro Stock v11</div>
+        <div class="dm-breadcrumb">Maikman Models · Pro Stock v11.1</div>
         <div class="dm-title">MODEL KIT DETAIL: <em id="dmTitleName"></em></div>
       </div>
       <button class="dm-close" onclick="closeModal('detailModal')">✕</button>
@@ -1384,7 +1384,7 @@ window.deleteModelo = async id => {
 };
 
 /* ═══════════════════════════════════════════════
-   MODAL DETALLE v11
+   MODAL DETALLE v11.1
 ═══════════════════════════════════════════════ */
 let dmScale=1, dmPanX=0, dmPanY=0;
 let dmImgs=[], dmActiveIdx=0;
