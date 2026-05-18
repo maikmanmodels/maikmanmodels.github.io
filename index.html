@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maikman Models — Pro Stock v11.1</title>
+<title>Maikman Models — Pro Stock v11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -422,11 +422,11 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 @media(max-width:640px){.sidebar{width:58px}.sidebar .brand,.sidebar .ver,.nav-item .ni-lbl{display:none}.nav-item{justify-content:center;padding:12px 0}.mixer-grid{grid-template-columns:1fr 1fr}.kpi-grid{grid-template-columns:1fr 1fr}.dil-row{grid-template-columns:1fr}#modGrid{grid-template-columns:1fr}.picker-results{grid-template-columns:1fr}}
 
 /* ═══════════════════════════════════════════════
-   MODAL DETALLE — v11.1
+   MODAL DETALLE — v11
    90 vh × 90 vw, dos columnas fijas
 ═══════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════
-   MODAL DETALLE v11.1 — 90vw × 90vh fijo, scroll correcto
+   MODAL DETALLE v11 — 90vw × 90vh fijo, scroll correcto
 ═══════════════════════════════════════════════ */
 
 /* El modal ocupa exactamente el 90% de la pantalla */
@@ -530,10 +530,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   display:flex;align-items:center;justify-content:center;
   will-change:transform;
 }
+/* Sin zoom: la imagen se ajusta al contenedor */
 #dmImgWrap img{
   max-width:100%;max-height:100%;
   object-fit:contain;display:block;
   user-select:none;pointer-events:none;
+  /* Al hacer zoom se escala con transform, no con CSS size,
+     así se preserva la resolución nativa del archivo original */
+  image-rendering:auto;
 }
 #dmZoomBadge{
   position:absolute;top:10px;right:10px;z-index:5;
@@ -551,40 +555,40 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 
 /* Info fija debajo del visor */
 .dm-info{
-  flex-shrink:0;        /* nunca se encoge */
+  flex-shrink:0;
   padding:14px 20px;
-  background:rgba(0,0,0,.4);
-  border-top:1px solid rgba(0,220,255,.1);
+  background:rgba(8,20,38,1);
+  border-top:1px solid rgba(0,220,255,.2);
 }
 .dm-info-name{
   font-family:var(--fd);font-size:17px;font-weight:700;
-  color:var(--text);text-transform:uppercase;letter-spacing:.5px;
+  color:#ffffff;text-transform:uppercase;letter-spacing:.5px;
   margin-bottom:10px;
-  text-shadow:0 0 20px rgba(0,220,255,.15);
+  text-shadow:0 0 20px rgba(0,220,255,.2);
 }
 .dm-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.dm-meta-item{display:flex;flex-direction:column;gap:2px}
+.dm-meta-item{display:flex;flex-direction:column;gap:3px}
 .dm-meta-lbl{
-  font-size:9px;color:var(--dim);text-transform:uppercase;
+  font-size:9px;color:#00c8e8;text-transform:uppercase;
   letter-spacing:1.5px;font-family:var(--fd);
 }
 .dm-meta-val{
-  font-size:13px;color:var(--text2);font-weight:500;
+  font-size:13px;color:#ddeeff;font-weight:500;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .dm-meta-val.hl{
-  color:var(--accent);font-family:var(--fd);
+  color:#00dcff;font-family:var(--fd);
   font-size:15px;font-weight:700;
-  text-shadow:0 0 10px rgba(0,220,255,.3);
+  text-shadow:0 0 10px rgba(0,220,255,.4);
 }
 
 /* ── COLUMNA DERECHA ── */
 .dm-right{
   display:flex;
   flex-direction:column;
-  overflow:hidden;    /* contiene el scroll interno */
+  overflow:hidden;
   min-height:0;
-  background:rgba(0,0,0,.2);
+  background:rgba(8,20,38,1);
 }
 
 /* Cabecera galería: fija */
@@ -592,9 +596,9 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   padding:13px 16px 10px;
   flex-shrink:0;
   font-family:var(--fd);font-size:11px;font-weight:700;
-  letter-spacing:2px;color:var(--dim);text-transform:uppercase;
-  border-bottom:1px solid rgba(0,220,255,.1);
-  background:rgba(0,0,0,.3);
+  letter-spacing:2px;color:#00dcff;text-transform:uppercase;
+  border-bottom:1px solid rgba(0,220,255,.2);
+  background:rgba(4,12,24,1);
 }
 
 /* ★ Zona de scroll: flex:1 + min-height:0 = scroll real ★ */
@@ -606,22 +610,22 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   padding:10px;
   display:grid;
   grid-template-columns:1fr 1fr;
-  grid-auto-rows:90px;   /* altura fija por fila — nunca se deforma */
+  grid-auto-rows:90px;
   gap:9px;
   align-content:start;
+  background:rgba(6,16,30,1);
 }
 .dm-gal-scroll::-webkit-scrollbar{width:4px}
-.dm-gal-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+.dm-gal-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.3)}
 .dm-gal-scroll::-webkit-scrollbar-thumb{
-  background:rgba(0,220,255,.3);border-radius:2px;
+  background:rgba(0,220,255,.4);border-radius:2px;
 }
 
 /* Miniatura */
 .dm-thumb{
   position:relative;border-radius:8px;overflow:hidden;cursor:pointer;
-  border:2px solid rgba(255,255,255,.05);
+  border:2px solid rgba(255,255,255,.08);
   transition:all .18s;
-  /* Sin aspect-ratio — la altura la marca grid-auto-rows */
   width:100%;
   height:100%;
 }
@@ -636,8 +640,8 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 }
 .dm-thumb:hover img{transform:scale(1.06)}
 .dm-thumb.active{
-  border-color:var(--accent);
-  box-shadow:0 0 14px rgba(0,220,255,.35),inset 0 0 0 1px rgba(0,220,255,.1);
+  border-color:#00dcff;
+  box-shadow:0 0 14px rgba(0,220,255,.4),inset 0 0 0 1px rgba(0,220,255,.15);
 }
 .dm-del{
   position:absolute;top:4px;right:4px;
@@ -654,13 +658,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 .dm-add{
   flex-shrink:0;
   padding:10px 12px;
-  background:rgba(0,0,0,.4);
-  border-top:1px solid rgba(0,220,255,.1);
+  background:rgba(4,12,24,1);
+  border-top:1px solid rgba(0,220,255,.15);
 }
 .dm-add .url-row{margin-bottom:0;gap:6px}
 .dm-add .fi{
   padding:9px 12px;font-size:12px;margin-bottom:0;
-  background:rgba(0,220,255,.03);
+  background:rgba(0,220,255,.05);
+  color:#ddeeff;
 }
 
 /* Responsive */
@@ -682,7 +687,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Maikman</div>
-    <div class="login-sub">Models — Pro Stock v11.1</div>
+    <div class="login-sub">Models — Pro Stock v11</div>
     <input id="loginEmail"    type="email"    placeholder="Email"      autocomplete="email">
     <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">ENTRAR</button>
@@ -696,7 +701,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Maikman</div>
-      <div class="ver">Pro Stock v11.1</div>
+      <div class="ver">Pro Stock v11</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="navTo('pg-modelos','Modelos',this)">
@@ -980,13 +985,13 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   </div>
 </div>
 
-<!-- MODAL DETALLE MODELO v11.1 -->
+<!-- MODAL DETALLE MODELO v11 -->
 <div class="modal" id="detailModal">
   <div class="modal-box">
 
     <div class="dm-header">
       <div class="dm-header-text">
-        <div class="dm-breadcrumb">Maikman Models · Pro Stock v11.1</div>
+        <div class="dm-breadcrumb">Maikman Models · Pro Stock v11</div>
         <div class="dm-title">MODEL KIT DETAIL: <em id="dmTitleName"></em></div>
       </div>
       <button class="dm-close" onclick="closeModal('detailModal')">✕</button>
@@ -1384,7 +1389,7 @@ window.deleteModelo = async id => {
 };
 
 /* ═══════════════════════════════════════════════
-   MODAL DETALLE v11.1
+   MODAL DETALLE v11
 ═══════════════════════════════════════════════ */
 let dmScale=1, dmPanX=0, dmPanY=0;
 let dmImgs=[], dmActiveIdx=0;
@@ -1469,9 +1474,21 @@ window.dmDelPhoto = async idx => {
 /* ─── ZOOM ─────────────────────────────────── */
 function dmApply(animate=false) {
   const wrap = document.getElementById('dmImgWrap');
-  if (!wrap) return;
+  const img  = document.getElementById('dmMainImg');
+  if (!wrap || !img) return;
   wrap.style.transition = animate?'transform .25s cubic-bezier(.22,1,.36,1)':'none';
   wrap.style.transform  = `translate(${dmPanX}px,${dmPanY}px) scale(${dmScale})`;
+
+  // Con zoom > 1: permitir que la imagen use su resolución nativa
+  // Sin zoom: volver a contener en el visor
+  if (dmScale > 1) {
+    img.style.maxWidth  = img.naturalWidth  ? img.naturalWidth  + 'px' : '100%';
+    img.style.maxHeight = img.naturalHeight ? img.naturalHeight + 'px' : '100%';
+  } else {
+    img.style.maxWidth  = '100%';
+    img.style.maxHeight = '100%';
+  }
+
   const badge = document.getElementById('dmZoomBadge');
   badge.textContent = Math.round(dmScale*100)+'%';
   badge.classList.toggle('show', dmScale!==1);
